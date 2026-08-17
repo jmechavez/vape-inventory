@@ -1,0 +1,12 @@
+/* App.css - Only app-specific styles */
+
+/* Links - Not in index.css */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* App container - Specific to App component */
+.app {
+  min-height: 100vh;
+}

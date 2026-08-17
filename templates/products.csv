@@ -1,0 +1,5 @@
+sku,name,brand,version,flavor,barcode,minimum_stock
+POD-V2-001,V2 Pod,Brand A,V2,Mango,,10
+POD-V2-002,V2 Pod,Brand A,V2,Blueberry,,10
+POD-V2-003,V2 Pod,Brand A,V2,Strawberry,,10
+POD-V1-001,V1 Pod,Brand A,V1,Mango,,5
