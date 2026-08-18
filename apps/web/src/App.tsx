@@ -11,6 +11,7 @@ import SaleDetailsPage from "./pages/SaleDetailsPage";
 import SalesHistoryPage from "./pages/SalesHistoryPage";
 import SalesPage from "./pages/SalesPage";
 import SuppliersPage from "./pages/SuppliersPage";
+import ReportsPage from "./pages/ReportsPage";
 
 export default function App() {
   return (
@@ -70,6 +71,11 @@ export default function App() {
           <Route
             path="*"
             element={<Navigate to="/dashboard" replace />}
+          />
+
+          <Route
+            path="/reports"
+            element={<ReportsPage />}
           />
         </Routes>
       </Layout>

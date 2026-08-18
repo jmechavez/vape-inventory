@@ -194,7 +194,7 @@ function printReceipt(sale: Sale) {
 // Loading Skeleton
 function SaleDetailsSkeleton() {
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col gpu">
       {/* Header Skeleton */}
       <div className="mb-4">
         <div className="h-4 w-20 bg-zinc-200 rounded animate-pulse"></div>
@@ -301,18 +301,18 @@ export default function SaleDetailsPage() {
 
   if (error || !sale) {
     return (
-      <div className="h-full flex flex-col">
+      <div className="h-full flex flex-col gpu">
         <header className="mb-4 shrink-0">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
           <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-950 sm:text-3xl">Sale Details</h1>
-          <p className="mt-1 text-sm text-zinc-500">View transaction information and receipt.</p>
+          <p className="mt-1 text-lg text-zinc-500">View transaction information and receipt.</p>
         </header>
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 mb-4 shrink-0">
-          <p className="text-sm font-medium text-red-700">{error || "Sale not found."}</p>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 mb-4 shrink-0 animate-fade-in gpu">
+          <p className="text-base font-medium text-red-700">{error || "Sale not found."}</p>
         </div>
         <Link
           to="/sales"
-          className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 tap-target"
+          className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
         >
           ← Back to Sales
         </Link>
@@ -321,28 +321,28 @@ export default function SaleDetailsPage() {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col gpu">
       {/* Header */}
       <header className="mb-4 shrink-0">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
         <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-950 sm:text-3xl">Sale Details</h1>
-        <p className="mt-1 text-sm text-zinc-500">View transaction information and receipt.</p>
+        <p className="mt-1 text-lg text-zinc-500">View transaction information and receipt.</p>
       </header>
 
       {/* Sale Summary */}
       <div className="flex-1 min-h-0 flex flex-col gap-4">
-        <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm card-hover gpu">
           <div className="flex flex-col gap-3 border-b border-zinc-200 p-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Transaction</p>
               <h2 className="mt-0.5 font-mono text-xl font-black text-zinc-950">
                 {getSaleReference(sale)}
               </h2>
-              <p className="mt-0.5 text-sm text-zinc-400">Transaction ID #{sale.id}</p>
+              <p className="mt-0.5 text-base text-zinc-400">Transaction ID #{sale.id}</p>
             </div>
             <div className="text-left sm:text-right">
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Total</p>
-              <p className="mt-0.5 text-3xl font-black text-zinc-950">
+              <p className="mt-0.5 text-3xl font-black text-zinc-950 number-transition">
                 {formatCurrency(Number(sale.total))}
               </p>
             </div>
@@ -378,7 +378,7 @@ export default function SaleDetailsPage() {
             </div>
 
             <div className="overflow-hidden rounded-xl border border-zinc-200">
-              <div className="hidden grid-cols-[1fr_140px_120px_140px] border-b border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-bold uppercase tracking-wider text-zinc-400 sm:grid">
+              <div className="hidden grid-cols-[1fr_140px_120px_140px] border-b border-zinc-200 bg-zinc-50 px-4 py-3 text-base font-bold uppercase tracking-wider text-zinc-400 sm:grid">
                 <span>Product</span>
                 <span>Unit Price</span>
                 <span>Quantity</span>
@@ -389,7 +389,7 @@ export default function SaleDetailsPage() {
                 {(sale.items ?? []).map((item) => (
                   <div
                     key={item.id}
-                    className="grid gap-2 px-4 py-4 sm:grid-cols-[1fr_140px_120px_140px] sm:items-center"
+                    className="grid gap-2 px-4 py-4 sm:grid-cols-[1fr_140px_120px_140px] sm:items-center hover:bg-zinc-50 transition-colors duration-150 gpu"
                   >
                     <div className="min-w-0">
                       <p className="truncate text-base font-black text-zinc-950">
@@ -399,7 +399,7 @@ export default function SaleDetailsPage() {
                         {item.sku || "-"}
                       </p>
                       {getProductDetails(item) && (
-                        <p className="mt-0.5 text-sm text-zinc-500">
+                        <p className="mt-0.5 text-base text-zinc-500">
                           {getProductDetails(item)}
                         </p>
                       )}
@@ -427,7 +427,7 @@ export default function SaleDetailsPage() {
                       <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 sm:hidden">
                         Subtotal
                       </p>
-                      <p className="mt-0.5 text-base font-black text-zinc-950 sm:mt-0">
+                      <p className="mt-0.5 text-base font-black text-zinc-950 sm:mt-0 number-transition">
                         {formatCurrency(Number(item.subtotal))}
                       </p>
                     </div>
@@ -447,7 +447,7 @@ export default function SaleDetailsPage() {
         {/* Totals + Actions */}
         <div className="grid gap-4 lg:grid-cols-[1fr_360px] shrink-0">
           {/* Receipt Action */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Receipt</p>
             <h2 className="mt-0.5 text-lg font-black text-zinc-950">Transaction Receipt</h2>
             <p className="mt-1 text-base text-zinc-500">View the receipt for this completed transaction.</p>
@@ -455,14 +455,21 @@ export default function SaleDetailsPage() {
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
               <Link
                 to="/sales"
-                className="inline-flex h-[48px] flex-1 items-center justify-center rounded-xl border border-zinc-300 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 tap-target"
+                className="inline-flex h-[48px] flex-1 items-center justify-center rounded-xl border border-zinc-300 bg-white px-5 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
                 ← Back
               </Link>
               <button
                 type="button"
                 onClick={viewReceipt}
-                className="inline-flex h-[48px] flex-1 items-center justify-center rounded-xl bg-black px-5 text-sm font-bold text-white transition hover:bg-zinc-800 tap-target"
+                className="inline-flex h-[48px] flex-1 items-center justify-center rounded-xl bg-black px-5 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target btn-ripple gpu"
+                onMouseDown={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
+                  e.currentTarget.style.setProperty('--x', x + 'px');
+                  e.currentTarget.style.setProperty('--y', y + 'px');
+                }}
               >
                 View Receipt
               </button>
@@ -470,25 +477,25 @@ export default function SaleDetailsPage() {
           </div>
 
           {/* Totals */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Summary</p>
             <div className="mt-3 space-y-2">
               <div className="flex items-center justify-between text-base">
                 <span className="text-zinc-500">Subtotal</span>
-                <span className="font-bold text-zinc-900">
+                <span className="font-bold text-zinc-900 number-transition">
                   {formatCurrency(Number(sale.subtotal))}
                 </span>
               </div>
               <div className="flex items-center justify-between text-base">
                 <span className="text-zinc-500">Discount</span>
-                <span className="font-bold text-zinc-900">
+                <span className="font-bold text-zinc-900 number-transition">
                   − {formatCurrency(Number(sale.discount))}
                 </span>
               </div>
               <div className="border-t border-zinc-200 pt-3">
                 <div className="flex items-end justify-between">
                   <span className="text-sm font-bold uppercase tracking-wider text-zinc-500">Total</span>
-                  <span className="text-2xl font-black text-zinc-950">
+                  <span className="text-2xl font-black text-zinc-950 number-transition">
                     {formatCurrency(Number(sale.total))}
                   </span>
                 </div>
@@ -500,8 +507,8 @@ export default function SaleDetailsPage() {
 
       {/* Receipt Modal */}
       {showReceipt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="max-h-[90vh] w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in backdrop-gpu gpu">
+          <div className="max-h-[90vh] w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl animate-slide-up gpu">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-zinc-200 p-5">
               <div>
@@ -511,14 +518,14 @@ export default function SaleDetailsPage() {
               <button
                 type="button"
                 onClick={() => setShowReceipt(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-xl text-zinc-500 hover:bg-zinc-100"
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-xl text-zinc-500 hover:bg-zinc-100 touch-feedback gpu"
               >
                 ×
               </button>
             </div>
 
             {/* Receipt */}
-            <div className="max-h-[65vh] overflow-y-auto p-5">
+            <div className="max-h-[65vh] overflow-y-auto p-5 gpu-scroll">
               <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 font-mono text-sm text-zinc-900">
                 {RECEIPT_COMPANY_NAME && (
                   <div className="text-center font-bold">{RECEIPT_COMPANY_NAME}</div>
@@ -594,14 +601,21 @@ export default function SaleDetailsPage() {
               <button
                 type="button"
                 onClick={() => printReceipt(sale)}
-                className="inline-flex h-[48px] items-center justify-center rounded-xl bg-black px-5 text-sm font-bold text-white hover:bg-zinc-800 tap-target"
+                className="inline-flex h-[48px] items-center justify-center rounded-xl bg-black px-5 text-base font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target btn-ripple gpu"
+                onMouseDown={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
+                  e.currentTarget.style.setProperty('--x', x + 'px');
+                  e.currentTarget.style.setProperty('--y', y + 'px');
+                }}
               >
                 Print Receipt
               </button>
               <button
                 type="button"
                 onClick={() => setShowReceipt(false)}
-                className="inline-flex h-[48px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-5 text-sm font-bold text-zinc-700 hover:bg-zinc-100 tap-target"
+                className="inline-flex h-[48px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-5 text-base font-bold text-zinc-700 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
                 Done
               </button>

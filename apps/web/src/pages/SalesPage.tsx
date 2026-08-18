@@ -244,6 +244,7 @@ export default function SalesPage() {
   const [saleDate, setSaleDate] = useState(toDateTimeLocalValue(new Date()));
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
   const [discount, setDiscount] = useState("0");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Modal states
   const [showClearCartModal, setShowClearCartModal] = useState(false);
@@ -286,6 +287,13 @@ export default function SalesPage() {
     } finally {
       setLoadingSales(false);
     }
+  }
+
+  // Combined refresh function like Dashboard
+  async function handleRefresh() {
+    setIsRefreshing(true);
+    await Promise.all([loadProducts(), loadSales()]);
+    setTimeout(() => setIsRefreshing(false), 500);
   }
 
   useEffect(() => {
@@ -620,17 +628,34 @@ export default function SalesPage() {
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
           <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-950 sm:text-3xl">Sales</h1>
-          <p className="mt-1 text-sm text-zinc-500">Record sales and track your transaction history.</p>
+          <p className="mt-1 text-lg text-zinc-500">Record sales and track your transaction history.</p>
         </div>
-        {!showForm && (
+        <div className="flex gap-2">
+          {!showForm && (
+            <button
+              type="button"
+              onClick={openNewSale}
+              className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-4 text-sm font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+            >
+              + New Sale
+            </button>
+          )}
           <button
             type="button"
-            onClick={openNewSale}
-            className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-4 text-sm font-bold text-white shadow-sm transition hover:bg-zinc-800 tap-target touch-feedback gpu"
+            onClick={handleRefresh}
+            disabled={loading || loadingSales || isRefreshing}
+            className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
           >
-            + New Sale
+            {isRefreshing ? (
+              <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+            ) : (
+              "Refresh"
+            )}
           </button>
-        )}
+        </div>
       </header>
 
       {/* Success */}
@@ -648,20 +673,23 @@ export default function SalesPage() {
         </div>
       )}
 
-      {/* Statistics */}
+      {/* Statistics - Extra Large Fonts */}
       {!showForm && (
-        <div className="grid grid-cols-3 gap-3 mb-4 shrink-0">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm card-hover gpu">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Sales Today</p>
-            <p className="mt-1.5 text-2xl font-black text-zinc-950 number-transition">{formatCurrency(todaySales)}</p>
+        <div className="grid grid-cols-3 gap-3 mb-4 shrink-0 animate-fade-in-up">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
+            <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Sales Today</p>
+            <p className="mt-2 text-3xl font-black text-zinc-950 number-transition">{formatCurrency(todaySales)}</p>
+            <p className="mt-1 text-lg text-zinc-400">Today's revenue</p>
           </div>
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm card-hover gpu">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Total Sales</p>
-            <p className="mt-1.5 text-2xl font-black text-zinc-950 number-transition">{formatCurrency(totalSales)}</p>
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
+            <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Total Sales</p>
+            <p className="mt-2 text-3xl font-black text-zinc-950 number-transition">{formatCurrency(totalSales)}</p>
+            <p className="mt-1 text-lg text-zinc-400">All time revenue</p>
           </div>
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm card-hover gpu">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Transactions</p>
-            <p className="mt-1.5 text-2xl font-black text-zinc-950 number-transition">{transactionCount}</p>
+          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
+            <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Transactions</p>
+            <p className="mt-2 text-3xl font-black text-zinc-950 number-transition">{transactionCount}</p>
+            <p className="mt-1 text-lg text-zinc-400">Total sales</p>
           </div>
         </div>
       )}
@@ -957,7 +985,7 @@ export default function SalesPage() {
                         value={saleDate}
                         onChange={(event) => setSaleDate(event.target.value)}
                         disabled={submitting}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-base outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 disabled:opacity-50 tap-target gpu"
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 disabled:opacity-50 tap-target gpu"
                       />
                     </label>
 
@@ -969,7 +997,7 @@ export default function SalesPage() {
                         value={paymentMethod}
                         onChange={(event) => setPaymentMethod(event.target.value as PaymentMethod)}
                         disabled={submitting}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-base font-semibold outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 disabled:opacity-50 tap-target gpu"
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base font-semibold outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 disabled:opacity-50 tap-target gpu"
                       >
                         {PAYMENT_METHODS.map((method) => (
                           <option key={method} value={method}>
@@ -991,7 +1019,7 @@ export default function SalesPage() {
                         onChange={(event) => setDiscount(event.target.value)}
                         disabled={submitting}
                         placeholder="0.00"
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5 font-mono text-base outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 disabled:opacity-50 tap-target gpu"
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 disabled:opacity-50 tap-target gpu"
                       />
                     </label>
 
@@ -1015,7 +1043,7 @@ export default function SalesPage() {
                         type="button"
                         onClick={handleCompleteSale}
                         disabled={submitting || cart.length === 0}
-                        className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 tap-target btn-ripple gpu"
+                        className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target btn-ripple gpu"
                         onMouseDown={(e) => {
                           const rect = e.currentTarget.getBoundingClientRect();
                           const x = e.clientX - rect.left;
@@ -1030,7 +1058,7 @@ export default function SalesPage() {
                         type="button"
                         onClick={closeForm}
                         disabled={submitting}
-                        className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 disabled:opacity-50 tap-target touch-feedback gpu"
+                        className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
                       >
                         Cancel
                       </button>
@@ -1043,7 +1071,7 @@ export default function SalesPage() {
         </div>
       )}
 
-      {/* Recent Sales */}
+      {/* Recent Sales - Extra Large Fonts */}
       {!showForm && (
         <section className="flex-1 min-h-0 flex flex-col">
           <div className="shrink-0 flex items-center justify-between mb-3">
@@ -1055,13 +1083,21 @@ export default function SalesPage() {
               <button
                 type="button"
                 onClick={loadSales}
-                className="rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 tap-target touch-feedback gpu"
+                disabled={loadingSales}
+                className="rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
-                Refresh
+                {loadingSales ? (
+                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                ) : (
+                  "Refresh"
+                )}
               </button>
               <Link
                 to="/sales/history"
-                className="rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 tap-target touch-feedback gpu"
+                className="rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
                 View All
               </Link>
@@ -1075,7 +1111,7 @@ export default function SalesPage() {
                   <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 gpu">
                     <div className="absolute inset-0 rounded-full border-4 border-black border-t-transparent animate-spin gpu"></div>
                   </div>
-                  <p className="mt-3 text-sm text-zinc-500">Loading sales...</p>
+                  <p className="mt-3 text-base text-zinc-500">Loading sales...</p>
                 </div>
               </div>
             ) : recentSales.length === 0 ? (
@@ -1100,7 +1136,7 @@ export default function SalesPage() {
                           {sale.payment_method}
                         </span>
                       </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-400">
+                      <div className="mt-1 flex flex-wrap items-center gap-3 text-base text-zinc-400">
                         <span>{formatDate(sale.sale_date)}</span>
                         <span>•</span>
                         <span className="font-medium">
@@ -1144,14 +1180,14 @@ export default function SalesPage() {
               <button
                 type="button"
                 onClick={() => setShowClearCartModal(false)}
-                className="inline-flex h-[48px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 tap-target touch-feedback gpu"
+                className="inline-flex h-[48px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={confirmClearCart}
-                className="inline-flex h-[48px] items-center justify-center rounded-xl bg-red-600 px-6 text-base font-bold text-white transition hover:bg-red-700 tap-target touch-feedback gpu"
+                className="inline-flex h-[48px] items-center justify-center rounded-xl bg-red-600 px-6 text-base font-bold text-white transition hover:bg-red-700 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
                 Clear Cart
               </button>
@@ -1168,7 +1204,7 @@ export default function SalesPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xl font-black text-zinc-950">Review Order</h3>
-                  <p className="mt-0.5 text-sm text-zinc-500">
+                  <p className="mt-0.5 text-base text-zinc-500">
                     Please review the items before completing the sale.
                   </p>
                 </div>
@@ -1218,7 +1254,7 @@ export default function SalesPage() {
                       <span className="text-2xl font-black text-zinc-950 number-transition">{formatCurrency(cartTotal)}</span>
                     </div>
                   </div>
-                  <div className="flex justify-between text-sm text-zinc-500">
+                  <div className="flex justify-between text-base text-zinc-500">
                     <span>Payment Method</span>
                     <span className="font-semibold text-zinc-700">{paymentMethod}</span>
                   </div>
@@ -1230,14 +1266,14 @@ export default function SalesPage() {
               <button
                 type="button"
                 onClick={() => setShowConfirmSaleModal(false)}
-                className="inline-flex h-[48px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 tap-target touch-feedback gpu"
+                className="inline-flex h-[48px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
                 Back
               </button>
               <button
                 type="button"
                 onClick={confirmCompleteSale}
-                className="inline-flex h-[48px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 tap-target btn-ripple gpu"
+                className="inline-flex h-[48px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target btn-ripple gpu"
                 onMouseDown={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const x = e.clientX - rect.left;
@@ -1337,14 +1373,14 @@ export default function SalesPage() {
               <button
                 type="button"
                 onClick={() => printReceipt(receiptSale)}
-                className="inline-flex h-[48px] flex-1 items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 tap-target touch-feedback gpu"
+                className="inline-flex h-[48px] flex-1 items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
                 🖨️ Print Receipt
               </button>
               <button
                 type="button"
                 onClick={() => setReceiptSale(null)}
-                className="inline-flex h-[48px] flex-1 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 tap-target touch-feedback gpu"
+                className="inline-flex h-[48px] flex-1 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
                 Done
               </button>

@@ -180,6 +180,7 @@ export default function InventoryPage() {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [movementDateSort, setMovementDateSort] = useState<MovementDateSort>("newest");
   const [selectedSupplierFilter, setSelectedSupplierFilter] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   async function loadInventory() {
     try {
@@ -242,6 +243,12 @@ export default function InventoryPage() {
     } finally {
       setLoadingMovements(false);
     }
+  }
+
+  async function handleRefresh() {
+    setIsRefreshing(true);
+    await Promise.all([loadInventory(), loadProducts(), loadSuppliers()]);
+    setTimeout(() => setIsRefreshing(false), 500);
   }
 
   useEffect(() => {
@@ -450,22 +457,37 @@ export default function InventoryPage() {
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Inventory</p>
           <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-950 sm:text-3xl">Stock Management</h1>
-          <p className="mt-1 text-sm text-zinc-500">Monitor and adjust your inventory levels.</p>
+          <p className="mt-1 text-lg text-zinc-500">Monitor and adjust your inventory levels.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={openMovementModal}
-            className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-4 text-sm font-bold text-white shadow-sm transition hover:bg-zinc-800 tap-target touch-feedback gpu"
+            className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-4 text-sm font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
           >
             + New Movement
           </button>
           <button
             type="button"
             onClick={openHistoryModal}
-            className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-100 tap-target touch-feedback gpu"
+            className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
           >
             History
+          </button>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={loadingInventory || isRefreshing}
+            className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
+          >
+            {isRefreshing ? (
+              <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+            ) : (
+              "Refresh"
+            )}
           </button>
         </div>
       </header>
@@ -482,55 +504,55 @@ export default function InventoryPage() {
         </div>
       )}
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-3 mb-4 shrink-0 sm:grid-cols-4">
+      {/* Stats Cards - Extra Large Fonts */}
+      <div className="grid grid-cols-2 gap-3 mb-4 shrink-0 sm:grid-cols-4 animate-fade-in-up">
         <button
           type="button"
           onClick={() => handleInventoryFilter("all")}
-          className={`rounded-2xl border bg-white p-5 text-left shadow-sm transition tap-target card-hover gpu ${inventoryFilter === "all"
-              ? "border-zinc-300 bg-zinc-50"
-              : "border-zinc-200 hover:border-zinc-400 hover:bg-zinc-50"
+          className={`rounded-2xl border bg-white p-6 text-left shadow-sm transition tap-target card-hover gpu ${inventoryFilter === "all"
+            ? "border-zinc-300 bg-zinc-50"
+            : "border-zinc-200 hover:border-zinc-400 hover:bg-zinc-50"
             }`}
         >
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Products</p>
-          <p className="mt-1.5 text-2xl font-black text-zinc-950 number-transition">{totalProducts}</p>
-          <p className="mt-0.5 text-sm text-zinc-400">Total items</p>
+          <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Products</p>
+          <p className="mt-2 text-3xl font-black text-zinc-950 number-transition">{totalProducts}</p>
+          <p className="mt-1 text-lg text-zinc-400">Total items</p>
         </button>
 
         <button
           type="button"
           onClick={() => handleInventoryFilter("all")}
-          className="rounded-2xl border border-zinc-200 bg-white p-5 text-left shadow-sm transition hover:border-zinc-400 hover:bg-zinc-50 tap-target card-hover gpu"
+          className="rounded-2xl border border-zinc-200 bg-white p-6 text-left shadow-sm transition hover:border-zinc-400 hover:bg-zinc-50 tap-target card-hover gpu"
         >
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Total Units</p>
-          <p className="mt-1.5 text-2xl font-black text-zinc-950 number-transition">{totalUnits}</p>
-          <p className="mt-0.5 text-sm text-zinc-400">In stock</p>
+          <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Total Units</p>
+          <p className="mt-2 text-3xl font-black text-zinc-950 number-transition">{totalUnits}</p>
+          <p className="mt-1 text-lg text-zinc-400">In stock</p>
         </button>
 
         <button
           type="button"
           onClick={() => handleInventoryFilter("low")}
-          className={`rounded-2xl border bg-white p-5 text-left shadow-sm transition tap-target card-hover gpu ${inventoryFilter === "low"
-              ? "border-amber-300 bg-amber-50"
-              : "border-zinc-200 hover:border-amber-400 hover:bg-amber-50"
+          className={`rounded-2xl border bg-white p-6 text-left shadow-sm transition tap-target card-hover gpu ${inventoryFilter === "low"
+            ? "border-amber-300 bg-amber-50"
+            : "border-zinc-200 hover:border-amber-400 hover:bg-amber-50"
             }`}
         >
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Low Stock</p>
-          <p className="mt-1.5 text-2xl font-black text-amber-600 number-transition">{lowStockCount}</p>
-          <p className="mt-0.5 text-sm text-amber-600">Below minimum</p>
+          <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Low Stock</p>
+          <p className="mt-2 text-3xl font-black text-amber-600 number-transition">{lowStockCount}</p>
+          <p className="mt-1 text-lg text-amber-600">Below minimum</p>
         </button>
 
         <button
           type="button"
           onClick={() => handleInventoryFilter("out")}
-          className={`rounded-2xl border bg-white p-5 text-left shadow-sm transition tap-target card-hover gpu ${inventoryFilter === "out"
-              ? "border-red-300 bg-red-50"
-              : "border-zinc-200 hover:border-red-400 hover:bg-red-50"
+          className={`rounded-2xl border bg-white p-6 text-left shadow-sm transition tap-target card-hover gpu ${inventoryFilter === "out"
+            ? "border-red-300 bg-red-50"
+            : "border-zinc-200 hover:border-red-400 hover:bg-red-50"
             }`}
         >
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Out of Stock</p>
-          <p className="mt-1.5 text-2xl font-black text-red-600 number-transition">{outOfStockCount}</p>
-          <p className="mt-0.5 text-sm text-red-600">Need restock</p>
+          <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Out of Stock</p>
+          <p className="mt-2 text-3xl font-black text-red-600 number-transition">{outOfStockCount}</p>
+          <p className="mt-1 text-lg text-red-600">Need restock</p>
         </button>
       </div>
 
@@ -576,7 +598,7 @@ export default function InventoryPage() {
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 gpu">
                   <div className="absolute inset-0 rounded-full border-4 border-black border-t-transparent animate-spin gpu"></div>
                 </div>
-                <p className="mt-3 text-sm text-zinc-500">Loading inventory...</p>
+                <p className="mt-3 text-base text-zinc-500">Loading inventory...</p>
               </div>
             </div>
           ) : filteredInventory.length === 0 ? (
@@ -605,25 +627,25 @@ export default function InventoryPage() {
                           </span>
                         )}
                       </div>
-                      <p className="mt-1 text-sm text-zinc-500">
+                      <p className="mt-1 text-base text-zinc-500">
                         {item.sku}
                         {item.flavor && ` • ${item.flavor}`}
                         {item.brand && ` • ${item.brand}`}
                       </p>
                       <div className="mt-2 flex items-center gap-4">
-                        <span className={`text-lg font-bold ${stockClass(item.current_stock, item.minimum_stock)} number-transition`}>
+                        <span className={`text-xl font-bold ${stockClass(item.current_stock, item.minimum_stock)} number-transition`}>
                           {item.current_stock} units
                         </span>
                         <span className={`rounded-full px-3 py-1 text-sm font-medium ${status.className} status-badge ${status.label === "In stock" ? "status-in-stock" :
-                            status.label === "Low stock" ? "status-low-stock" :
-                              "status-out-of-stock"
+                          status.label === "Low stock" ? "status-low-stock" :
+                            "status-out-of-stock"
                           }`}>
                           {status.label}
                         </span>
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-sm text-zinc-400">Min: {item.minimum_stock}</p>
+                      <p className="text-base text-zinc-400">Min: {item.minimum_stock}</p>
                     </div>
                   </div>
                 );
@@ -669,8 +691,8 @@ export default function InventoryPage() {
                   onClick={() => selectForm(type)}
                   disabled={submitting}
                   className={`rounded-xl px-5 py-2.5 text-base font-bold transition tap-target touch-feedback gpu ${activeForm === type
-                      ? "bg-black text-white"
-                      : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
+                    ? "bg-black text-white"
+                    : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
                     }`}
                 >
                   {label}
@@ -697,12 +719,12 @@ export default function InventoryPage() {
                 {activeForm === "receive" && (
                   <div>
                     <div className="mb-1.5 flex items-center justify-between gap-3">
-                      <label className="block text-sm font-bold uppercase tracking-wider text-zinc-400">Supplier</label>
+                      <label className="block text-base font-bold uppercase tracking-wider text-zinc-400">Supplier</label>
                       <button
                         type="button"
                         onClick={() => navigate("/suppliers")}
                         disabled={submitting}
-                        className="text-sm font-medium text-zinc-600 underline transition hover:text-zinc-900 touch-feedback gpu"
+                        className="text-base font-medium text-zinc-600 underline transition hover:text-zinc-900 touch-feedback gpu"
                       >
                         + Manage
                       </button>
@@ -721,7 +743,7 @@ export default function InventoryPage() {
                       ))}
                     </select>
                     {suppliers.length === 0 && (
-                      <p className="mt-1 text-sm text-zinc-500">
+                      <p className="mt-1 text-base text-zinc-500">
                         No suppliers available.{" "}
                         <button
                           type="button"
@@ -736,7 +758,7 @@ export default function InventoryPage() {
                 )}
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                  <label className="mb-1.5 block text-base font-bold uppercase tracking-wider text-zinc-400">
                     Quantity {activeForm === "adjustment" ? "(positive to add, negative to remove/loss)" : "*"}
                   </label>
                   <input
@@ -751,7 +773,7 @@ export default function InventoryPage() {
                     className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
                   />
                   {activeForm === "adjustment" && (
-                    <p className="mt-1 text-sm text-zinc-400">
+                    <p className="mt-1 text-base text-zinc-400">
                       Enter a <strong>positive</strong> number to add stock, or a <strong>negative</strong> number to remove/loss stock.
                     </p>
                   )}
@@ -759,7 +781,7 @@ export default function InventoryPage() {
 
                 {activeForm === "receive" && (
                   <div>
-                    <label className="mb-1.5 block text-sm font-bold uppercase tracking-wider text-zinc-400">Unit Cost</label>
+                    <label className="mb-1.5 block text-base font-bold uppercase tracking-wider text-zinc-400">Unit Cost</label>
                     <input
                       type="number"
                       min="0"
@@ -774,7 +796,7 @@ export default function InventoryPage() {
                 )}
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-bold uppercase tracking-wider text-zinc-400">Movement Date</label>
+                  <label className="mb-1.5 block text-base font-bold uppercase tracking-wider text-zinc-400">Movement Date</label>
                   <input
                     type="datetime-local"
                     value={movementDate}
@@ -782,11 +804,11 @@ export default function InventoryPage() {
                     disabled={submitting}
                     className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
                   />
-                  <p className="mt-1 text-sm text-zinc-400">Leave blank to use current time</p>
+                  <p className="mt-1 text-base text-zinc-400">Leave blank to use current time</p>
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-bold uppercase tracking-wider text-zinc-400">Reference</label>
+                  <label className="mb-1.5 block text-base font-bold uppercase tracking-wider text-zinc-400">Reference</label>
                   <input
                     type="text"
                     value={reference}
@@ -798,7 +820,7 @@ export default function InventoryPage() {
                 </div>
 
                 <div>
-                  <label className="mb-1.5 block text-sm font-bold uppercase tracking-wider text-zinc-400">Notes</label>
+                  <label className="mb-1.5 block text-base font-bold uppercase tracking-wider text-zinc-400">Notes</label>
                   <textarea
                     rows={3}
                     value={notes}
@@ -812,11 +834,11 @@ export default function InventoryPage() {
                 {/* Preview of supplier and cost info before submission */}
                 {activeForm === "receive" && selectedSupplier && (
                   <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 animate-fade-in gpu">
-                    <p className="text-sm font-medium text-blue-800">
+                    <p className="text-base font-medium text-blue-800">
                       Receiving from: <span className="font-bold">{getSupplierName(Number(selectedSupplier))}</span>
                     </p>
                     {unitCost && (
-                      <p className="text-sm text-blue-700 mt-1">
+                      <p className="text-base text-blue-700 mt-1">
                         Unit Cost: {formatCurrency(Number(unitCost))}
                       </p>
                     )}
@@ -828,7 +850,7 @@ export default function InventoryPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 tap-target btn-ripple gpu"
+                  className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target btn-ripple gpu"
                   onMouseDown={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const x = e.clientX - rect.left;
@@ -843,7 +865,7 @@ export default function InventoryPage() {
                   type="button"
                   onClick={closeMovementModal}
                   disabled={submitting}
-                  className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 disabled:opacity-50 tap-target touch-feedback gpu"
+                  className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
                 >
                   Cancel
                 </button>
@@ -877,7 +899,7 @@ export default function InventoryPage() {
                         current === "newest" ? "oldest" : "newest"
                       )
                     }
-                    className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 tap-target touch-feedback gpu"
+                    className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 tap-target touch-feedback gpu"
                   >
                     <span>Sort: {movementDateSort === "newest" ? "Newest" : "Oldest"}</span>
                     <svg
@@ -943,7 +965,7 @@ export default function InventoryPage() {
 
             {/* Summary Stats */}
             <div className="border-b border-zinc-200 px-5 py-3 shrink-0 bg-zinc-50">
-              <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex flex-wrap gap-4 text-base">
                 <span className="font-medium text-zinc-700">
                   Total Movements: {movements.length}
                 </span>
@@ -972,13 +994,13 @@ export default function InventoryPage() {
                     <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 gpu">
                       <div className="absolute inset-0 rounded-full border-4 border-black border-t-transparent animate-spin gpu"></div>
                     </div>
-                    <p className="mt-3 text-sm text-zinc-500">Loading movements...</p>
+                    <p className="mt-3 text-base text-zinc-500">Loading movements...</p>
                   </div>
                 </div>
               ) : filteredBySupplier.length === 0 ? (
                 <div className="p-8 text-center">
                   <p className="text-base font-medium text-zinc-700">No movements found.</p>
-                  <p className="mt-1 text-sm text-zinc-500">Try changing the movement or supplier filter.</p>
+                  <p className="mt-1 text-base text-zinc-500">Try changing the movement or supplier filter.</p>
                 </div>
               ) : (
                 <div className="divide-y divide-zinc-100">
@@ -998,7 +1020,7 @@ export default function InventoryPage() {
                       <div key={movement.id} className="flex items-center justify-between p-5 hover:bg-zinc-50 card-hover gpu">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2.5">
-                            <span className={`rounded-full px-3 py-1 text-sm font-medium ${movementClass(movement.type)}`}>
+                            <span className={`rounded-full px-3 py-1 text-base font-medium ${movementClass(movement.type)}`}>
                               {movementLabel(movement.type)}
                             </span>
                             <h4 className="truncate text-lg font-black text-zinc-950">{movement.product_name}</h4>
@@ -1008,12 +1030,12 @@ export default function InventoryPage() {
                               </span>
                             )}
                           </div>
-                          <p className="mt-1 text-sm text-zinc-500">
+                          <p className="mt-1 text-base text-zinc-500">
                             {movement.sku}
                             {movement.flavor && ` • ${movement.flavor}`}
                             {movement.brand && ` • ${movement.brand}`}
                           </p>
-                          <div className="mt-1.5 flex flex-wrap items-center gap-4 text-sm text-zinc-400">
+                          <div className="mt-1.5 flex flex-wrap items-center gap-4 text-base text-zinc-400">
                             <span>{formatDateTime(movement.movement_date)}</span>
                             {movement.reference && <span>Ref: {movement.reference}</span>}
                             {hasSupplier && (
@@ -1039,12 +1061,12 @@ export default function InventoryPage() {
                             {quantityText}
                           </p>
                           {hasUnitCost && (
-                            <p className="text-sm font-medium text-zinc-600">
+                            <p className="text-base font-medium text-zinc-600">
                               Total: {formatCurrency((movement.unit_cost || 0) * Math.abs(movement.quantity))}
                             </p>
                           )}
                           {movement.notes && (
-                            <p className="mt-0.5 text-sm text-zinc-400 max-w-[150px] truncate">{movement.notes}</p>
+                            <p className="mt-0.5 text-base text-zinc-400 max-w-[150px] truncate">{movement.notes}</p>
                           )}
                         </div>
                       </div>
@@ -1065,7 +1087,7 @@ export default function InventoryPage() {
                     type="button"
                     disabled={page <= 1}
                     onClick={() => setPage((current) => Math.max(1, current - 1))}
-                    className="rounded-xl border border-zinc-200 bg-white px-5 py-2.5 text-base font-semibold text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-30 tap-target touch-feedback gpu"
+                    className="rounded-xl border border-zinc-200 bg-white px-5 py-2.5 text-base font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:scale-[1.02] active:scale-95 disabled:opacity-30 tap-target touch-feedback gpu"
                   >
                     Previous
                   </button>
@@ -1073,7 +1095,7 @@ export default function InventoryPage() {
                     type="button"
                     disabled={page >= totalPages}
                     onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                    className="rounded-xl border border-zinc-200 bg-white px-5 py-2.5 text-base font-semibold text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-30 tap-target touch-feedback gpu"
+                    className="rounded-xl border border-zinc-200 bg-white px-5 py-2.5 text-base font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:scale-[1.02] active:scale-95 disabled:opacity-30 tap-target touch-feedback gpu"
                   >
                     Next
                   </button>

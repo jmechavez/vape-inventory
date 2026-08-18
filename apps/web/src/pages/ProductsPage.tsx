@@ -71,7 +71,7 @@ function downloadCsvTemplate() {
 
 function ProductsSkeleton() {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 gpu">
       {[...Array(3)].map((_, i) => (
         <div
           key={i}
@@ -210,6 +210,7 @@ export default function ProductsPage() {
   const [costPrice, setCostPrice] = useState("");
   const [sellingPrice, setSellingPrice] = useState("");
   const [minimumStock, setMinimumStock] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   async function loadProducts() {
     try {
@@ -261,6 +262,12 @@ export default function ProductsPage() {
     } finally {
       setLoadingArchived(false);
     }
+  }
+
+  async function handleRefresh() {
+    setIsRefreshing(true);
+    await Promise.all([loadProducts(), loadArchivedProducts()]);
+    setTimeout(() => setIsRefreshing(false), 500);
   }
 
   useEffect(() => {
@@ -713,7 +720,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col gpu">
       {/* Header */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 shrink-0">
         <div>
@@ -725,7 +732,7 @@ export default function ProductsPage() {
             Products
           </h1>
 
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-lg text-zinc-500">
             Manage your product catalog.
           </p>
         </div>
@@ -734,8 +741,24 @@ export default function ProductsPage() {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
+              onClick={handleRefresh}
+              disabled={loading || loadingArchived || isRefreshing}
+              className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
+            >
+              {isRefreshing ? (
+                <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              ) : (
+                "Refresh"
+              )}
+            </button>
+
+            <button
+              type="button"
               onClick={downloadCsvTemplate}
-              className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
+              className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
             >
               <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -744,7 +767,7 @@ export default function ProductsPage() {
             </button>
 
             <label
-              className={`inline-flex h-[44px] cursor-pointer items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target ${uploadingCsv
+              className={`inline-flex h-[44px] cursor-pointer items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu ${uploadingCsv
                 ? "pointer-events-none opacity-50"
                 : ""
                 }`}
@@ -766,7 +789,7 @@ export default function ProductsPage() {
               type="button"
               onClick={openAddForm}
               disabled={uploadingCsv}
-              className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-4 text-sm font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target"
+              className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-4 text-sm font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target touch-feedback gpu"
             >
               + New Product
             </button>
@@ -776,7 +799,7 @@ export default function ProductsPage() {
 
       {/* Success */}
       {successMessage && (
-        <div className="rounded-xl border border-zinc-200 bg-white p-4 text-base font-medium text-zinc-900 shadow-sm mb-3 shrink-0 animate-fade-in">
+        <div className="rounded-xl border border-zinc-200 bg-white p-4 text-base font-medium text-zinc-900 shadow-sm mb-3 shrink-0 animate-fade-in gpu">
           <span className="mr-2 inline-block h-2 w-2 rounded-full bg-black" />
           {successMessage}
         </div>
@@ -784,18 +807,18 @@ export default function ProductsPage() {
 
       {/* Error */}
       {error && !showForm && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-base font-medium text-red-700 mb-3 shrink-0 animate-fade-in">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-base font-medium text-red-700 mb-3 shrink-0 animate-fade-in gpu">
           {error}
         </div>
       )}
 
       {/* View Tabs */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-2 shadow-sm mb-4 shrink-0">
+      <div className="rounded-2xl border border-zinc-200 bg-white p-2 shadow-sm mb-4 shrink-0 gpu">
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => changeView("active")}
-            className={`rounded-xl px-4 py-3 text-base font-bold transition-all duration-200 touch-feedback ${viewMode === "active"
+            className={`rounded-xl px-4 py-3 text-base font-bold transition-all duration-200 touch-feedback gpu ${viewMode === "active"
               ? "bg-black text-white shadow-sm hover:scale-[1.02]"
               : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 hover:scale-[1.02] active:scale-95"
               }`}
@@ -815,7 +838,7 @@ export default function ProductsPage() {
           <button
             type="button"
             onClick={() => changeView("archived")}
-            className={`rounded-xl px-4 py-3 text-base font-bold transition-all duration-200 touch-feedback ${viewMode === "archived"
+            className={`rounded-xl px-4 py-3 text-base font-bold transition-all duration-200 touch-feedback gpu ${viewMode === "archived"
               ? "bg-black text-white shadow-sm hover:scale-[1.02]"
               : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 hover:scale-[1.02] active:scale-95"
               }`}
@@ -835,7 +858,7 @@ export default function ProductsPage() {
       </div>
 
       {/* Search */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm mb-4 shrink-0 transition-all duration-200 hover:shadow-md hover:border-zinc-300">
+      <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm mb-4 shrink-0 transition-all duration-200 hover:shadow-md hover:border-zinc-300 card-hover gpu">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">
@@ -863,7 +886,7 @@ export default function ProductsPage() {
                 setSearch(event.target.value)
               }
               placeholder="Search SKU, name, brand, flavor..."
-              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target"
+              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
             />
           </div>
         </div>
@@ -873,11 +896,11 @@ export default function ProductsPage() {
       <div className="flex-1 min-h-0 gap-4 lg:grid lg:grid-cols-[1fr_440px] xl:grid-cols-[1fr_520px]">
         {/* Products List */}
         <div className="flex flex-col min-h-0">
-          <div className="flex-1 overflow-y-auto space-y-3">
+          <div className="flex-1 overflow-y-auto space-y-3 gpu-scroll">
             {isLoading ? (
               <ProductsSkeleton />
             ) : displayedProducts.length === 0 ? (
-              <div className="rounded-2xl border border-zinc-200 bg-white p-12 text-center shadow-sm animate-fade-in-up">
+              <div className="rounded-2xl border border-zinc-200 bg-white p-12 text-center shadow-sm animate-fade-in-up gpu">
                 <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 shadow-sm animate-bounce-slow">
                   <svg
                     viewBox="0 0 24 24"
@@ -922,7 +945,7 @@ export default function ProductsPage() {
                   <button
                     type="button"
                     onClick={() => setSearch("")}
-                    className="mt-4 rounded-lg border border-zinc-300 bg-white px-5 py-3 text-sm font-bold text-zinc-700 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
+                    className="mt-4 rounded-lg border border-zinc-300 bg-white px-5 py-3 text-base font-bold text-zinc-700 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
                   >
                     Clear Search
                   </button>
@@ -930,7 +953,7 @@ export default function ProductsPage() {
                   <button
                     type="button"
                     onClick={openAddForm}
-                    className="mt-4 rounded-xl bg-black px-6 py-3 text-base font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target"
+                    className="mt-4 rounded-xl bg-black px-6 py-3 text-base font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
                   >
                     + Add Product
                   </button>
@@ -943,7 +966,7 @@ export default function ProductsPage() {
                 return (
                   <div
                     key={product.id}
-                    className={`rounded-2xl border bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01] ${viewMode === "archived"
+                    className={`rounded-2xl border bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01] card-hover gpu ${viewMode === "archived"
                       ? "border-zinc-200 opacity-90"
                       : "border-zinc-200 hover:border-zinc-400"
                       }`}
@@ -973,7 +996,7 @@ export default function ProductsPage() {
                             )}
                           </div>
 
-                          <p className="mt-1 text-sm text-zinc-500">
+                          <p className="mt-1 text-base text-zinc-500">
                             {product.brand && ` • ${product.brand}`}
                             {product.flavor && ` • ${product.flavor}`}
                           </p>
@@ -1027,7 +1050,7 @@ export default function ProductsPage() {
                                 onClick={() =>
                                   openEditForm(product)
                                 }
-                                className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
+                                className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
                               >
                                 Edit
                               </button>
@@ -1037,7 +1060,7 @@ export default function ProductsPage() {
                                 onClick={() =>
                                   openArchiveModal(product)
                                 }
-                                className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50 hover:scale-[1.02] active:scale-95 tap-target"
+                                className="rounded-lg border border-red-200 bg-white px-4 py-2 text-base font-bold text-red-600 transition hover:bg-red-50 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
                               >
                                 Archive
                               </button>
@@ -1048,7 +1071,7 @@ export default function ProductsPage() {
                               onClick={() =>
                                 openRestoreModal(product)
                               }
-                              className="rounded-lg bg-black px-4 py-2 text-sm font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target"
+                              className="rounded-lg bg-black px-4 py-2 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
                             >
                               Restore
                             </button>
@@ -1066,7 +1089,7 @@ export default function ProductsPage() {
         {/* Desktop Form */}
         <div className="hidden lg:block">
           {showForm ? (
-            <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm h-full flex flex-col animate-slide-up">
+            <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm h-full flex flex-col animate-slide-up gpu">
               <div className="border-b border-zinc-200 p-5 shrink-0">
                 <div className="flex items-center justify-between">
                   <div>
@@ -1086,7 +1109,7 @@ export default function ProductsPage() {
                   <button
                     type="button"
                     onClick={closeForm}
-                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-xl text-zinc-500 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
+                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-xl text-zinc-500 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
                   >
                     ×
                   </button>
@@ -1095,17 +1118,17 @@ export default function ProductsPage() {
 
               <form
                 onSubmit={saveProduct}
-                className="flex-1 overflow-y-auto p-5"
+                className="flex-1 overflow-y-auto p-5 gpu-scroll"
               >
                 {error && (
-                  <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-base font-medium text-red-700 animate-fade-in">
+                  <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-base font-medium text-red-700 animate-fade-in gpu">
                     {error}
                   </div>
                 )}
 
                 <div className="space-y-4">
                   <div>
-                    <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                    <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                       SKU *
                     </label>
 
@@ -1118,12 +1141,12 @@ export default function ProductsPage() {
                       }
                       placeholder="VAPE-001"
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                    <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                       Product Name *
                     </label>
 
@@ -1136,12 +1159,12 @@ export default function ProductsPage() {
                       }
                       placeholder="Juice Box"
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                    <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                       Brand
                     </label>
 
@@ -1153,13 +1176,13 @@ export default function ProductsPage() {
                       }
                       placeholder="Cloud Co."
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                      <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                         Version
                       </label>
 
@@ -1171,12 +1194,12 @@ export default function ProductsPage() {
                         }
                         placeholder="V2"
                         disabled={submitting}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                       />
                     </div>
 
                     <div>
-                      <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                      <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                         Flavor
                       </label>
 
@@ -1188,14 +1211,14 @@ export default function ProductsPage() {
                         }
                         placeholder="Strawberry"
                         disabled={submitting}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                      <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                         Cost Price
                       </label>
 
@@ -1209,12 +1232,12 @@ export default function ProductsPage() {
                         }
                         placeholder="300.00"
                         disabled={submitting}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                       />
                     </div>
 
                     <div>
-                      <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                      <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                         Selling Price *
                       </label>
 
@@ -1229,13 +1252,13 @@ export default function ProductsPage() {
                         }
                         placeholder="500.00"
                         disabled={submitting}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                    <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                       Minimum Stock *
                     </label>
 
@@ -1250,7 +1273,7 @@ export default function ProductsPage() {
                       }
                       placeholder="5"
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -1259,7 +1282,14 @@ export default function ProductsPage() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target"
+                    className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target btn-ripple gpu"
+                    onMouseDown={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const x = e.clientX - rect.left;
+                      const y = e.clientY - rect.top;
+                      e.currentTarget.style.setProperty('--x', x + 'px');
+                      e.currentTarget.style.setProperty('--y', y + 'px');
+                    }}
                   >
                     {submitting
                       ? "Saving..."
@@ -1277,7 +1307,7 @@ export default function ProductsPage() {
                             editingProduct,
                           )
                         }
-                        className="inline-flex h-[52px] items-center justify-center rounded-xl border border-red-200 bg-red-50 px-6 text-base font-bold text-red-700 transition hover:bg-red-100 hover:scale-[1.02] active:scale-95 tap-target"
+                        className="inline-flex h-[52px] items-center justify-center rounded-xl border border-red-200 bg-red-50 px-6 text-base font-bold text-red-700 transition hover:bg-red-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
                       >
                         Archive Product
                       </button>
@@ -1287,7 +1317,7 @@ export default function ProductsPage() {
                     type="button"
                     onClick={closeForm}
                     disabled={submitting}
-                    className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
+                    className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
                   >
                     Cancel
                   </button>
@@ -1295,7 +1325,7 @@ export default function ProductsPage() {
               </form>
             </div>
           ) : (
-            <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm h-full flex flex-col items-center justify-center p-10 text-center transition-all duration-200 hover:shadow-md">
+            <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm h-full flex flex-col items-center justify-center p-10 text-center transition-all duration-200 hover:shadow-md card-hover gpu">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 shadow-sm animate-bounce-slow">
                 <svg
                   viewBox="0 0 24 24"
@@ -1335,7 +1365,7 @@ export default function ProductsPage() {
               {viewMode === "active" && (
                 <button
                   onClick={openAddForm}
-                  className="mt-5 inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target"
+                  className="mt-5 inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
                 >
                   + Create New Product
                 </button>
@@ -1347,8 +1377,8 @@ export default function ProductsPage() {
 
       {/* Mobile Form */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm lg:hidden">
-          <div className="max-h-[90vh] w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl animate-scale-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm lg:hidden animate-fade-in backdrop-gpu gpu">
+          <div className="max-h-[90vh] w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl animate-scale-in gpu">
             <div className="border-b border-zinc-200 p-5">
               <div className="flex items-center justify-between">
                 <div>
@@ -1366,7 +1396,7 @@ export default function ProductsPage() {
                 <button
                   type="button"
                   onClick={closeForm}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-xl text-zinc-500 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-xl text-zinc-500 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
                 >
                   ×
                 </button>
@@ -1375,17 +1405,17 @@ export default function ProductsPage() {
 
             <form
               onSubmit={saveProduct}
-              className="max-h-[calc(90vh-120px)] overflow-y-auto p-5"
+              className="max-h-[calc(90vh-120px)] overflow-y-auto p-5 gpu-scroll"
             >
               {error && (
-                <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-base font-medium text-red-700 animate-fade-in">
+                <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-base font-medium text-red-700 animate-fade-in gpu">
                   {error}
                 </div>
               )}
 
               <div className="space-y-4">
                 <div>
-                  <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                  <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                     SKU *
                   </label>
 
@@ -1398,12 +1428,12 @@ export default function ProductsPage() {
                     }
                     placeholder="VAPE-001"
                     disabled={submitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                    className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                  <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                     Product Name *
                   </label>
 
@@ -1416,12 +1446,12 @@ export default function ProductsPage() {
                     }
                     placeholder="Juice Box"
                     disabled={submitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                    className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                  <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                     Brand
                   </label>
 
@@ -1433,13 +1463,13 @@ export default function ProductsPage() {
                     }
                     placeholder="Cloud Co."
                     disabled={submitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                    className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                    <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                       Version
                     </label>
 
@@ -1451,12 +1481,12 @@ export default function ProductsPage() {
                       }
                       placeholder="V2"
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                    <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                       Flavor
                     </label>
 
@@ -1468,14 +1498,14 @@ export default function ProductsPage() {
                       }
                       placeholder="Strawberry"
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                    <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                       Cost Price
                     </label>
 
@@ -1489,12 +1519,12 @@ export default function ProductsPage() {
                       }
                       placeholder="300.00"
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                    <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                       Selling Price *
                     </label>
 
@@ -1511,13 +1541,13 @@ export default function ProductsPage() {
                       }
                       placeholder="500.00"
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm font-bold uppercase tracking-wider text-zinc-400">
+                  <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">
                     Minimum Stock *
                   </label>
 
@@ -1534,7 +1564,7 @@ export default function ProductsPage() {
                     }
                     placeholder="5"
                     disabled={submitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                    className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -1543,7 +1573,14 @@ export default function ProductsPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target"
+                  className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target btn-ripple gpu"
+                  onMouseDown={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    e.currentTarget.style.setProperty('--x', x + 'px');
+                    e.currentTarget.style.setProperty('--y', y + 'px');
+                  }}
                 >
                   {submitting
                     ? "Saving..."
@@ -1561,7 +1598,7 @@ export default function ProductsPage() {
                           editingProduct,
                         )
                       }
-                      className="inline-flex h-[52px] items-center justify-center rounded-xl border border-red-200 bg-red-50 px-6 text-base font-bold text-red-700 transition hover:bg-red-100 hover:scale-[1.02] active:scale-95 tap-target"
+                      className="inline-flex h-[52px] items-center justify-center rounded-xl border border-red-200 bg-red-50 px-6 text-base font-bold text-red-700 transition hover:bg-red-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
                     >
                       Archive Product
                     </button>
@@ -1571,7 +1608,7 @@ export default function ProductsPage() {
                   type="button"
                   onClick={closeForm}
                   disabled={submitting}
-                  className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
+                  className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
                 >
                   Cancel
                 </button>
@@ -1584,7 +1621,7 @@ export default function ProductsPage() {
       {/* Archive Modal */}
       {productToArchive && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
           role="dialog"
           aria-modal="true"
           onClick={(event) => {
@@ -1595,7 +1632,7 @@ export default function ProductsPage() {
             }
           }}
         >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl animate-scale-in">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl animate-scale-in gpu">
             <div className="p-6">
               <div className="flex items-start gap-4">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
@@ -1620,7 +1657,7 @@ export default function ProductsPage() {
                     Archive Product?
                   </h2>
 
-                  <p className="mt-1 text-sm leading-6 text-zinc-500">
+                  <p className="mt-1 text-base leading-6 text-zinc-500">
                     This product will be removed from
                     the active catalog. Its historical
                     records will remain intact.
@@ -1629,11 +1666,11 @@ export default function ProductsPage() {
               </div>
 
               <div className="mt-5 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                <p className="text-sm font-black text-zinc-950">
+                <p className="text-base font-black text-zinc-950">
                   {productToArchive.name}
                 </p>
 
-                <p className="mt-1 font-mono text-xs font-bold text-zinc-500">
+                <p className="mt-1 font-mono text-sm font-bold text-zinc-500">
                   {productToArchive.sku}
                 </p>
               </div>
@@ -1644,7 +1681,7 @@ export default function ProductsPage() {
                 type="button"
                 onClick={closeArchiveModal}
                 disabled={archiving}
-                className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
+                className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-5 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
               >
                 Cancel
               </button>
@@ -1653,7 +1690,7 @@ export default function ProductsPage() {
                 type="button"
                 onClick={archiveProduct}
                 disabled={archiving}
-                className="inline-flex h-[44px] items-center justify-center rounded-xl bg-red-600 px-5 text-sm font-bold text-white transition hover:bg-red-700 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
+                className="inline-flex h-[44px] items-center justify-center rounded-xl bg-red-600 px-5 text-base font-bold text-white transition hover:bg-red-700 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
               >
                 {archiving
                   ? "Archiving..."
@@ -1667,7 +1704,7 @@ export default function ProductsPage() {
       {/* Restore Modal */}
       {productToRestore && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
           role="dialog"
           aria-modal="true"
           onClick={(event) => {
@@ -1678,7 +1715,7 @@ export default function ProductsPage() {
             }
           }}
         >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl animate-scale-in">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl animate-scale-in gpu">
             <div className="p-6">
               <div className="flex items-start gap-4">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900">
@@ -1702,7 +1739,7 @@ export default function ProductsPage() {
                     Restore Product?
                   </h2>
 
-                  <p className="mt-1 text-sm leading-6 text-zinc-500">
+                  <p className="mt-1 text-base leading-6 text-zinc-500">
                     This product will be returned to
                     the active product catalog.
                   </p>
@@ -1710,11 +1747,11 @@ export default function ProductsPage() {
               </div>
 
               <div className="mt-5 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                <p className="text-sm font-black text-zinc-950">
+                <p className="text-base font-black text-zinc-950">
                   {productToRestore.name}
                 </p>
 
-                <p className="mt-1 font-mono text-xs font-bold text-zinc-500">
+                <p className="mt-1 font-mono text-sm font-bold text-zinc-500">
                   {productToRestore.sku}
                 </p>
               </div>
@@ -1725,7 +1762,7 @@ export default function ProductsPage() {
                 type="button"
                 onClick={closeRestoreModal}
                 disabled={restoring}
-                className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-5 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
+                className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-5 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
               >
                 Cancel
               </button>
@@ -1734,7 +1771,7 @@ export default function ProductsPage() {
                 type="button"
                 onClick={restoreProduct}
                 disabled={restoring}
-                className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-5 text-sm font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
+                className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-5 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
               >
                 {restoring
                   ? "Restoring..."

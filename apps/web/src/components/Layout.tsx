@@ -64,6 +64,18 @@ const navigation = [
       </svg>
     ),
   },
+  {
+    label: "Reports",
+    to: "/reports",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 shrink-0">
+        <path d="M4 20h16M4 20V8M4 20l4-6 3 2 5-8 4 5v9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M8 20V14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M12 20V16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M16 20V12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Layout({ children }: LayoutProps) {
@@ -111,7 +123,7 @@ export default function Layout({ children }: LayoutProps) {
         {/* Sidebar */}
         <aside
           className={[
-            "momentum-scroll hidden border-r border-zinc-200 bg-white transition-all duration-300 ease-in-out lg:flex lg:flex-col lg:overflow-y-auto lg:shrink-0",
+            "momentum-scroll hidden border-r border-zinc-200 bg-white transition-all duration-300 ease-in-out lg:flex lg:flex-col lg:overflow-y-auto lg:shrink-0 gpu",
             collapsed ? "w-20" : "w-64",
           ].join(" ")}
         >
@@ -142,7 +154,7 @@ export default function Layout({ children }: LayoutProps) {
           {/* Collapse Toggle */}
           <button
             onClick={toggleSidebar}
-            className="mx-3 mt-3 shrink-0 flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2 text-xs font-bold text-zinc-500 transition-all duration-200 hover:bg-zinc-100 hover:text-zinc-900 hover:border-zinc-300 active:scale-95"
+            className="mx-3 mt-3 shrink-0 flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2 text-xs font-bold text-zinc-500 transition-all duration-200 hover:bg-zinc-100 hover:text-zinc-900 hover:border-zinc-300 active:scale-95 touch-feedback gpu"
           >
             {!collapsed ? (
               <>
@@ -159,7 +171,7 @@ export default function Layout({ children }: LayoutProps) {
           </button>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-0.5 p-3 overflow-y-auto">
+          <nav className="flex-1 space-y-0.5 p-3 overflow-y-auto gpu-scroll">
             {!collapsed && (
               <p className="px-3 pb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 animate-fade-in">
                 Menu
@@ -279,7 +291,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
 
             {/* Mobile Navigation */}
-            <nav className="flex gap-1 overflow-x-auto px-3 pb-3">
+            <nav className="flex gap-1 overflow-x-auto px-3 pb-3 gpu-scroll">
               {navigation.map((item) => {
                 const active = isActive(item.to);
 
@@ -288,7 +300,7 @@ export default function Layout({ children }: LayoutProps) {
                     key={item.to}
                     to={item.to}
                     className={[
-                      "flex items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2.5 text-xs font-bold transition-all duration-200 min-h-[44px] shrink-0 active:scale-95",
+                      "flex items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-2.5 text-xs font-bold transition-all duration-200 min-h-[44px] shrink-0 active:scale-95 touch-feedback",
                       active
                         ? "bg-zinc-950 text-white"
                         : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900",
@@ -331,7 +343,7 @@ export default function Layout({ children }: LayoutProps) {
           </header>
 
           {/* Page Content */}
-          <main className="flex-1 overflow-y-auto min-h-0">
+          <main className="flex-1 overflow-y-auto min-h-0 gpu-scroll">
             <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
               {children}
             </div>
