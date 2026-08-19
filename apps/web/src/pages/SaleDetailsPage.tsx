@@ -27,7 +27,7 @@ type Sale = {
   items?: SaleItem[];
 };
 
-const API_URL = "http://localhost:8080";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const RECEIPT_COMPANY_NAME = "";
 const RECEIPT_COMPANY_ADDRESS = "";

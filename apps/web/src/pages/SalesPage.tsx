@@ -51,7 +51,7 @@ type CartItem = {
   quantity: number;
 };
 
-const API_URL = "http://localhost:8080";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const RECEIPT_COMPANY_NAME = "";
 const RECEIPT_COMPANY_ADDRESS = "";
@@ -673,7 +673,7 @@ export default function SalesPage() {
         </div>
       )}
 
-      {/* Statistics - Extra Large Fonts */}
+      {/* Statistics - Plain Colors (like old design) */}
       {!showForm && (
         <div className="grid grid-cols-3 gap-3 mb-4 shrink-0 animate-fade-in-up">
           <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
@@ -737,13 +737,28 @@ export default function SalesPage() {
                       <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Products</p>
                       <h3 className="mt-0.5 text-lg font-black text-zinc-950">Add Products</h3>
                     </div>
-                    <input
-                      type="search"
-                      value={search}
-                      onChange={(event) => setSearch(event.target.value)}
-                      placeholder="Search product..."
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 sm:max-w-xs tap-target gpu"
-                    />
+                    <div className="relative w-full sm:max-w-xs">
+                      <svg className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="search"
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder="Search products..."
+                        className="w-full rounded-xl border border-zinc-300 bg-white pl-11 pr-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+                      />
+                      {search && (
+                        <button
+                          onClick={() => setSearch("")}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 hover:bg-zinc-100 touch-feedback"
+                        >
+                          <svg className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Product Grid */}
@@ -797,9 +812,10 @@ export default function SalesPage() {
                                   {product.flavor ? ` • ${product.flavor}` : ""}
                                 </p>
                                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                                  <span className="text-sm font-bold uppercase tracking-wider text-zinc-400">
-                                    Available
-                                  </span>
+                                  <div className="flex items-center gap-1.5">
+                                    <div className={`h-2 w-2 rounded-full ${isOutOfStock ? 'bg-red-500 animate-pulse' : isLowStock ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                                    <span className="text-sm font-bold uppercase tracking-wider text-zinc-400">Available</span>
+                                  </div>
                                   <span
                                     className={[
                                       "rounded px-2 py-0.5 text-sm font-black status-badge",
@@ -917,6 +933,19 @@ export default function SalesPage() {
                                       {stock}
                                     </span>
                                   </p>
+                                  {/* Stock Progress Bar */}
+                                  <div className="mt-2">
+                                    <div className="flex justify-between text-xs text-zinc-400">
+                                      <span>Stock: {stock}</span>
+                                      <span>{Math.round((item.quantity / stock) * 100)}% used</span>
+                                    </div>
+                                    <div className="mt-1 h-1 w-full rounded-full bg-zinc-100 overflow-hidden">
+                                      <div
+                                        className="h-full rounded-full bg-black transition-all duration-300 gpu"
+                                        style={{ width: `${Math.min((item.quantity / stock) * 100, 100)}%` }}
+                                      />
+                                    </div>
+                                  </div>
                                 </div>
                                 <button
                                   type="button"
@@ -989,10 +1018,33 @@ export default function SalesPage() {
                       />
                     </label>
 
-                    <label className="mt-3 block">
+                    {/* Payment Method - Enhanced with Quick Select */}
+                    <div className="mt-3">
                       <span className="mb-1.5 block text-sm font-bold uppercase tracking-wider text-zinc-400">
                         Payment Method
                       </span>
+
+                      {/* Quick Payment Buttons */}
+                      <div className="grid grid-cols-3 gap-2 mb-2">
+                        {['CASH', 'GCASH', 'MAYA'].map((method) => (
+                          <button
+                            key={method}
+                            type="button"
+                            onClick={() => setPaymentMethod(method as PaymentMethod)}
+                            className={[
+                              "rounded-xl border-2 p-3 text-center font-bold transition tap-target touch-feedback gpu",
+                              paymentMethod === method
+                                ? "border-black bg-black text-white"
+                                : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400",
+                            ].join(" ")}
+                          >
+                            <span className="block text-lg">{method === 'CASH' ? '💵' : method === 'GCASH' ? '📱' : '🏦'}</span>
+                            <span className="text-sm">{method}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Full dropdown */}
                       <select
                         value={paymentMethod}
                         onChange={(event) => setPaymentMethod(event.target.value as PaymentMethod)}
@@ -1005,12 +1057,31 @@ export default function SalesPage() {
                           </option>
                         ))}
                       </select>
-                    </label>
+                    </div>
 
-                    <label className="mt-3 block">
+                    {/* Discount - Enhanced with Quick Presets */}
+                    <div className="mt-3">
                       <span className="mb-1.5 block text-sm font-bold uppercase tracking-wider text-zinc-400">
                         Discount
                       </span>
+
+                      {/* Quick discount presets */}
+                      <div className="flex gap-2 mb-2 flex-wrap">
+                        {[0, 50, 100, 200].map((amount) => (
+                          <button
+                            key={amount}
+                            type="button"
+                            onClick={() => setDiscount(String(amount))}
+                            className={`rounded-lg border px-3 py-1.5 text-sm font-bold transition tap-target touch-feedback gpu ${Number(discount) === amount
+                                ? "border-black bg-black text-white"
+                                : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
+                              }`}
+                          >
+                            ₱{amount}
+                          </button>
+                        ))}
+                      </div>
+
                       <input
                         type="number"
                         min="0"
@@ -1021,7 +1092,7 @@ export default function SalesPage() {
                         placeholder="0.00"
                         className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 disabled:opacity-50 tap-target gpu"
                       />
-                    </label>
+                    </div>
 
                     <div className="mt-4 space-y-2 border-t border-zinc-200 pt-4">
                       <div className="flex justify-between text-base">
@@ -1071,7 +1142,7 @@ export default function SalesPage() {
         </div>
       )}
 
-      {/* Recent Sales - Extra Large Fonts */}
+      {/* Recent Sales - Enhanced with Status Indicators */}
       {!showForm && (
         <section className="flex-1 min-h-0 flex flex-col">
           <div className="shrink-0 flex items-center justify-between mb-3">
@@ -1115,9 +1186,25 @@ export default function SalesPage() {
                 </div>
               </div>
             ) : recentSales.length === 0 ? (
-              <div className="p-10 text-center">
-                <h3 className="text-xl font-black text-zinc-950">No sales yet</h3>
-                <p className="mt-1 text-base text-zinc-500">Create your first sale above to see it here.</p>
+              <div className="flex-1 rounded-2xl border border-zinc-200 bg-gradient-to-br from-zinc-50 to-white shadow-sm flex flex-col items-center justify-center p-10 animate-fade-in-up">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center justify-center opacity-5">
+                    <svg viewBox="0 0 24 24" fill="none" className="h-48 w-48 text-zinc-900">
+                      <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                      <path d="M9 8h6M9 12h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                  <div className="relative">
+                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 shadow-lg animate-bounce-slow">
+                      <svg viewBox="0 0 24 24" fill="none" className="h-10 w-10 text-white">
+                        <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                        <path d="M9 8h6M9 12h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                      </svg>
+                    </div>
+                    <h3 className="mt-5 text-2xl font-black text-zinc-950">No sales yet</h3>
+                    <p className="mt-1 text-base text-zinc-500">Create your first sale above to see it here.</p>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="divide-y divide-zinc-100">
@@ -1127,27 +1214,37 @@ export default function SalesPage() {
                     to={`/sales/${sale.id}`}
                     className="flex items-center justify-between p-5 transition hover:bg-zinc-50 card-hover gpu"
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-3">
-                        <p className="font-mono text-lg font-black text-zinc-950">
-                          {getSaleReference(sale)}
-                        </p>
-                        <span className="rounded-full bg-zinc-100 px-3 py-1 text-sm font-black text-zinc-700">
-                          {sale.payment_method}
-                        </span>
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
+                        <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                       </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-3 text-base text-zinc-400">
-                        <span>{formatDate(sale.sale_date)}</span>
-                        <span>•</span>
-                        <span className="font-medium">
-                          {getItemCount(sale)} {getItemCount(sale) === 1 ? "item" : "items"}
-                        </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-3">
+                          <p className="font-mono text-lg font-black text-zinc-950">
+                            {getSaleReference(sale)}
+                          </p>
+                          <span className="rounded-full bg-zinc-100 px-3 py-1 text-sm font-black text-zinc-700">
+                            {sale.payment_method}
+                          </span>
+                        </div>
+                        <div className="mt-1 flex flex-wrap items-center gap-3 text-base text-zinc-400">
+                          <span>{formatDate(sale.sale_date)}</span>
+                          <span>•</span>
+                          <span className="font-medium">
+                            {getItemCount(sale)} {getItemCount(sale) === 1 ? "item" : "items"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
                       <p className="text-xl font-black text-zinc-950 number-transition">
                         {formatCurrency(Number(sale.total))}
                       </p>
+                      <span className="inline-block rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700">
+                        Completed
+                      </span>
                     </div>
                   </Link>
                 ))}

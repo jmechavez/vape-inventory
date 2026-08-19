@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/jmechavez/vape-inventory/internal/database"
@@ -206,9 +207,19 @@ func main() {
 	// SERVER
 	// =========================================================
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	corsOrigin := os.Getenv("CORS_ORIGIN")
+	if corsOrigin == "" {
+		corsOrigin = "http://localhost:5173"
+	}
+
 	server := &http.Server{
-		Addr:              ":8080",
-		Handler:           corsMiddleware(mux),
+		Addr:              ":" + port,
+		Handler:           corsMiddleware(mux, corsOrigin),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
@@ -223,12 +234,15 @@ func main() {
 	}
 }
 
-func corsMiddleware(next http.Handler) http.Handler {
+func corsMiddleware(
+	next http.Handler,
+	allowedOrigin string,
+) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set(
 				"Access-Control-Allow-Origin",
-				"http://localhost:5173",
+				allowedOrigin,
 			)
 
 			w.Header().Set(

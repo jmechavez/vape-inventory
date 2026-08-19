@@ -4,16 +4,40 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/user"
+	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func Connect(ctx context.Context) (*pgxpool.Pool, error) {
-	currentUser, err := user.Current()
-	if err != nil {
-		return nil, fmt.Errorf("get current user: %w", err)
+	host := os.Getenv("PGHOST")
+	portString := os.Getenv("PGPORT")
+	user := os.Getenv("PGUSER")
+	password := os.Getenv("PGPASSWORD")
+	database := os.Getenv("PGDATABASE")
+
+	if host == "" {
+		host = "localhost"
+	}
+
+	port := uint16(5432)
+
+	if portString != "" {
+		parsedPort, err := strconv.ParseUint(portString, 10, 16)
+		if err != nil {
+			return nil, fmt.Errorf("invalid PGPORT: %w", err)
+		}
+
+		port = uint16(parsedPort)
+	}
+
+	if user == "" {
+		return nil, fmt.Errorf("PGUSER is required")
+	}
+
+	if database == "" {
+		database = "vape_inventory"
 	}
 
 	config, err := pgxpool.ParseConfig("")
@@ -21,10 +45,11 @@ func Connect(ctx context.Context) (*pgxpool.Pool, error) {
 		return nil, fmt.Errorf("parse database config: %w", err)
 	}
 
-	config.ConnConfig.Host = os.Getenv("PGHOST")
-	config.ConnConfig.Port = 5432
-	config.ConnConfig.User = currentUser.Username
-	config.ConnConfig.Database = "vape_inventory"
+	config.ConnConfig.Host = host
+	config.ConnConfig.Port = port
+	config.ConnConfig.User = user
+	config.ConnConfig.Password = password
+	config.ConnConfig.Database = database
 
 	config.MaxConns = 10
 	config.MinConns = 2
