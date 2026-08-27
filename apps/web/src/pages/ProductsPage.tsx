@@ -835,16 +835,16 @@ export default function ProductsPage() {
             type="button"
             onClick={() => changeView("active")}
             className={`relative z-10 rounded-xl px-4 py-3 text-base font-bold transition-all duration-200 touch-feedback gpu ${viewMode === "active"
-                ? "text-white"
-                : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95"
+              ? "text-white"
+              : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95"
               }`}
           >
             <span>Active</span>
 
             <span
               className={`ml-2 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-sm transition-all duration-300 ${viewMode === "active"
-                  ? "bg-white/15 text-white"
-                  : "bg-zinc-100 text-zinc-500"
+                ? "bg-white/15 text-white"
+                : "bg-zinc-100 text-zinc-500"
                 }`}
             >
               <AnimatedCounter value={products.length} />
@@ -858,16 +858,16 @@ export default function ProductsPage() {
             type="button"
             onClick={() => changeView("archived")}
             className={`relative z-10 rounded-xl px-4 py-3 text-base font-bold transition-all duration-200 touch-feedback gpu ${viewMode === "archived"
-                ? "text-white"
-                : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95"
+              ? "text-white"
+              : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95"
               }`}
           >
             <span>Archived</span>
 
             <span
               className={`ml-2 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-sm transition-all duration-300 ${viewMode === "archived"
-                  ? "bg-white/15 text-white"
-                  : "bg-zinc-100 text-zinc-500"
+                ? "bg-white/15 text-white"
+                : "bg-zinc-100 text-zinc-500"
                 }`}
             >
               <AnimatedCounter value={archivedProducts.length} />
@@ -933,8 +933,8 @@ export default function ProductsPage() {
             {/* Slide Transition Container */}
             <div
               className={`transition-all duration-300 ease-in-out gpu ${isTransitioning
-                  ? "opacity-0 -translate-x-4 scale-95"
-                  : "opacity-100 translate-x-0 scale-100"
+                ? "opacity-0 -translate-x-4 scale-95"
+                : "opacity-100 translate-x-0 scale-100"
                 }`}
             >
               {isLoading ? (
@@ -998,8 +998,8 @@ export default function ProductsPage() {
                     <div
                       key={product.id}
                       className={`rounded-2xl border bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01] card-hover gpu ${viewMode === "archived"
-                          ? "border-zinc-200 opacity-90"
-                          : "border-zinc-200 hover:border-zinc-400"
+                        ? "border-zinc-200 opacity-90"
+                        : "border-zinc-200 hover:border-zinc-400"
                         }`}
                     >
                       <div className="p-5">
@@ -1023,8 +1023,8 @@ export default function ProductsPage() {
 
                               {/* Status Badge */}
                               <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border flex-shrink-0 ${viewMode === "active"
-                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                  : "bg-zinc-50 text-zinc-500 border-zinc-200"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : "bg-zinc-50 text-zinc-500 border-zinc-200"
                                 }`}>
                                 <span className={`${viewMode === 'active' ? 'animate-pulse' : ''}`}>
                                   {viewMode === 'active' ? '●' : '○'}
@@ -1047,7 +1047,7 @@ export default function ProductsPage() {
                               <div className="mt-1 h-1.5 w-full rounded-full bg-zinc-100 overflow-hidden">
                                 <div
                                   className={`h-full rounded-full transition-all duration-500 ${product.minimum_stock <= 5 ? 'bg-red-500' :
-                                      product.minimum_stock <= 10 ? 'bg-amber-500' : 'bg-emerald-500'
+                                    product.minimum_stock <= 10 ? 'bg-amber-500' : 'bg-emerald-500'
                                     }`}
                                   style={{ width: `${Math.min((product.minimum_stock / 20) * 100, 100)}%` }}
                                 />
@@ -1065,11 +1065,11 @@ export default function ProductsPage() {
                                 <p className="text-sm font-bold text-emerald-700">{formatCurrency(product.selling_price)}</p>
                               </div>
                               <div className={`rounded-xl p-2.5 text-center ${margin >= 30 ? 'bg-emerald-50' :
-                                  margin >= 15 ? 'bg-amber-50' : 'bg-red-50'
+                                margin >= 15 ? 'bg-amber-50' : 'bg-red-50'
                                 }`}>
                                 <p className="text-[10px] font-bold uppercase text-zinc-400">Margin</p>
                                 <p className={`text-sm font-bold ${margin >= 30 ? 'text-emerald-700' :
-                                    margin >= 15 ? 'text-amber-700' : 'text-red-700'
+                                  margin >= 15 ? 'text-amber-700' : 'text-red-700'
                                   }`}>
                                   {margin.toFixed(0)}%
                                 </p>
@@ -1647,3 +1647,4 @@ export default function ProductsPage() {
     </div>
   );
 }
+

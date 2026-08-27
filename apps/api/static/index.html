@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+
+  <!--
+      iPad POS viewport configuration:
+      - maximum-scale=1 + user-scalable=no: disables pinch-zoom so an
+        accidental two-finger touch mid-sale can't distort the layout.
+        This is standard for kiosk/POS-style web apps, not for public
+        marketing sites (where blocking zoom would be an a11y problem).
+      - viewport-fit=cover: lets the app draw under the status bar /
+        rounded corners and use safe-area-inset-* CSS env() variables,
+        which matters if this ever runs full-screen (e.g. Safari "Add
+        to Home Screen" or wrapped in a native WKWebView shell).
+    -->
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+
+  <!-- Standalone / home-screen app behavior on iPadOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Vape Inventory" />
+
+  <!-- Prevents Safari auto-linking things like phone numbers found
+         in receipt text or product data — undesired in a POS UI -->
+  <meta name="format-detection" content="telephone=no" />
+
+  <meta name="theme-color" content="#18181b" />
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <title>Vape Inventory</title>
+  <script type="module" crossorigin src="/assets/index-DewoLBEI.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DgKf9MI9.css">
+</head>
+
+<body>
+  <div id="root"></div>
+</body>
+
+</html>

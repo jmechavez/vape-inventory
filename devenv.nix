@@ -4,6 +4,7 @@
   packages = [
     pkgs.git
     pkgs.golangci-lint
+    pkgs.ngrok
   ];
 
   languages.go.enable = true;
@@ -24,13 +25,14 @@
   };
 
   # env.DATABASE_URL = "postgres:///$PGHOST/vape_inventory";
-
-  enterShell = ''
-    echo "🚀 Vape Inventory development environment"
-    echo "Go: $(go version)"
-    echo "Node: $(node --version)"
-    echo "Git: $(git --version)"
-    echo "golangci-lint: $(golangci-lint --version | head -n 1)"
-    echo "PostgreSQL: $(psql --version)"
-  '';
+  #
+  # enterShell = ''
+  #   echo "🚀 Vape Inventory development environment"
+  #   echo "Go: $(go version)"
+  #   echo "Node: $(node --version)"
+  #   echo "Git: $(git --version)"
+  #   echo "golangci-lint: $(golangci-lint --version | head -n 1)"
+  #   echo "PostgreSQL: $(psql --version)"
+  #   echo "ngrok: $(ngrok --version 2>/dev/null || echo 'not installed')"
+  # '';
 }
