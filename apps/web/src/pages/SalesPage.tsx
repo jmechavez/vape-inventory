@@ -1073,8 +1073,8 @@ export default function SalesPage() {
                             type="button"
                             onClick={() => setDiscount(String(amount))}
                             className={`rounded-lg border px-3 py-1.5 text-sm font-bold transition tap-target touch-feedback gpu ${Number(discount) === amount
-                                ? "border-black bg-black text-white"
-                                : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
+                              ? "border-black bg-black text-white"
+                              : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
                               }`}
                           >
                             ₱{amount}
