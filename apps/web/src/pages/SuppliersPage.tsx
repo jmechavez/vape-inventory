@@ -274,39 +274,36 @@ export default function SuppliersPage() {
     });
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header - Keep as is */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 shrink-0">
+    <div className="h-full flex flex-col min-h-0 overflow-x-hidden">
+      {/* Header */}
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 shrink-0">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">
             Management
           </p>
 
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-950 sm:text-3xl">
+          <h1 className="mt-1.5 text-4xl font-black tracking-tight text-zinc-950 sm:text-5xl">
             Suppliers
           </h1>
 
-          <p className="mt-1 text-sm text-zinc-500">
-            Manage your suppliers and
-            contact information.
+          <p className="mt-1.5 text-xl text-zinc-500">
+            Manage your suppliers and contact information.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {/* Back to Inventory */}
+        <div className="flex flex-wrap gap-3">
           <button
             type="button"
             onClick={() => navigate("/inventory")}
-            className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 tap-target"
+            className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
           >
             ← Back to Inventory
           </button>
 
-          {/* Add Supplier */}
           <button
             type="button"
             onClick={openAddForm}
-            className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-4 text-sm font-bold text-white transition hover:bg-zinc-800 tap-target"
+            className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-lg font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
           >
             + Add Supplier
           </button>
@@ -315,22 +312,22 @@ export default function SuppliersPage() {
 
       {/* Error */}
       {pageError && (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 mb-3 shrink-0">
-          <p className="text-base font-semibold text-red-700">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-5 mb-4 shrink-0">
+          <p className="text-xl font-semibold text-red-700">
             {pageError}
           </p>
         </div>
       )}
 
-      {/* Search / Summary - Extra Large */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm mb-4 shrink-0">
+      {/* Search / Summary */}
+      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm mb-6 shrink-0 card-hover gpu transition-all duration-200 hover:shadow-md hover:border-zinc-300">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">
+            <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-500">
               Supplier Directory
             </p>
 
-            <p className="mt-1 text-xl font-black">
+            <p className="mt-1.5 text-2xl font-black">
               {filteredSuppliers.length}{" "}
               <span className="font-normal text-zinc-400">
                 of {suppliers.length}{" "}
@@ -349,7 +346,9 @@ export default function SuppliersPage() {
                   event.target.value,
                 )
               }
-              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target"
+              className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+              style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+              aria-label="Search suppliers"
             />
           </div>
         </div>
@@ -360,10 +359,10 @@ export default function SuppliersPage() {
         <div className="flex-1 rounded-2xl border border-zinc-200 bg-white shadow-sm flex items-center justify-center">
           <div className="text-center">
             <div
-              className="mx-auto mb-3 h-7 w-7 animate-spin rounded-full border-2 border-zinc-300"
+              className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-3 border-zinc-300 gpu"
               style={{ borderTopColor: "var(--accent)" }}
             />
-            <p className="text-base font-medium text-zinc-500">
+            <p className="text-xl font-medium text-zinc-500">
               Loading suppliers...
             </p>
           </div>
@@ -373,9 +372,9 @@ export default function SuppliersPage() {
       {/* Empty */}
       {!loading &&
         filteredSuppliers.length === 0 && (
-          <div className="flex-1 rounded-2xl border border-zinc-200 bg-white shadow-sm flex flex-col items-center justify-center p-8">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 shadow-sm">
-              <svg viewBox="0 0 24 24" fill="none" className="h-10 w-10 text-white">
+          <div className="flex-1 rounded-2xl border border-zinc-200 bg-white shadow-sm flex flex-col items-center justify-center p-12">
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 shadow-sm animate-bounce-slow">
+              <svg viewBox="0 0 24 24" fill="none" className="h-12 w-12 text-white">
                 <path
                   d="M3 16V6a1 1 0 011-1h9v11"
                   stroke="currentColor"
@@ -394,13 +393,13 @@ export default function SuppliersPage() {
               </svg>
             </div>
 
-            <h2 className="mt-5 text-2xl font-black text-zinc-950">
+            <h2 className="mt-6 text-3xl font-black text-zinc-950">
               {search
                 ? "No suppliers found"
                 : "No suppliers yet"}
             </h2>
 
-            <p className="mt-2 text-base text-zinc-500">
+            <p className="mt-1.5 text-xl text-zinc-500">
               {search
                 ? "Try a different search."
                 : "Add your first supplier to get started."}
@@ -410,7 +409,7 @@ export default function SuppliersPage() {
               <button
                 type="button"
                 onClick={openAddForm}
-                className="mt-5 rounded-xl bg-black px-6 py-3 text-base font-bold text-white transition hover:bg-zinc-800 tap-target"
+                className="mt-5 rounded-xl bg-black px-8 py-3.5 text-lg font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
                 + Add Supplier
               </button>
@@ -418,31 +417,31 @@ export default function SuppliersPage() {
           </div>
         )}
 
-      {/* Suppliers Table - Extra Large */}
+      {/* Suppliers Table */}
       {!loading &&
         filteredSuppliers.length > 0 && (
           <div className="flex-1 min-h-0 flex flex-col">
-            <div className="flex-1 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm">
+            <div className="flex-1 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm gpu-scroll">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[900px] text-left">
                   <thead className="border-b border-zinc-200 bg-zinc-50 sticky top-0 z-10">
                     <tr>
-                      <th className="px-5 py-4 text-sm font-bold uppercase tracking-wider text-zinc-500">
+                      <th className="px-7 py-5 text-xl font-bold uppercase tracking-wider text-zinc-500">
                         Supplier
                       </th>
-                      <th className="px-5 py-4 text-sm font-bold uppercase tracking-wider text-zinc-500">
+                      <th className="px-7 py-5 text-xl font-bold uppercase tracking-wider text-zinc-500">
                         Contact
                       </th>
-                      <th className="px-5 py-4 text-sm font-bold uppercase tracking-wider text-zinc-500">
+                      <th className="px-7 py-5 text-xl font-bold uppercase tracking-wider text-zinc-500">
                         Phone
                       </th>
-                      <th className="px-5 py-4 text-sm font-bold uppercase tracking-wider text-zinc-500">
+                      <th className="px-7 py-5 text-xl font-bold uppercase tracking-wider text-zinc-500">
                         Email
                       </th>
-                      <th className="px-5 py-4 text-sm font-bold uppercase tracking-wider text-zinc-500">
+                      <th className="px-7 py-5 text-xl font-bold uppercase tracking-wider text-zinc-500">
                         Address
                       </th>
-                      <th className="px-5 py-4 text-right text-sm font-bold uppercase tracking-wider text-zinc-500">
+                      <th className="px-7 py-5 text-right text-xl font-bold uppercase tracking-wider text-zinc-500">
                         Actions
                       </th>
                     </tr>
@@ -453,55 +452,55 @@ export default function SuppliersPage() {
                       (supplier) => (
                         <tr
                           key={supplier.id}
-                          className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50"
+                          className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50 transition-colors duration-150"
                         >
-                          <td className="px-5 py-5">
+                          <td className="px-7 py-7">
                             <div>
-                              <p className="text-lg font-black text-zinc-950">
+                              <p className="text-xl font-black text-zinc-950">
                                 {supplier.name}
                               </p>
-                              <p className="mt-1 text-sm text-zinc-400">
+                              <p className="mt-0.5 text-lg text-zinc-400">
                                 ID #{supplier.id}
                               </p>
                             </div>
                           </td>
 
-                          <td className="px-5 py-5">
+                          <td className="px-7 py-7">
                             {supplier.contact_person ? (
-                              <span className="text-base font-medium text-zinc-900">
+                              <span className="text-xl font-medium text-zinc-900">
                                 {supplier.contact_person}
                               </span>
                             ) : (
-                              <span className="text-base text-zinc-400">
+                              <span className="text-lg text-zinc-400">
                                 —
                               </span>
                             )}
                           </td>
 
-                          <td className="px-5 py-5 font-mono text-base text-zinc-700">
+                          <td className="px-7 py-7 font-mono text-lg text-zinc-700">
                             {supplier.phone || "—"}
                           </td>
 
-                          <td className="px-5 py-5">
+                          <td className="px-7 py-7">
                             {supplier.email ? (
-                              <span className="text-base text-zinc-700">
+                              <span className="text-lg text-zinc-700">
                                 {supplier.email}
                               </span>
                             ) : (
-                              <span className="text-base text-zinc-400">
+                              <span className="text-lg text-zinc-400">
                                 —
                               </span>
                             )}
                           </td>
 
-                          <td className="max-w-[220px] px-5 py-5">
-                            <span className="block truncate text-base text-zinc-700">
+                          <td className="max-w-[200px] px-7 py-7">
+                            <span className="block truncate text-lg text-zinc-700">
                               {supplier.address || "—"}
                             </span>
                           </td>
 
-                          <td className="px-5 py-5">
-                            <div className="flex justify-end gap-2">
+                          <td className="px-7 py-7">
+                            <div className="flex justify-end gap-3">
                               <button
                                 type="button"
                                 onClick={() =>
@@ -509,7 +508,8 @@ export default function SuppliersPage() {
                                     supplier,
                                   )
                                 }
-                                className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 tap-target"
+                                className="rounded-lg border border-zinc-300 bg-white px-5 py-3 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                                aria-label={`Edit ${supplier.name}`}
                               >
                                 Edit
                               </button>
@@ -521,7 +521,8 @@ export default function SuppliersPage() {
                                     supplier,
                                   )
                                 }
-                                className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50 tap-target"
+                                className="rounded-lg border border-red-200 bg-white px-5 py-3 text-lg font-bold text-red-600 transition hover:bg-red-50 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                                aria-label={`Delete ${supplier.name}`}
                               >
                                 Delete
                               </button>
@@ -537,17 +538,17 @@ export default function SuppliersPage() {
           </div>
         )}
 
-      {/* Add / Edit Modal - Extra Large */}
+      {/* Add / Edit Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm animate-fade-in backdrop-gpu gpu">
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-up gpu">
             {/* Modal Header */}
-            <div className="border-b border-zinc-200 p-6 shrink-0">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">
+            <div className="border-b border-zinc-200 p-8 shrink-0">
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-500">
                 Supplier
               </p>
 
-              <h2 className="mt-1 text-xl font-black text-zinc-950">
+              <h2 className="mt-0.5 text-2xl font-black text-zinc-950">
                 {editingSupplier
                   ? "Edit Supplier"
                   : "Add Supplier"}
@@ -555,10 +556,10 @@ export default function SuppliersPage() {
             </div>
 
             {/* Form */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+            <div className="flex-1 overflow-y-auto p-8 space-y-6 gpu-scroll">
               {formError && (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-                  <p className="text-base font-medium text-red-700">
+                <div className="rounded-xl border border-red-200 bg-red-50 p-5">
+                  <p className="text-xl font-medium text-red-700">
                     {formError}
                   </p>
                 </div>
@@ -566,7 +567,7 @@ export default function SuppliersPage() {
 
               {/* Supplier Name */}
               <div>
-                <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">
+                <label className="text-lg font-bold uppercase tracking-wider text-zinc-500">
                   Supplier Name *
                 </label>
 
@@ -581,13 +582,14 @@ export default function SuppliersPage() {
                   }
                   placeholder="e.g. ABC Distribution"
                   autoFocus
-                  className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target"
+                  className="mt-2.5 w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+                  style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                 />
               </div>
 
               {/* Contact Person */}
               <div>
-                <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">
+                <label className="text-lg font-bold uppercase tracking-wider text-zinc-500">
                   Contact Person
                 </label>
 
@@ -601,14 +603,15 @@ export default function SuppliersPage() {
                     )
                   }
                   placeholder="e.g. Juan Dela Cruz"
-                  className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target"
+                  className="mt-2.5 w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+                  style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                 />
               </div>
 
               {/* Phone + Email */}
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">
+                  <label className="text-lg font-bold uppercase tracking-wider text-zinc-500">
                     Phone
                   </label>
 
@@ -622,12 +625,13 @@ export default function SuppliersPage() {
                       )
                     }
                     placeholder="09XXXXXXXXX"
-                    className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target"
+                    className="mt-2.5 w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+                    style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">
+                  <label className="text-lg font-bold uppercase tracking-wider text-zinc-500">
                     Email
                   </label>
 
@@ -641,14 +645,15 @@ export default function SuppliersPage() {
                       )
                     }
                     placeholder="supplier@example.com"
-                    className="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target"
+                    className="mt-2.5 w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+                    style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                   />
                 </div>
               </div>
 
               {/* Address */}
               <div>
-                <label className="text-sm font-bold uppercase tracking-wider text-zinc-500">
+                <label className="text-lg font-bold uppercase tracking-wider text-zinc-500">
                   Address
                 </label>
 
@@ -662,18 +667,19 @@ export default function SuppliersPage() {
                   }
                   placeholder="Supplier address"
                   rows={3}
-                  className="mt-2 w-full resize-none rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target"
+                  className="mt-2.5 w-full resize-none rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+                  style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                 />
               </div>
             </div>
 
             {/* Modal Actions */}
-            <div className="flex flex-col gap-2 border-t border-zinc-200 bg-zinc-50 p-5 sm:flex-row sm:justify-end shrink-0">
+            <div className="flex flex-col gap-3 border-t border-zinc-200 bg-zinc-50 p-8 sm:flex-row sm:justify-end shrink-0">
               <button
                 type="button"
                 disabled={saving}
                 onClick={closeForm}
-                className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 disabled:opacity-50 tap-target"
+                className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-8 text-xl font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
               >
                 Cancel
               </button>
@@ -682,7 +688,14 @@ export default function SuppliersPage() {
                 type="button"
                 disabled={saving}
                 onClick={saveSupplier}
-                className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 tap-target"
+                className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-8 text-xl font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target btn-ripple gpu"
+                onMouseDown={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
+                  e.currentTarget.style.setProperty('--x', x + 'px');
+                  e.currentTarget.style.setProperty('--y', y + 'px');
+                }}
               >
                 {saving
                   ? "Saving..."
@@ -695,32 +708,32 @@ export default function SuppliersPage() {
         </div>
       )}
 
-      {/* Delete Confirmation - Extra Large */}
+      {/* Delete Confirmation */}
       {deletingSupplier && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-6">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-red-500">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm animate-fade-in backdrop-gpu gpu">
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-8 animate-scale-in gpu">
+            <p className="text-lg font-bold uppercase tracking-[0.2em] text-red-500">
               Delete Supplier
             </p>
 
-            <h2 className="mt-2 text-xl font-black text-zinc-950">
+            <h2 className="mt-2.5 text-2xl font-black text-zinc-950">
               Delete {deletingSupplier.name}?
             </h2>
 
-            <p className="mt-2 text-base leading-6 text-zinc-500">
+            <p className="mt-2.5 text-xl leading-7 text-zinc-500">
               This will permanently remove
               this supplier. This action
               cannot be undone.
             </p>
 
-            <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 disabled={deleting}
                 onClick={() =>
                   setDeletingSupplier(null)
                 }
-                className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 disabled:opacity-50 tap-target"
+                className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-8 text-xl font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
               >
                 Cancel
               </button>
@@ -729,7 +742,7 @@ export default function SuppliersPage() {
                 type="button"
                 disabled={deleting}
                 onClick={deleteSupplier}
-                className="inline-flex h-[52px] items-center justify-center rounded-xl bg-red-600 px-6 text-base font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 tap-target"
+                className="inline-flex h-[52px] items-center justify-center rounded-xl bg-red-600 px-8 text-xl font-bold text-white transition hover:bg-red-700 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target touch-feedback gpu"
               >
                 {deleting
                   ? "Deleting..."

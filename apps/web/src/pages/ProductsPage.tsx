@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Product = {
   id: number;
@@ -32,7 +32,6 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-// Download CSV Template
 function downloadCsvTemplate() {
   const headers = [
     "sku",
@@ -69,107 +68,160 @@ function downloadCsvTemplate() {
   URL.revokeObjectURL(url);
 }
 
-function ProductsSkeleton() {
+// ============================================================
+// TOOLTIP COMPONENT
+// ============================================================
+type TooltipProps = {
+  children: React.ReactNode;
+  text: string;
+  position?: "top" | "bottom" | "left" | "right";
+};
+
+function Tooltip({ children, text, position = "top" }: TooltipProps) {
+  const [show, setShow] = useState(false);
+
+  const positionClasses = {
+    top: "bottom-full left-1/2 -translate-x-1/2 mb-2",
+    bottom: "top-full left-1/2 -translate-x-1/2 mt-2",
+    left: "right-full top-1/2 -translate-y-1/2 mr-2",
+    right: "left-full top-1/2 -translate-y-1/2 ml-2",
+  };
+
+  const arrowClasses = {
+    top: "top-full left-1/2 -translate-x-1/2 border-t-zinc-900",
+    bottom: "bottom-full left-1/2 -translate-x-1/2 border-b-zinc-900",
+    left: "left-full top-1/2 -translate-y-1/2 border-l-zinc-900",
+    right: "right-full top-1/2 -translate-y-1/2 border-r-zinc-900",
+  };
+
   return (
-    <div className="space-y-3 gpu">
-      {[...Array(3)].map((_, i) => (
-        <div
-          key={i}
-          className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm animate-pulse"
-        >
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-56 rounded bg-zinc-200 animate-shimmer" />
-                <div className="h-6 w-16 rounded bg-zinc-200 animate-shimmer" />
-              </div>
-              <div className="mt-2 h-5 w-40 rounded bg-zinc-200 animate-shimmer" />
-              <div className="mt-3 flex gap-4">
-                {[20, 16, 16].map((width, index) => (
-                  <div key={index}>
-                    <div className="h-4 w-10 rounded bg-zinc-200 animate-shimmer" />
-                    <div className={`mt-1 h-5 w-${width} rounded bg-zinc-200 animate-shimmer`} />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <div className="h-11 w-20 rounded bg-zinc-200 animate-shimmer" />
-              <div className="h-11 w-20 rounded bg-zinc-200 animate-shimmer" />
-            </div>
+    <div
+      className="relative inline-flex"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+      onTouchStart={() => setShow(true)}
+      onTouchEnd={() => setTimeout(() => setShow(false), 1500)}
+    >
+      {children}
+      {show && (
+        <div className={`absolute z-50 ${positionClasses[position]} pointer-events-none animate-fade-in`}>
+          <div className="px-3 py-1.5 text-sm font-medium text-white bg-zinc-900 rounded-lg whitespace-nowrap shadow-lg">
+            {text}
           </div>
-          <div className="mt-3 flex justify-between border-t border-zinc-100 pt-2">
-            <div className="h-4 w-28 rounded bg-zinc-200 animate-shimmer" />
-            <div className="h-4 w-16 rounded bg-zinc-200 animate-shimmer" />
-          </div>
+          <div className={`absolute w-0 h-0 border-4 border-transparent ${arrowClasses[position]}`} />
         </div>
-      ))}
+      )}
     </div>
   );
 }
 
 // ============================================================
-// ANIMATED COUNTER COMPONENT
+// TOAST COMPONENT
 // ============================================================
-function AnimatedCounter({ value, prefix = '', suffix = '' }: {
-  value: number;
-  prefix?: string;
-  suffix?: string;
-}) {
-  const [displayValue, setDisplayValue] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
+type ToastProps = {
+  message: string;
+  type?: "success" | "error" | "info";
+  duration?: number;
+  onDismiss?: () => void;
+};
+
+function Toast({
+  message,
+  type = "success",
+  duration = 3500,
+  onDismiss,
+}: ToastProps) {
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!isVisible) return;
-
-    const steps = 30;
-    const increment = value / steps;
-    let current = 0;
-    let frame: number;
-
-    const animate = () => {
-      current += increment;
-      if (current >= value) {
-        setDisplayValue(value);
-        return;
-      }
-      setDisplayValue(Math.floor(current));
-      frame = requestAnimationFrame(animate);
-    };
-
     const timer = setTimeout(() => {
-      frame = requestAnimationFrame(animate);
-    }, 100);
+      setVisible(false);
+      if (onDismiss) {
+        setTimeout(onDismiss, 300);
+      }
+    }, duration);
 
-    return () => {
-      clearTimeout(timer);
-      cancelAnimationFrame(frame);
-    };
-  }, [value, isVisible]);
+    return () => clearTimeout(timer);
+  }, [duration, onDismiss]);
 
-  const formattedValue = typeof displayValue === 'number'
-    ? displayValue.toLocaleString()
-    : displayValue;
+  if (!visible) return null;
 
-  return <span ref={ref}>{prefix}{formattedValue}{suffix}</span>;
+  const styles = {
+    success: "border-emerald-500 bg-emerald-50",
+    error: "border-red-500 bg-red-50",
+    info: "border-blue-500 bg-blue-50",
+  };
+
+  const iconStyles = {
+    success: "text-emerald-600",
+    error: "text-red-600",
+    info: "text-blue-600",
+  };
+
+  return (
+    <div
+      className={`
+        fixed bottom-6 right-6 z-300 max-w-md w-full
+        rounded-2xl border-l-8 shadow-lg p-5
+        animate-slide-up
+        ${styles[type]}
+      `}
+      role="alert"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <span className={`text-2xl ${iconStyles[type]}`}>
+            {type === "success" && "✅"}
+            {type === "error" && "❌"}
+            {type === "info" && "ℹ️"}
+          </span>
+          <p className="text-lg font-bold text-zinc-900 leading-tight">
+            {message}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setVisible(false);
+            if (onDismiss) setTimeout(onDismiss, 300);
+          }}
+          className="min-h-9 min-w-9 flex items-center justify-center text-xl text-zinc-400 hover:text-zinc-600 transition shrink-0"
+          aria-label="Dismiss notification"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ProductsSkeleton() {
+  return (
+    <div className="space-y-3">
+      {[...Array(5)].map((_, i) => (
+        <div
+          key={i}
+          className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm animate-pulse"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="h-6 w-48 rounded bg-zinc-200 animate-shimmer" />
+              <div className="mt-1.5 h-5 w-56 rounded bg-zinc-200 animate-shimmer" />
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="h-6 w-24 rounded bg-zinc-200 animate-shimmer" />
+              <div className="h-6 w-20 rounded bg-zinc-200 animate-shimmer" />
+              <div className="h-6 w-16 rounded bg-zinc-200 animate-shimmer" />
+              <div className="flex gap-3">
+                <div className="h-10 w-10 rounded-full bg-zinc-200 animate-shimmer" />
+                <div className="h-10 w-10 rounded-full bg-zinc-200 animate-shimmer" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function ProductsPage() {
@@ -187,7 +239,7 @@ export default function ProductsPage() {
   const [restoring, setRestoring] = useState(false);
 
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
 
   const [search, setSearch] = useState("");
 
@@ -211,21 +263,16 @@ export default function ProductsPage() {
   const [sellingPrice, setSellingPrice] = useState("");
   const [minimumStock, setMinimumStock] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
   async function loadProducts() {
     try {
       setLoading(true);
       setError("");
-
       const response = await fetch(`${API_URL}/api/products`);
-
       if (!response.ok) {
         throw new Error(await response.text());
       }
-
       const data: Product[] = await response.json();
-
       setProducts(Array.isArray(data) ? data : []);
     } catch (error) {
       setError(
@@ -242,17 +289,11 @@ export default function ProductsPage() {
     try {
       setLoadingArchived(true);
       setError("");
-
-      const response = await fetch(
-        `${API_URL}/api/products/archived`,
-      );
-
+      const response = await fetch(`${API_URL}/api/products/archived`);
       if (!response.ok) {
         throw new Error(await response.text());
       }
-
       const data: Product[] = await response.json();
-
       setArchivedProducts(Array.isArray(data) ? data : []);
     } catch (error) {
       setError(
@@ -334,24 +375,13 @@ export default function ProductsPage() {
 
   function openAddForm() {
     setError("");
-    setSuccessMessage("");
-
     resetForm();
-
     setShowForm(true);
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
   }
 
   function openEditForm(product: Product) {
     setError("");
-    setSuccessMessage("");
-
     setEditingProduct(product);
-
     setSku(product.sku);
     setName(product.name);
     setBrand(product.brand || "");
@@ -360,33 +390,21 @@ export default function ProductsPage() {
     setCostPrice(product.cost_price?.toString() || "");
     setSellingPrice(product.selling_price?.toString() || "");
     setMinimumStock(product.minimum_stock?.toString() || "");
-
     setShowForm(true);
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
   }
 
   function closeForm() {
-    if (submitting) {
-      return;
-    }
-
+    if (submitting) return;
     setShowForm(false);
     resetForm();
     setError("");
   }
 
-  async function saveProduct(
-    event: React.FormEvent,
-  ) {
+  async function saveProduct(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setSubmitting(true);
     setError("");
-    setSuccessMessage("");
 
     const trimmedSku = sku.trim();
     const trimmedName = name.trim();
@@ -407,31 +425,20 @@ export default function ProductsPage() {
     const parsedSellingPrice = Number(sellingPrice);
     const parsedMinimumStock = Number(minimumStock);
 
-    if (
-      !Number.isFinite(parsedCostPrice) ||
-      parsedCostPrice < 0
-    ) {
+    if (!Number.isFinite(parsedCostPrice) || parsedCostPrice < 0) {
       setError("Cost price must be zero or greater.");
       setSubmitting(false);
       return;
     }
 
-    if (
-      !Number.isFinite(parsedSellingPrice) ||
-      parsedSellingPrice < 0
-    ) {
+    if (!Number.isFinite(parsedSellingPrice) || parsedSellingPrice < 0) {
       setError("Selling price must be zero or greater.");
       setSubmitting(false);
       return;
     }
 
-    if (
-      !Number.isInteger(parsedMinimumStock) ||
-      parsedMinimumStock < 0
-    ) {
-      setError(
-        "Minimum stock must be a whole number zero or greater.",
-      );
+    if (!Number.isInteger(parsedMinimumStock) || parsedMinimumStock < 0) {
+      setError("Minimum stock must be a whole number zero or greater.");
       setSubmitting(false);
       return;
     }
@@ -452,15 +459,11 @@ export default function ProductsPage() {
         ? `${API_URL}/api/products/${editingProduct.id}`
         : `${API_URL}/api/products`;
 
-      const method = editingProduct
-        ? "PUT"
-        : "POST";
+      const method = editingProduct ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
@@ -473,11 +476,12 @@ export default function ProductsPage() {
       setShowForm(false);
       resetForm();
 
-      setSuccessMessage(
-        wasEditing
+      setToast({
+        message: wasEditing
           ? "Product updated successfully."
           : "Product added successfully.",
-      );
+        type: "success",
+      });
 
       await loadProducts();
       await loadArchivedProducts();
@@ -492,56 +496,40 @@ export default function ProductsPage() {
     }
   }
 
-  /*
-   * CSV IMPORT
-   */
-  async function uploadProductsCsv(
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) {
+  async function uploadProductsCsv(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-
-    // Reset the input so the same CSV can be selected again.
     event.target.value = "";
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
-    if (
-      !file.name.toLowerCase().endsWith(".csv")
-    ) {
+    if (!file.name.toLowerCase().endsWith(".csv")) {
       setError("Please select a CSV file.");
       return;
     }
 
     setUploadingCsv(true);
     setError("");
-    setSuccessMessage("");
+    setToast(null);
 
     try {
       const formData = new FormData();
-
       formData.append("file", file);
 
-      const response = await fetch(
-        `${API_URL}/api/products/import`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
+      const response = await fetch(`${API_URL}/api/products/import`, {
+        method: "POST",
+        body: formData,
+      });
 
       if (!response.ok) {
         throw new Error(await response.text());
       }
 
-      const result: ImportResult =
-        await response.json();
+      const result: ImportResult = await response.json();
 
-      setSuccessMessage(
-        result.message ||
-        `${result.imported} products imported successfully.`,
-      );
+      setToast({
+        message: result.message || `${result.imported} products imported successfully.`,
+        type: "success",
+      });
 
       await loadProducts();
       await loadArchivedProducts();
@@ -558,34 +546,24 @@ export default function ProductsPage() {
 
   function openArchiveModal(product: Product) {
     setError("");
-    setSuccessMessage("");
-
     setProductToArchive(product);
   }
 
   function closeArchiveModal() {
-    if (archiving) {
-      return;
-    }
-
+    if (archiving) return;
     setProductToArchive(null);
   }
 
   async function archiveProduct() {
-    if (!productToArchive) {
-      return;
-    }
+    if (!productToArchive) return;
 
     setArchiving(true);
     setError("");
-    setSuccessMessage("");
 
     try {
       const response = await fetch(
         `${API_URL}/api/products/${productToArchive.id}`,
-        {
-          method: "DELETE",
-        },
+        { method: "DELETE" },
       );
 
       if (!response.ok) {
@@ -593,11 +571,10 @@ export default function ProductsPage() {
       }
 
       setProductToArchive(null);
-
-      setSuccessMessage(
-        `${productToArchive.name} archived successfully.`,
-      );
-
+      setToast({
+        message: `${productToArchive.name} archived successfully.`,
+        type: "success",
+      });
       await loadProducts();
       await loadArchivedProducts();
     } catch (error) {
@@ -613,51 +590,35 @@ export default function ProductsPage() {
 
   function openRestoreModal(product: Product) {
     setError("");
-    setSuccessMessage("");
-
     setProductToRestore(product);
   }
 
   function closeRestoreModal() {
-    if (restoring) {
-      return;
-    }
-
+    if (restoring) return;
     setProductToRestore(null);
   }
 
   async function restoreProduct() {
-    if (!productToRestore) {
-      return;
-    }
+    if (!productToRestore) return;
 
     setRestoring(true);
     setError("");
-    setSuccessMessage("");
 
     try {
       const response = await fetch(
         `${API_URL}/api/products/${productToRestore.id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             sku: productToRestore.sku,
             name: productToRestore.name,
-            brand:
-              productToRestore.brand || undefined,
-            version:
-              productToRestore.version || undefined,
-            flavor:
-              productToRestore.flavor || undefined,
-            cost_price:
-              productToRestore.cost_price,
-            selling_price:
-              productToRestore.selling_price,
-            minimum_stock:
-              productToRestore.minimum_stock,
+            brand: productToRestore.brand || undefined,
+            version: productToRestore.version || undefined,
+            flavor: productToRestore.flavor || undefined,
+            cost_price: productToRestore.cost_price,
+            selling_price: productToRestore.selling_price,
+            minimum_stock: productToRestore.minimum_stock,
             active: true,
           }),
         },
@@ -668,11 +629,10 @@ export default function ProductsPage() {
       }
 
       setProductToRestore(null);
-
-      setSuccessMessage(
-        `${productToRestore.name} restored successfully.`,
-      );
-
+      setToast({
+        message: `${productToRestore.name} restored successfully.`,
+        type: "success",
+      });
       await loadProducts();
       await loadArchivedProducts();
     } catch (error) {
@@ -689,23 +649,15 @@ export default function ProductsPage() {
   function changeView(mode: ViewMode) {
     if (mode === viewMode) return;
 
-    setIsTransitioning(true);
     setViewMode(mode);
     setSearch("");
     setError("");
-    setSuccessMessage("");
 
-    // Load the data for the new view
     if (mode === "archived") {
       loadArchivedProducts();
     } else {
       loadProducts();
     }
-
-    // End transition after animation
-    setTimeout(() => {
-      setIsTransitioning(false);
-    }, 300);
   }
 
   const displayedProducts =
@@ -713,143 +665,139 @@ export default function ProductsPage() {
       ? filteredProducts
       : filteredArchivedProducts;
 
-  const displayedTotal =
-    viewMode === "active"
-      ? products.length
-      : archivedProducts.length;
-
   const isLoading =
     viewMode === "active"
       ? loading
       : loadingArchived;
 
-  // Calculate margin percentage
   function calculateMargin(cost: number, selling: number) {
     if (selling === 0) return 0;
     return ((selling - cost) / selling) * 100;
   }
 
   return (
-    <div className="h-full flex flex-col gpu">
+    <div className="h-full flex flex-col min-h-0 overflow-x-hidden">
       {/* Header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 shrink-0">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 shrink-0">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">
             Inventory
           </p>
-
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-950 sm:text-3xl">
+          <h1 className="mt-1.5 text-4xl font-black tracking-tight text-zinc-950 sm:text-5xl">
             Products
           </h1>
-
-          <p className="mt-1 text-lg text-zinc-500">
+          <p className="mt-1.5 text-xl text-zinc-500">
             Manage your product catalog.
           </p>
         </div>
 
         {viewMode === "active" && (
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={handleRefresh}
-              disabled={loading || loadingArchived || isRefreshing}
-              className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
-            >
-              {isRefreshing ? (
-                <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          <div className="flex flex-wrap gap-3 items-center">
+            {/* Left side: Secondary actions */}
+            <div className="flex gap-3">
+              <label
+                className={`touch-feedback inline-flex min-h-13 cursor-pointer items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target ${uploadingCsv ? "pointer-events-none opacity-50" : ""
+                  }`}
+              >
+                <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
-              ) : (
-                "Refresh"
-              )}
-            </button>
+                {uploadingCsv ? "Uploading..." : "Import CSV"}
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  className="hidden"
+                  disabled={uploadingCsv}
+                  onChange={uploadProductsCsv}
+                />
+              </label>
 
-            <button
-              type="button"
-              onClick={downloadCsvTemplate}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-300 bg-white px-4 h-[44px] text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Template
-            </button>
+              <button
+                type="button"
+                onClick={downloadCsvTemplate}
+                className="touch-feedback inline-flex min-h-13 items-center gap-2 rounded-xl border border-zinc-300 bg-white px-6 text-lg font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Template
+              </button>
+            </div>
 
-            <label
-              className={`inline-flex h-[44px] cursor-pointer items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu ${uploadingCsv
-                ? "pointer-events-none opacity-50"
-                : ""
-                }`}
-            >
-              {uploadingCsv
-                ? "Uploading..."
-                : "Upload CSV"}
-
-              <input
-                type="file"
-                accept=".csv,text/csv"
-                className="hidden"
+            {/* Right side: Primary actions with Refresh always rightmost */}
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={openAddForm}
                 disabled={uploadingCsv}
-                onChange={uploadProductsCsv}
-              />
-            </label>
+                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl bg-black px-6 text-lg font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target"
+              >
+                + New Product
+              </button>
 
-            <button
-              type="button"
-              onClick={openAddForm}
-              disabled={uploadingCsv}
-              className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-4 text-sm font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target touch-feedback gpu"
-            >
-              + New Product
-            </button>
+              <button
+                type="button"
+                onClick={handleRefresh}
+                disabled={loading || loadingArchived || isRefreshing}
+                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
+              >
+                {isRefreshing ? (
+                  <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                ) : (
+                  "⟳ Refresh"
+                )}
+              </button>
+            </div>
           </div>
         )}
       </header>
 
-      {/* Success */}
-      {successMessage && (
-        <div className="rounded-xl border border-zinc-200 bg-white p-4 text-base font-medium text-zinc-900 shadow-sm mb-3 shrink-0 animate-fade-in gpu">
-          <span className="mr-2 inline-block h-2 w-2 rounded-full bg-black" />
-          {successMessage}
-        </div>
+      {/* Toast */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onDismiss={() => setToast(null)}
+        />
       )}
 
       {/* Error */}
       {error && !showForm && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-base font-medium text-red-700 mb-3 shrink-0 animate-fade-in gpu">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-xl font-medium text-red-700 mb-4 shrink-0 animate-fade-in">
           {error}
         </div>
       )}
 
-      {/* View Tabs with Slide Effect */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-2 shadow-sm mb-4 shrink-0 gpu overflow-hidden">
-        <div className="grid grid-cols-2 gap-2 relative">
-          {/* Sliding Background Indicator */}
+      {/* View Tabs */}
+      <div className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm mb-6 shrink-0 overflow-hidden">
+        <div className="grid grid-cols-2 gap-3 relative">
           <div
-            className={`absolute top-2 bottom-2 w-[calc(50%-4px)] rounded-xl bg-black transition-all duration-300 ease-in-out gpu ${viewMode === "active" ? "left-2" : "left-[calc(50%+2px)]"
+            className={`absolute top-3 bottom-3 w-[calc(50%-6px)] rounded-xl bg-black transition-all duration-300 ease-in-out ${viewMode === "active" ? "left-3" : "left-[calc(50%+3px)]"
               }`}
           />
 
           <button
             type="button"
             onClick={() => changeView("active")}
-            className={`relative z-10 rounded-xl px-4 py-3 text-base font-bold transition-all duration-200 touch-feedback gpu ${viewMode === "active"
+            aria-pressed={viewMode === "active"}
+            className={`touch-feedback relative z-10 rounded-xl px-5 py-4 text-xl font-bold transition-all duration-200 ${viewMode === "active"
               ? "text-white"
               : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95"
               }`}
           >
             <span>Active</span>
-
             <span
-              className={`ml-2 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-sm transition-all duration-300 ${viewMode === "active"
+              className={`ml-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-lg transition-all duration-300 ${viewMode === "active"
                 ? "bg-white/15 text-white"
                 : "bg-zinc-100 text-zinc-500"
                 }`}
             >
-              <AnimatedCounter value={products.length} />
+              {products.length}
               {viewMode === "active" && (
-                <span className="text-[10px] opacity-70">items</span>
+                <span className="text-xs opacity-70">items</span>
               )}
             </span>
           </button>
@@ -857,22 +805,22 @@ export default function ProductsPage() {
           <button
             type="button"
             onClick={() => changeView("archived")}
-            className={`relative z-10 rounded-xl px-4 py-3 text-base font-bold transition-all duration-200 touch-feedback gpu ${viewMode === "archived"
+            aria-pressed={viewMode === "archived"}
+            className={`touch-feedback relative z-10 rounded-xl px-5 py-4 text-xl font-bold transition-all duration-200 ${viewMode === "archived"
               ? "text-white"
               : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95"
               }`}
           >
             <span>Archived</span>
-
             <span
-              className={`ml-2 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-sm transition-all duration-300 ${viewMode === "archived"
+              className={`ml-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-lg transition-all duration-300 ${viewMode === "archived"
                 ? "bg-white/15 text-white"
                 : "bg-zinc-100 text-zinc-500"
                 }`}
             >
-              <AnimatedCounter value={archivedProducts.length} />
+              {archivedProducts.length}
               {viewMode === "archived" && (
-                <span className="text-[10px] opacity-70">items</span>
+                <span className="text-xs opacity-70">items</span>
               )}
             </span>
           </button>
@@ -880,19 +828,18 @@ export default function ProductsPage() {
       </div>
 
       {/* Search */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm mb-4 shrink-0 transition-all duration-200 hover:shadow-md hover:border-zinc-300 card-hover gpu">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm mb-6 shrink-0 transition-all duration-200 hover:shadow-md hover:border-zinc-300 card-hover">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">
+            <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-500">
               {viewMode === "active"
                 ? "Product Catalog"
                 : "Archived Products"}
             </p>
-
-            <p className="mt-0.5 text-base font-black text-zinc-950">
-              <AnimatedCounter value={displayedProducts.length} />{" "}
+            <p className="mt-0.5 text-xl font-black text-zinc-950">
+              {displayedProducts.length}{" "}
               <span className="font-normal text-zinc-400">
-                of {displayedTotal}{" "}
+                of {viewMode === "active" ? products.length : archivedProducts.length}{" "}
                 {viewMode === "active"
                   ? "products"
                   : "archived"}
@@ -900,8 +847,8 @@ export default function ProductsPage() {
             </p>
           </div>
 
-          <div className="relative w-full sm:max-w-xs">
-            <svg className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="relative w-full sm:max-w-sm">
+            <svg className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -909,14 +856,17 @@ export default function ProductsPage() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search products..."
-              className="w-full rounded-xl border border-zinc-300 bg-white pl-11 pr-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+              className="w-full rounded-xl border border-zinc-300 bg-white pl-14 pr-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target"
+              style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+              aria-label="Search products"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 hover:bg-zinc-100 touch-feedback"
+                className="touch-feedback absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1.5 hover:bg-zinc-100 active:scale-90 tap-target"
+                aria-label="Clear search"
               >
-                <svg className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="h-5 w-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -925,592 +875,369 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* Products + Form */}
-      <div className="flex-1 min-h-0 gap-4 lg:grid lg:grid-cols-[1fr_440px] xl:grid-cols-[1fr_520px]">
-        {/* Products List */}
-        <div className="flex flex-col min-h-0 overflow-hidden">
-          <div className="flex-1 overflow-y-auto space-y-3 gpu-scroll pr-1 products-scroll">
-            {/* Slide Transition Container */}
-            <div
-              className={`transition-all duration-300 ease-in-out gpu ${isTransitioning
-                ? "opacity-0 -translate-x-4 scale-95"
-                : "opacity-100 translate-x-0 scale-100"
-                }`}
-            >
-              {isLoading ? (
-                <ProductsSkeleton />
-              ) : displayedProducts.length === 0 ? (
-                <div className="relative rounded-2xl border border-zinc-200 bg-gradient-to-br from-zinc-50 to-white p-12 text-center shadow-sm animate-fade-in-up gpu">
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center justify-center opacity-5">
-                      <svg viewBox="0 0 24 24" fill="none" className="h-48 w-48 text-zinc-900">
-                        <path d="M21 8l-9-5-9 5 9 5 9-5z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                        <path d="M3 8v8l9 5 9-5V8" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                        <path d="M12 13v8" stroke="currentColor" strokeWidth="1.8" />
-                      </svg>
-                    </div>
-                    <div className="relative">
-                      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 shadow-lg animate-bounce-slow">
-                        <svg viewBox="0 0 24 24" fill="none" className="h-10 w-10 text-white">
-                          <path d="M21 8l-9-5-9 5 9 5 9-5z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                          <path d="M3 8v8l9 5 9-5V8" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                          <path d="M12 13v8" stroke="currentColor" strokeWidth="1.8" />
-                        </svg>
-                      </div>
-                      <h2 className="mt-5 text-2xl font-black text-zinc-950">
-                        {viewMode === "active"
-                          ? "No products found"
-                          : "No archived products"}
-                      </h2>
-                      <p className="mt-1 text-base text-zinc-500">
-                        {search.trim()
-                          ? "No products match your search."
-                          : viewMode === "active"
-                            ? "Add your first product to get started."
-                            : "Archived products will appear here."}
-                      </p>
+      {/* Table */}
+      <div className="flex-1 min-h-0 flex flex-col">
+        <div className="flex-1 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm gpu-scroll">
+          {isLoading ? (
+            <ProductsSkeleton />
+          ) : displayedProducts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-16 text-center">
+              <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-linear-to-br from-zinc-900 to-zinc-700 shadow-lg animate-bounce-slow">
+                <svg viewBox="0 0 24 24" fill="none" className="h-12 w-12 text-white">
+                  <path d="M21 8l-9-5-9 5 9 5 9-5z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                  <path d="M3 8v8l9 5 9-5V8" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                  <path d="M12 13v8" stroke="currentColor" strokeWidth="1.8" />
+                </svg>
+              </div>
+              <h2 className="mt-6 text-3xl font-black text-zinc-950">
+                {viewMode === "active"
+                  ? "No products found"
+                  : "No archived products"}
+              </h2>
+              <p className="mt-1.5 text-xl text-zinc-500">
+                {search.trim()
+                  ? "No products match your search."
+                  : viewMode === "active"
+                    ? "Add your first product to get started."
+                    : "Archived products will appear here."}
+              </p>
 
-                      {search.trim() ? (
-                        <button
-                          type="button"
-                          onClick={() => setSearch("")}
-                          className="mt-4 rounded-lg border border-zinc-300 bg-white px-5 py-3 text-base font-bold text-zinc-700 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-                        >
-                          Clear Search
-                        </button>
-                      ) : viewMode === "active" ? (
-                        <button
-                          type="button"
-                          onClick={openAddForm}
-                          className="mt-4 rounded-xl bg-black px-6 py-3 text-base font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-                        >
-                          + Add Product
-                        </button>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                displayedProducts.map((product) => {
-                  const margin = calculateMargin(product.cost_price, product.selling_price);
+              {search.trim() ? (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="touch-feedback mt-5 rounded-lg border border-zinc-300 bg-white px-6 py-3.5 text-lg font-bold text-zinc-700 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
+                >
+                  Clear Search
+                </button>
+              ) : viewMode === "active" ? (
+                <button
+                  type="button"
+                  onClick={openAddForm}
+                  className="touch-feedback mt-5 rounded-xl bg-black px-8 py-3.5 text-lg font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target"
+                >
+                  + Add Product
+                </button>
+              ) : null}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-180 text-left">
+                <thead className="border-b border-zinc-200 bg-zinc-50 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-6 py-5 text-lg font-bold uppercase tracking-wider text-zinc-500">
+                      Product
+                    </th>
+                    <th className="px-6 py-5 text-right text-lg font-bold uppercase tracking-wider text-zinc-500">
+                      Price
+                    </th>
+                    <th className="px-6 py-5 text-right text-lg font-bold uppercase tracking-wider text-zinc-500">
+                      Margin
+                    </th>
+                    <th className="px-6 py-5 text-center text-lg font-bold uppercase tracking-wider text-zinc-500">
+                      Min Stock
+                    </th>
+                    <th className="px-6 py-5 text-right text-lg font-bold uppercase tracking-wider text-zinc-500">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayedProducts.map((product) => {
+                    const margin = calculateMargin(product.cost_price, product.selling_price);
+                    const details = [product.brand, product.version, product.flavor].filter(Boolean).join(" • ");
 
-                  return (
-                    <div
-                      key={product.id}
-                      className={`rounded-2xl border bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01] card-hover gpu ${viewMode === "archived"
-                        ? "border-zinc-200 opacity-90"
-                        : "border-zinc-200 hover:border-zinc-400"
-                        }`}
-                    >
-                      <div className="p-5">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="min-w-0 flex-1 overflow-hidden">
-                            {/* Product Header */}
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h4 className="truncate text-lg font-black text-zinc-950">
-                                {product.name}
-                              </h4>
-
-                              <span className="font-mono text-sm font-bold bg-zinc-100 text-zinc-700 px-3 py-1 rounded border border-zinc-200 whitespace-nowrap flex-shrink-0">
-                                {product.sku}
-                              </span>
-
-                              {product.version && (
-                                <span className="rounded bg-black px-2.5 py-1 text-xs font-bold uppercase text-white flex-shrink-0">
-                                  {product.version}
-                                </span>
-                              )}
-
-                              {/* Status Badge */}
-                              <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border flex-shrink-0 ${viewMode === "active"
-                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                : "bg-zinc-50 text-zinc-500 border-zinc-200"
-                                }`}>
-                                <span className={`${viewMode === 'active' ? 'animate-pulse' : ''}`}>
-                                  {viewMode === 'active' ? '●' : '○'}
-                                </span>
-                                {viewMode === 'active' ? 'Active' : 'Archived'}
-                              </span>
-                            </div>
-
-                            <p className="mt-1 text-base text-zinc-500 truncate">
-                              {product.brand && ` • ${product.brand}`}
-                              {product.flavor && ` • ${product.flavor}`}
+                    return (
+                      <tr
+                        key={product.id}
+                        className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50 transition-colors duration-150"
+                      >
+                        <td className="px-6 py-5">
+                          <div className="min-w-0">
+                            <p className="text-xl font-black text-zinc-950 truncate">
+                              {product.name}
                             </p>
-
-                            {/* Stock Level Bar */}
-                            <div className="mt-2 max-w-xs">
-                              <div className="flex justify-between text-xs text-zinc-400">
-                                <span>Stock: {product.minimum_stock}</span>
-                                <span>Min: {product.minimum_stock}</span>
-                              </div>
-                              <div className="mt-1 h-1.5 w-full rounded-full bg-zinc-100 overflow-hidden">
-                                <div
-                                  className={`h-full rounded-full transition-all duration-500 ${product.minimum_stock <= 5 ? 'bg-red-500' :
-                                    product.minimum_stock <= 10 ? 'bg-amber-500' : 'bg-emerald-500'
-                                    }`}
-                                  style={{ width: `${Math.min((product.minimum_stock / 20) * 100, 100)}%` }}
-                                />
-                              </div>
-                            </div>
-
-                            {/* Metrics Grid */}
-                            <div className="mt-3 grid grid-cols-3 gap-2 max-w-md">
-                              <div className="rounded-xl bg-zinc-50 p-2.5 text-center">
-                                <p className="text-[10px] font-bold uppercase text-zinc-400">Cost</p>
-                                <p className="text-sm font-bold text-zinc-700">{formatCurrency(product.cost_price)}</p>
-                              </div>
-                              <div className="rounded-xl bg-emerald-50 p-2.5 text-center">
-                                <p className="text-[10px] font-bold uppercase text-emerald-400">Selling</p>
-                                <p className="text-sm font-bold text-emerald-700">{formatCurrency(product.selling_price)}</p>
-                              </div>
-                              <div className={`rounded-xl p-2.5 text-center ${margin >= 30 ? 'bg-emerald-50' :
-                                margin >= 15 ? 'bg-amber-50' : 'bg-red-50'
-                                }`}>
-                                <p className="text-[10px] font-bold uppercase text-zinc-400">Margin</p>
-                                <p className={`text-sm font-bold ${margin >= 30 ? 'text-emerald-700' :
-                                  margin >= 15 ? 'text-amber-700' : 'text-red-700'
-                                  }`}>
-                                  {margin.toFixed(0)}%
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Divider */}
-                            <div className="mt-3 pt-3 relative">
-                              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-200 to-transparent" />
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-[10px] font-bold uppercase text-zinc-400">Min Stock</span>
-                                  <span className="text-sm font-bold text-zinc-800">{product.minimum_stock}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className={`inline-block h-2 w-2 rounded-full ${viewMode === 'active' ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-400'}`} />
-                                  <span className="text-xs font-medium text-zinc-500">
-                                    {viewMode === 'active' ? 'Active' : 'Archived'}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Action Buttons */}
-                          <div className="shrink-0 flex flex-row sm:flex-col gap-2">
-                            {viewMode === "active" ? (
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={() => openEditForm(product)}
-                                  className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-                                >
-                                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                  </svg>
-                                  Edit
-                                </button>
-
-                                <button
-                                  type="button"
-                                  onClick={() => openArchiveModal(product)}
-                                  className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-bold text-red-600 transition hover:bg-red-50 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-                                >
-                                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                                  </svg>
-                                  Archive
-                                </button>
-                              </>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => openRestoreModal(product)}
-                                className="inline-flex items-center gap-1.5 rounded-lg bg-black px-4 py-2 text-sm font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-                              >
-                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                                Restore
-                              </button>
+                            <p className="mt-0.5 font-mono text-base font-medium text-zinc-400">
+                              SKU: {product.sku}
+                            </p>
+                            {details && (
+                              <p className="mt-0.5 text-base text-zinc-500 truncate">
+                                {details}
+                              </p>
+                            )}
+                            {product.version && (
+                              <span className="mt-1 inline-block rounded bg-zinc-100 px-2.5 py-0.5 text-xs font-bold uppercase text-zinc-700">
+                                {product.version}
+                              </span>
                             )}
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+                        </td>
+                        <td className="px-6 py-5 text-right">
+                          <span className="text-lg font-bold text-zinc-950">
+                            {formatCurrency(product.selling_price)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5 text-right">
+                          <div className="flex items-center justify-end gap-3">
+                            <span className={`text-lg font-bold ${margin >= 30 ? 'text-emerald-600' :
+                              margin >= 15 ? 'text-amber-600' : 'text-red-600'
+                              }`}>
+                              {margin.toFixed(0)}%
+                            </span>
+                            <div className="w-16 h-2.5 rounded-full bg-zinc-100 overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${margin >= 30 ? 'bg-emerald-500' :
+                                  margin >= 15 ? 'bg-amber-500' : 'bg-red-500'
+                                  }`}
+                                style={{ width: `${Math.min(margin, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 text-center">
+                          <span className="text-lg font-bold text-zinc-700">
+                            {product.minimum_stock}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex justify-end gap-1">
+                            {viewMode === "active" ? (
+                              <>
+                                <Tooltip text="Edit product" position="top">
+                                  <button
+                                    type="button"
+                                    onClick={() => openEditForm(product)}
+                                    className="min-h-12 min-w-12 rounded-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 active:scale-95 transition tap-target"
+                                    aria-label="Edit product"
+                                  >
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </button>
+                                </Tooltip>
+                                <Tooltip text="Archive product" position="top">
+                                  <button
+                                    type="button"
+                                    onClick={() => openArchiveModal(product)}
+                                    className="min-h-12 min-w-12 rounded-full flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition tap-target"
+                                    aria-label="Archive product"
+                                  >
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                </Tooltip>
+                              </>
+                            ) : (
+                              <Tooltip text="Restore product" position="top">
+                                <button
+                                  type="button"
+                                  onClick={() => openRestoreModal(product)}
+                                  className="min-h-12 min-w-12 rounded-full flex items-center justify-center text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 active:scale-95 transition tap-target"
+                                  aria-label="Restore product"
+                                >
+                                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V10z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7l-4 4-4-4" />
+                                  </svg>
+                                </button>
+                              </Tooltip>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Desktop Form - Hide when in archived view */}
-        {viewMode === "active" && (
-          <div className="hidden lg:block">
-            {showForm ? (
-              <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm h-full flex flex-col animate-slide-up gpu">
-                <div className="border-b border-zinc-200 p-5 shrink-0">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">
-                        {editingProduct ? "Edit" : "New"}
-                      </p>
-
-                      <h2 className="mt-0.5 text-xl font-black text-zinc-950">
-                        {editingProduct ? "Edit Product" : "Create Product"}
-                      </h2>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={closeForm}
-                      className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-xl text-zinc-500 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-                    >
-                      ×
-                    </button>
-                  </div>
-                </div>
-
-                <form onSubmit={saveProduct} className="flex-1 overflow-y-auto p-5 gpu-scroll">
-                  {error && (
-                    <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-base font-medium text-red-700 animate-fade-in gpu">
-                      {error}
-                    </div>
-                  )}
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">SKU *</label>
-                      <input
-                        type="text"
-                        required
-                        value={sku}
-                        onChange={(event) => setSku(event.target.value)}
-                        placeholder="VAPE-001"
-                        disabled={submitting}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Product Name *</label>
-                      <input
-                        type="text"
-                        required
-                        value={name}
-                        onChange={(event) => setName(event.target.value)}
-                        placeholder="Juice Box"
-                        disabled={submitting}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Brand</label>
-                      <input
-                        type="text"
-                        value={brand}
-                        onChange={(event) => setBrand(event.target.value)}
-                        placeholder="Cloud Co."
-                        disabled={submitting}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Version</label>
-                        <input
-                          type="text"
-                          value={version}
-                          onChange={(event) => setVersion(event.target.value)}
-                          placeholder="V2"
-                          disabled={submitting}
-                          className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Flavor</label>
-                        <input
-                          type="text"
-                          value={flavor}
-                          onChange={(event) => setFlavor(event.target.value)}
-                          placeholder="Strawberry"
-                          disabled={submitting}
-                          className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Cost Price</label>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={costPrice}
-                          onChange={(event) => setCostPrice(event.target.value)}
-                          placeholder="300.00"
-                          disabled={submitting}
-                          className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Selling Price *</label>
-                        <input
-                          type="number"
-                          required
-                          min="0"
-                          step="0.01"
-                          value={sellingPrice}
-                          onChange={(event) => setSellingPrice(event.target.value)}
-                          placeholder="500.00"
-                          disabled={submitting}
-                          className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Minimum Stock *</label>
-                      <input
-                        type="number"
-                        required
-                        min="0"
-                        step="1"
-                        value={minimumStock}
-                        onChange={(event) => setMinimumStock(event.target.value)}
-                        placeholder="5"
-                        disabled={submitting}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-6 grid gap-2">
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target btn-ripple gpu"
-                      onMouseDown={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
-                        e.currentTarget.style.setProperty('--x', x + 'px');
-                        e.currentTarget.style.setProperty('--y', y + 'px');
-                      }}
-                    >
-                      {submitting ? "Saving..." : editingProduct ? "Update Product" : "Create Product"}
-                    </button>
-
-                    {editingProduct && viewMode === "active" && (
-                      <button
-                        type="button"
-                        onClick={() => openArchiveModal(editingProduct)}
-                        className="inline-flex h-[52px] items-center justify-center rounded-xl border border-red-200 bg-red-50 px-6 text-base font-bold text-red-700 transition hover:bg-red-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-                      >
-                        Archive Product
-                      </button>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={closeForm}
-                      disabled={submitting}
-                      className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm h-full flex flex-col items-center justify-center p-10 text-center transition-all duration-200 hover:shadow-md card-hover gpu">
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 shadow-lg animate-bounce-slow">
-                  <svg viewBox="0 0 24 24" fill="none" className="h-10 w-10 text-white">
-                    <path d="M21 8l-9-5-9 5 9 5 9-5z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                    <path d="M3 8v8l9 5 9-5V8" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                    <path d="M12 13v8" stroke="currentColor" strokeWidth="1.8" />
-                  </svg>
-                </div>
-                <h3 className="mt-5 text-xl font-black text-zinc-950">Select a Product</h3>
-                <p className="mt-2 max-w-xs text-base text-zinc-500">
-                  Choose a product from the list to view or edit its details.
-                </p>
-                <button
-                  onClick={openAddForm}
-                  className="mt-5 inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-                >
-                  + Create New Product
-                </button>
-              </div>
-            )}
+        {/* Footer with count */}
+        {!isLoading && displayedProducts.length > 0 && (
+          <div className="shrink-0 flex items-center justify-between border-t border-zinc-200 bg-white px-6 py-4 mt-4 rounded-2xl shadow-sm">
+            <p className="text-lg text-zinc-500">
+              Showing {displayedProducts.length} of{" "}
+              {viewMode === "active" ? products.length : archivedProducts.length} products
+            </p>
           </div>
         )}
       </div>
 
-      {/* Mobile Form */}
+      {/* Add/Edit Product Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm lg:hidden animate-fade-in backdrop-gpu gpu">
-          <div className="max-h-[90vh] w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl animate-scale-in gpu">
-            <div className="border-b border-zinc-200 p-5">
+        <div
+          className="fixed inset-0 z-200 flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) closeForm();
+          }}
+        >
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-up gpu">
+            {/* Modal Header */}
+            <div className="border-b border-zinc-200 p-6 shrink-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">
+                  <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-500">
                     {editingProduct ? "Edit" : "New"}
                   </p>
-                  <h2 className="mt-0.5 text-xl font-black text-zinc-950">
+                  <h2 className="mt-0.5 text-2xl font-black text-zinc-950">
                     {editingProduct ? "Edit Product" : "Create Product"}
                   </h2>
                 </div>
                 <button
                   type="button"
                   onClick={closeForm}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-xl text-zinc-500 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                  className="touch-feedback flex min-h-12 min-w-12 items-center justify-center rounded-lg border border-zinc-200 text-2xl text-zinc-500 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
+                  aria-label="Close form"
                 >
                   ×
                 </button>
               </div>
             </div>
 
-            <form onSubmit={saveProduct} className="max-h-[calc(90vh-120px)] overflow-y-auto p-5 gpu-scroll">
+            <form onSubmit={saveProduct} className="flex-1 overflow-y-auto p-6 gpu-scroll">
               {error && (
-                <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-base font-medium text-red-700 animate-fade-in gpu">
+                <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-5 text-lg font-medium text-red-700 animate-fade-in">
                   {error}
                 </div>
               )}
 
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">SKU *</label>
+                  <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">SKU *</label>
                   <input
                     type="text"
                     required
                     value={sku}
-                    onChange={(event) => setSku(event.target.value)}
+                    onChange={(e) => setSku(e.target.value)}
                     placeholder="VAPE-001"
                     disabled={submitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
+                    className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                    style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Product Name *</label>
+                  <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Name *</label>
                   <input
                     type="text"
                     required
                     value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    onChange={(e) => setName(e.target.value)}
                     placeholder="Juice Box"
                     disabled={submitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
+                    className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                    style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Brand</label>
+                  <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Brand</label>
                   <input
                     type="text"
                     value={brand}
-                    onChange={(event) => setBrand(event.target.value)}
+                    onChange={(e) => setBrand(e.target.value)}
                     placeholder="Cloud Co."
                     disabled={submitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
+                    className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                    style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Version</label>
+                    <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Version</label>
                     <input
                       type="text"
                       value={version}
-                      onChange={(event) => setVersion(event.target.value)}
+                      onChange={(e) => setVersion(e.target.value)}
                       placeholder="V2"
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Flavor</label>
+                    <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Flavor</label>
                     <input
                       type="text"
                       value={flavor}
-                      onChange={(event) => setFlavor(event.target.value)}
+                      onChange={(e) => setFlavor(e.target.value)}
                       placeholder="Strawberry"
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Cost Price</label>
+                    <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Cost Price</label>
                     <input
                       type="number"
                       min="0"
                       step="0.01"
                       value={costPrice}
-                      onChange={(event) => setCostPrice(event.target.value)}
+                      onChange={(e) => setCostPrice(e.target.value)}
                       placeholder="300.00"
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 font-mono text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Selling Price *</label>
+                    <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Selling Price *</label>
                     <input
                       type="number"
                       required
                       min="0"
                       step="0.01"
                       value={sellingPrice}
-                      onChange={(event) => setSellingPrice(event.target.value)}
+                      onChange={(e) => setSellingPrice(e.target.value)}
                       placeholder="500.00"
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 font-mono text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-base font-bold uppercase tracking-wider text-zinc-400">Minimum Stock *</label>
+                  <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Minimum Stock *</label>
                   <input
                     type="number"
                     required
                     min="0"
                     step="1"
                     value={minimumStock}
-                    onChange={(event) => setMinimumStock(event.target.value)}
+                    onChange={(e) => setMinimumStock(e.target.value)}
                     placeholder="5"
                     disabled={submitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu disabled:opacity-50"
+                    className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 font-mono text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                    style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                   />
                 </div>
               </div>
 
-              <div className="mt-6 grid gap-2">
+              <div className="mt-6 grid gap-3">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target btn-ripple gpu"
-                  onMouseDown={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    e.currentTarget.style.setProperty('--x', x + 'px');
-                    e.currentTarget.style.setProperty('--y', y + 'px');
-                  }}
+                  className="touch-feedback inline-flex min-h-14 items-center justify-center rounded-xl bg-black px-8 text-xl font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target btn-ripple"
                 >
                   {submitting ? "Saving..." : editingProduct ? "Update Product" : "Create Product"}
                 </button>
 
-                {editingProduct && viewMode === "active" && (
+                {editingProduct && (
                   <button
                     type="button"
-                    onClick={() => openArchiveModal(editingProduct)}
-                    className="inline-flex h-[52px] items-center justify-center rounded-xl border border-red-200 bg-red-50 px-6 text-base font-bold text-red-700 transition hover:bg-red-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                    onClick={() => {
+                      closeForm();
+                      openArchiveModal(editingProduct);
+                    }}
+                    className="touch-feedback inline-flex min-h-14 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-8 text-xl font-bold text-red-700 transition hover:bg-red-100 hover:scale-[1.02] active:scale-95 tap-target"
                   >
                     Archive Product
                   </button>
@@ -1520,7 +1247,7 @@ export default function ProductsPage() {
                   type="button"
                   onClick={closeForm}
                   disabled={submitting}
-                  className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
+                  className="touch-feedback inline-flex min-h-14 items-center justify-center rounded-xl border border-zinc-300 bg-white px-8 text-xl font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
                 >
                   Cancel
                 </button>
@@ -1533,7 +1260,7 @@ export default function ProductsPage() {
       {/* Archive Modal */}
       {productToArchive && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
+          className="fixed inset-0 z-200 flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
           role="dialog"
           aria-modal="true"
           onClick={(event) => {
@@ -1542,11 +1269,11 @@ export default function ProductsPage() {
             }
           }}
         >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl animate-scale-in gpu">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl animate-scale-in">
             <div className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
-                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <div className="flex items-start gap-5">
+                <div className="flex min-h-13 min-w-13 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M3 6h18" />
                     <path d="M8 6V4h8v2" />
                     <path d="M19 6l-1 14H6L5 6" />
@@ -1555,23 +1282,23 @@ export default function ProductsPage() {
                   </svg>
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-lg font-black text-zinc-950">Archive Product?</h2>
-                  <p className="mt-1 text-base leading-6 text-zinc-500">
+                  <h2 className="text-2xl font-black text-zinc-950">Archive Product?</h2>
+                  <p className="mt-1.5 text-xl leading-7 text-zinc-500">
                     This product will be removed from the active catalog. Its historical records will remain intact.
                   </p>
                 </div>
               </div>
-              <div className="mt-5 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                <p className="text-base font-black text-zinc-950">{productToArchive.name}</p>
-                <p className="mt-1 font-mono text-sm font-bold text-zinc-500">{productToArchive.sku}</p>
+              <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-5">
+                <p className="text-xl font-black text-zinc-950">{productToArchive.name}</p>
+                <p className="mt-1.5 font-mono text-lg font-bold text-zinc-500">{productToArchive.sku}</p>
               </div>
             </div>
-            <div className="flex flex-col-reverse gap-2 border-t border-zinc-200 bg-zinc-50 p-4 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-zinc-200 bg-zinc-50 p-5 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={closeArchiveModal}
                 disabled={archiving}
-                className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-5 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
+                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-xl font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
               >
                 Cancel
               </button>
@@ -1579,7 +1306,7 @@ export default function ProductsPage() {
                 type="button"
                 onClick={archiveProduct}
                 disabled={archiving}
-                className="inline-flex h-[44px] items-center justify-center rounded-xl bg-red-600 px-5 text-base font-bold text-white transition hover:bg-red-700 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
+                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl bg-red-600 px-6 text-xl font-bold text-white transition hover:bg-red-700 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
               >
                 {archiving ? "Archiving..." : "Archive Product"}
               </button>
@@ -1591,7 +1318,7 @@ export default function ProductsPage() {
       {/* Restore Modal */}
       {productToRestore && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
+          className="fixed inset-0 z-200 flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
           role="dialog"
           aria-modal="true"
           onClick={(event) => {
@@ -1600,11 +1327,11 @@ export default function ProductsPage() {
             }
           }}
         >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl animate-scale-in gpu">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl animate-scale-in">
             <div className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900">
-                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <div className="flex items-start gap-5">
+                <div className="flex min-h-13 min-w-13 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M3 12a9 9 0 0 1 15.5-6.3L21 8" />
                     <path d="M21 3v5h-5" />
                     <path d="M21 12a9 9 0 0 1-15.5 6.3L3 16" />
@@ -1612,23 +1339,23 @@ export default function ProductsPage() {
                   </svg>
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-lg font-black text-zinc-950">Restore Product?</h2>
-                  <p className="mt-1 text-base leading-6 text-zinc-500">
+                  <h2 className="text-2xl font-black text-zinc-950">Restore Product?</h2>
+                  <p className="mt-1.5 text-xl leading-7 text-zinc-500">
                     This product will be returned to the active product catalog.
                   </p>
                 </div>
               </div>
-              <div className="mt-5 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                <p className="text-base font-black text-zinc-950">{productToRestore.name}</p>
-                <p className="mt-1 font-mono text-sm font-bold text-zinc-500">{productToRestore.sku}</p>
+              <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-5">
+                <p className="text-xl font-black text-zinc-950">{productToRestore.name}</p>
+                <p className="mt-1.5 font-mono text-lg font-bold text-zinc-500">{productToRestore.sku}</p>
               </div>
             </div>
-            <div className="flex flex-col-reverse gap-2 border-t border-zinc-200 bg-zinc-50 p-4 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-zinc-200 bg-zinc-50 p-5 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={closeRestoreModal}
                 disabled={restoring}
-                className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-5 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
+                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-xl font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
               >
                 Cancel
               </button>
@@ -1636,7 +1363,7 @@ export default function ProductsPage() {
                 type="button"
                 onClick={restoreProduct}
                 disabled={restoring}
-                className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-5 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
+                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl bg-black px-6 text-xl font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
               >
                 {restoring ? "Restoring..." : "Restore Product"}
               </button>
@@ -1647,4 +1374,3 @@ export default function ProductsPage() {
     </div>
   );
 }
-

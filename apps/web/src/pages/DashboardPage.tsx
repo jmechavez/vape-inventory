@@ -112,7 +112,7 @@ function formatChartDate(value: Date) {
 }
 
 // ============================================================
-// ANIMATED COUNTER COMPONENT (Fixed - removed unused duration)
+// ANIMATED COUNTER COMPONENT
 // ============================================================
 function AnimatedCounter({ value, prefix = '', suffix = '' }: {
   value: number;
@@ -176,59 +176,59 @@ function AnimatedCounter({ value, prefix = '', suffix = '' }: {
 }
 
 // ============================================================
-// ICONS
+// ICONS - Standardized sizes for tablet
 // ============================================================
 const icons = {
   peso: (
-    <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
+    <svg viewBox="0 0 28 28" fill="none" className="h-10 w-10">
       <path
         d="M7 4h6a4 4 0 010 8H7m0-8v16m0-8h9m-9 4h9"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
     </svg>
   ),
   receipt: (
-    <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
+    <svg viewBox="0 0 28 28" fill="none" className="h-10 w-10">
       <path
         d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
         strokeLinejoin="round"
       />
       <path
         d="M9 8h6M9 12h6"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
         strokeLinecap="round"
       />
     </svg>
   ),
   box: (
-    <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
+    <svg viewBox="0 0 28 28" fill="none" className="h-10 w-10">
       <path
         d="M21 8l-9-5-9 5 9 5 9-5z"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
         strokeLinejoin="round"
       />
       <path
         d="M3 8v8l9 5 9-5V8"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
         strokeLinejoin="round"
       />
       <path
         d="M12 13v8"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
       />
     </svg>
   ),
   package: (
-    <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
+    <svg viewBox="0 0 28 28" fill="none" className="h-10 w-10">
       <rect
         x="3"
         y="7"
@@ -236,17 +236,17 @@ const icons = {
         height="13"
         rx="1.5"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
       />
       <path
         d="M3 11h18"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
       />
       <path
         d="M8 3.5h8l1.5 3.5h-11L8 3.5z"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="2"
         strokeLinejoin="round"
       />
     </svg>
@@ -254,69 +254,69 @@ const icons = {
 };
 
 // ============================================================
-// SKELETON
+// SKELETON - Updated for tablet sizing
 // ============================================================
 function DashboardSkeleton() {
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-3">
+    <div className="space-y-6">
+      <div className="grid grid-cols-3 gap-4">
         {[...Array(3)].map((_, i) => (
           <div
             key={i}
-            className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm animate-pulse"
+            className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm animate-pulse"
           >
             <div className="flex items-start justify-between">
               <div>
-                <div className="h-4 w-28 bg-zinc-200 rounded" />
-                <div className="mt-3 h-10 w-36 bg-zinc-200 rounded" />
-                <div className="mt-2 h-5 w-28 bg-zinc-200 rounded" />
+                <div className="h-5 w-32 bg-zinc-200 rounded" />
+                <div className="mt-3 h-12 w-40 bg-zinc-200 rounded" />
+                <div className="mt-2 h-6 w-32 bg-zinc-200 rounded" />
               </div>
-              <div className="h-12 w-12 bg-zinc-200 rounded-xl" />
+              <div className="h-16 w-16 bg-zinc-200 rounded-xl" />
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-3">
         {[...Array(2)].map((_, i) => (
           <div
             key={i}
-            className="text-center p-5 bg-white rounded-2xl border border-zinc-200 shadow-sm animate-pulse"
+            className="text-center p-6 bg-white rounded-2xl border border-zinc-200 shadow-sm animate-pulse"
           >
-            <div className="h-4 w-24 bg-zinc-200 rounded mx-auto" />
-            <div className="mt-2 h-9 w-32 bg-zinc-200 rounded mx-auto" />
-            <div className="mt-1 h-5 w-20 bg-zinc-200 rounded mx-auto" />
+            <div className="h-5 w-28 bg-zinc-200 rounded mx-auto" />
+            <div className="mt-2 h-10 w-36 bg-zinc-200 rounded mx-auto" />
+            <div className="mt-1 h-6 w-24 bg-zinc-200 rounded mx-auto" />
           </div>
         ))}
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-3">
-        <div className="xl:col-span-2 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm animate-pulse">
+      <div className="grid gap-6 xl:grid-cols-3">
+        <div className="xl:col-span-2 rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm animate-pulse">
           <div className="flex justify-between">
             <div>
-              <div className="h-4 w-20 bg-zinc-200 rounded" />
-              <div className="mt-1 h-9 w-44 bg-zinc-200 rounded" />
+              <div className="h-5 w-24 bg-zinc-200 rounded" />
+              <div className="mt-1 h-10 w-48 bg-zinc-200 rounded" />
             </div>
             <div className="text-right">
-              <div className="h-4 w-24 bg-zinc-200 rounded ml-auto" />
-              <div className="mt-1 h-9 w-36 bg-zinc-200 rounded ml-auto" />
+              <div className="h-5 w-28 bg-zinc-200 rounded ml-auto" />
+              <div className="mt-1 h-10 w-40 bg-zinc-200 rounded ml-auto" />
             </div>
           </div>
-          <div className="mt-4 flex h-72 items-end gap-2">
+          <div className="mt-6 flex h-96 items-end gap-3">
             {[...Array(7)].map((_, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                <div className="h-48 w-full bg-zinc-200 rounded-t-lg" />
-                <div className="h-5 w-12 bg-zinc-200 rounded" />
+                <div className="h-72 w-full bg-zinc-200 rounded-t-lg" />
+                <div className="h-6 w-14 bg-zinc-200 rounded" />
               </div>
             ))}
           </div>
         </div>
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm animate-pulse">
-          <div className="h-4 w-24 bg-zinc-200 rounded" />
-          <div className="mt-1 h-9 w-44 bg-zinc-200 rounded" />
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="h-28 bg-zinc-200 rounded-xl" />
-            <div className="h-28 bg-zinc-200 rounded-xl" />
+        <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm animate-pulse">
+          <div className="h-5 w-28 bg-zinc-200 rounded" />
+          <div className="mt-1 h-10 w-48 bg-zinc-200 rounded" />
+          <div className="mt-6 grid grid-cols-2 gap-4">
+            <div className="h-32 bg-zinc-200 rounded-xl" />
+            <div className="h-32 bg-zinc-200 rounded-xl" />
           </div>
         </div>
       </div>
@@ -325,7 +325,7 @@ function DashboardSkeleton() {
 }
 
 // ============================================================
-// MAIN DASHBOARD
+// MAIN DASHBOARD - Updated for tablet
 // ============================================================
 export default function DashboardPage() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -517,18 +517,18 @@ export default function DashboardPage() {
   }, [todaySales, todayTransactions]);
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 shrink-0">
+    <div className="h-full flex flex-col min-h-0">
+      {/* Header - Larger typography */}
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 shrink-0">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Overview</p>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-950 sm:text-3xl">Dashboard</h1>
-          <p className="mt-1 text-sm text-zinc-500">Here's what's happening in your inventory today.</p>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">Overview</p>
+          <h1 className="mt-1.5 text-4xl font-black tracking-tight text-zinc-950 sm:text-5xl">Dashboard</h1>
+          <p className="mt-1.5 text-xl text-zinc-500">Here's what's happening in your inventory today.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <Link
             to="/sales"
-            className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-4 text-sm font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target"
+            className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-lg font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target"
           >
             + New Sale
           </Link>
@@ -536,10 +536,11 @@ export default function DashboardPage() {
             type="button"
             onClick={handleRefresh}
             disabled={loading || isRefreshing}
-            className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
+            className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
+            aria-label="Refresh dashboard data"
           >
             {isRefreshing ? (
-              <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
@@ -552,10 +553,10 @@ export default function DashboardPage() {
 
       {/* Error */}
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700 mb-3 shrink-0 animate-fade-in">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-lg font-medium text-red-700 mb-4 shrink-0 animate-fade-in">
           <div className="flex items-start justify-between gap-4">
             <span>{error}</span>
-            <button type="button" onClick={() => setError("")} className="font-bold underline">
+            <button type="button" onClick={() => setError("")} className="font-bold underline tap-target">
               Dismiss
             </button>
           </div>
@@ -564,124 +565,126 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       {loading ? (
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto min-h-0">
           <DashboardSkeleton />
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto space-y-4 pb-4">
-          {/* Stats Cards - with hover effects and animated counters */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 animate-fade-in-up [animation-delay:0ms]">
+        <div className="flex-1 overflow-y-auto min-h-0 space-y-6 pb-6">
+          {/* Stats Cards - Increased padding and sizes */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 active:scale-[0.98] animate-fade-in-up [animation-delay:0ms] tap-target">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Today's Sales</p>
-                  <p className="mt-1.5 text-4xl font-black tracking-tight text-zinc-950">
+                  <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Today's Sales</p>
+                  <p className="mt-2 text-5xl font-black tracking-tight text-zinc-950">
                     <AnimatedCounter value={todaySales} prefix="₱" />
                   </p>
-                  <p className="mt-1 text-lg text-zinc-500">{todayTransactions} transactions</p>
+                  <p className="mt-1.5 text-xl text-zinc-500">{todayTransactions} transactions</p>
                 </div>
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 transition-transform duration-200 hover:scale-110">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 transition-transform duration-200 hover:scale-110">
                   {icons.peso}
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 animate-fade-in-up [animation-delay:75ms]">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 active:scale-[0.98] animate-fade-in-up [animation-delay:75ms] tap-target">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Avg. Transaction</p>
-                  <p className="mt-1.5 text-4xl font-black tracking-tight text-zinc-950">
+                  <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Avg. Transaction</p>
+                  <p className="mt-2 text-5xl font-black tracking-tight text-zinc-950">
                     <AnimatedCounter
                       value={todayTransactions > 0 ? avgTransaction : 0}
                       prefix="₱"
                     />
                   </p>
-                  <p className="mt-1 text-lg text-zinc-500">
+                  <p className="mt-1.5 text-xl text-zinc-500">
                     {todayTransactions > 0 ? `Based on ${todayTransactions} sales` : "No sales today"}
                   </p>
                 </div>
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 transition-transform duration-200 hover:scale-110">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 transition-transform duration-200 hover:scale-110">
                   {icons.receipt}
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 animate-fade-in-up [animation-delay:150ms]">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 active:scale-[0.98] animate-fade-in-up [animation-delay:150ms] tap-target">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Items Sold</p>
-                  <p className="mt-1.5 text-4xl font-black tracking-tight text-zinc-950">
+                  <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Items Sold</p>
+                  <p className="mt-2 text-5xl font-black tracking-tight text-zinc-950">
                     <AnimatedCounter value={todayItemsSold} />
                   </p>
-                  <p className="mt-1 text-lg text-zinc-500">
+                  <p className="mt-1.5 text-xl text-zinc-500">
                     {todayItemsSold > 0 ? `${todayTransactions} orders` : "No items sold"}
                   </p>
                 </div>
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 transition-transform duration-200 hover:scale-110">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-600 transition-transform duration-200 hover:scale-110">
                   {icons.box}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Weekly & Monthly Summary */}
-          <div className="grid grid-cols-2 gap-2 animate-fade-in-up">
-            <div className="text-center p-5 bg-white rounded-2xl border border-zinc-200 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
-              <p className="text-base font-bold uppercase text-zinc-400">This Week</p>
-              <p className="mt-1.5 text-3xl font-black text-zinc-950">
+          {/* Weekly & Monthly Summary - Larger */}
+          <div className="grid grid-cols-2 gap-3 animate-fade-in-up">
+            <div className="text-center p-6 bg-white rounded-2xl border border-zinc-200 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300 active:scale-[0.98] tap-target">
+              <p className="text-lg font-bold uppercase text-zinc-400">This Week</p>
+              <p className="mt-2 text-4xl font-black text-zinc-950">
                 <AnimatedCounter value={weekSales} prefix="₱" />
               </p>
-              <p className="mt-1 text-lg text-zinc-400">7-day revenue</p>
+              <p className="mt-1 text-xl text-zinc-400">7-day revenue</p>
             </div>
-            <div className="text-center p-5 bg-white rounded-2xl border border-zinc-200 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
-              <p className="text-base font-bold uppercase text-zinc-400">This Month</p>
-              <p className="mt-1.5 text-3xl font-black text-zinc-950">
+            <div className="text-center p-6 bg-white rounded-2xl border border-zinc-200 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300 active:scale-[0.98] tap-target">
+              <p className="text-lg font-bold uppercase text-zinc-400">This Month</p>
+              <p className="mt-2 text-4xl font-black text-zinc-950">
                 <AnimatedCounter value={monthSales} prefix="₱" />
               </p>
-              <p className="mt-1 text-lg text-zinc-400">30-day revenue</p>
+              <p className="mt-1 text-xl text-zinc-400">30-day revenue</p>
             </div>
           </div>
 
-          {/* Sales Chart + Inventory */}
-          <div className="grid gap-4 xl:grid-cols-3">
+          {/* Sales Chart + Inventory - Larger */}
+          <div className="grid gap-6 xl:grid-cols-3">
             <div className="xl:col-span-2 rounded-2xl border border-zinc-200 bg-white shadow-sm">
-              <div className="flex flex-col gap-2 border-b border-zinc-200 p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 border-b border-zinc-200 p-8 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Sales</p>
-                  <h2 className="mt-0.5 text-2xl font-black text-zinc-950">Last 7 Days</h2>
+                  <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Sales</p>
+                  <h2 className="mt-0.5 text-3xl font-black text-zinc-950">Last 7 Days</h2>
                 </div>
                 <div className="text-left sm:text-right">
-                  <p className="text-base font-bold text-zinc-400">7-day revenue</p>
-                  <p className="mt-0.5 text-2xl font-black text-zinc-950">
+                  <p className="text-lg font-bold text-zinc-400">7-day revenue</p>
+                  <p className="mt-0.5 text-3xl font-black text-zinc-950">
                     <AnimatedCounter value={sevenDayTotal} prefix="₱" />
                   </p>
                 </div>
               </div>
-              <div className="p-6">
-                <div className="flex h-72 items-end gap-2 sm:gap-4">
+              <div className="p-8">
+                <div className="flex h-96 items-end gap-4 sm:gap-6">
                   {dailySales.map((day) => {
                     const height = Math.max((day.total / maxDailySales) * 100, day.total > 0 ? 4 : 0);
                     const today = isToday(`${day.date}T00:00:00`);
                     return (
-                      <div key={day.date} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-2 group">
-                        <div className="relative flex h-56 w-full items-end justify-center">
+                      <div key={day.date} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-3 group">
+                        <div className="relative flex h-80 w-full items-end justify-center">
                           {day.total > 0 && (
-                            <span className="absolute -top-7 text-base font-bold text-zinc-500 transition-opacity group-hover:opacity-100">
+                            <span className="absolute -top-8 text-xl font-bold text-zinc-500 transition-opacity group-hover:opacity-100">
                               {formatCurrency(day.total)}
                             </span>
                           )}
                           <div
-                            className="w-full max-w-14 rounded-t-lg transition-all duration-500 hover:opacity-80"
+                            className="w-full max-w-16 rounded-t-lg transition-all duration-500 hover:opacity-80 active:scale-[0.98]"
                             style={{
                               height: `${height}%`,
                               background: today ? "var(--accent)" : "#f4f4f5",
                               boxShadow: today ? "0 0 30px rgba(82, 82, 91, 0.2)" : "none",
                             }}
                             title={`${day.label}: ${formatCurrency(day.total)} · ${day.transactions} transactions`}
+                            role="img"
+                            aria-label={`${day.label}: ${formatCurrency(day.total)}`}
                           />
                         </div>
                         <div className="text-center">
-                          <p className={`text-base font-bold ${today ? "text-zinc-950" : "text-zinc-400"}`}>
+                          <p className={`text-xl font-bold ${today ? "text-zinc-950" : "text-zinc-400"}`}>
                             {day.label}
                           </p>
                         </div>
@@ -693,72 +696,72 @@ export default function DashboardPage() {
             </div>
 
             <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm">
-              <div className="flex items-center justify-between border-b border-zinc-200 p-6">
+              <div className="flex items-center justify-between border-b border-zinc-200 p-8">
                 <div>
-                  <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Inventory</p>
-                  <h2 className="mt-0.5 text-2xl font-black text-zinc-950">Stock Summary</h2>
+                  <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Inventory</p>
+                  <h2 className="mt-0.5 text-3xl font-black text-zinc-950">Stock Summary</h2>
                 </div>
                 <Link
                   to="/inventory"
-                  className="rounded-lg border border-zinc-300 px-3 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
+                  className="rounded-lg border border-zinc-300 px-4 py-3 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
                 >
                   View
                 </Link>
               </div>
-              <div className="p-6">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl bg-zinc-50 p-4 transition-all duration-200 hover:bg-zinc-100">
-                    <p className="text-base font-bold uppercase tracking-wider text-zinc-400">Total Units</p>
-                    <p className="mt-1 text-3xl font-black text-zinc-950">
+              <div className="p-8">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-xl bg-zinc-50 p-5 transition-all duration-200 hover:bg-zinc-100 active:scale-[0.98] tap-target">
+                    <p className="text-lg font-bold uppercase tracking-wider text-zinc-400">Total Units</p>
+                    <p className="mt-1.5 text-4xl font-black text-zinc-950">
                       <AnimatedCounter value={totalUnits} />
                     </p>
                   </div>
-                  <div className="rounded-xl bg-zinc-50 p-4 transition-all duration-200 hover:bg-zinc-100">
-                    <p className="text-base font-bold uppercase tracking-wider text-zinc-400">Alerts</p>
-                    <p className={`mt-1 text-3xl font-black ${lowStockItems.length > 0 ? "text-red-600" : "text-zinc-950"}`}>
+                  <div className="rounded-xl bg-zinc-50 p-5 transition-all duration-200 hover:bg-zinc-100 active:scale-[0.98] tap-target">
+                    <p className="text-lg font-bold uppercase tracking-wider text-zinc-400">Alerts</p>
+                    <p className={`mt-1.5 text-4xl font-black ${lowStockItems.length > 0 ? "text-red-600" : "text-zinc-950"}`}>
                       <AnimatedCounter value={lowStockItems.length} />
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-4">
-                  <div className="mb-2 flex items-center justify-between">
-                    <p className="text-base font-bold uppercase tracking-wider text-zinc-400">Needs Attention</p>
+                <div className="mt-6">
+                  <div className="mb-3 flex items-center justify-between">
+                    <p className="text-lg font-bold uppercase tracking-wider text-zinc-400">Needs Attention</p>
                     {outOfStockCount > 0 && (
-                      <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-bold text-red-700 animate-pulse">
+                      <span className="rounded-full bg-red-100 px-4 py-1.5 text-lg font-bold text-red-700 animate-pulse">
                         {outOfStockCount} out of stock
                       </span>
                     )}
                   </div>
                   {lowStockItems.length === 0 ? (
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 transition-all duration-200 hover:bg-emerald-100">
-                      <p className="text-lg font-bold text-emerald-800">✅ Stock looks good</p>
-                      <p className="mt-0.5 text-base text-emerald-600">
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 transition-all duration-200 hover:bg-emerald-100 active:scale-[0.98] tap-target">
+                      <p className="text-xl font-bold text-emerald-800">✅ Stock looks good</p>
+                      <p className="mt-0.5 text-lg text-emerald-600">
                         No products are currently at or below minimum stock.
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-2 max-h-52 overflow-y-auto">
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
                       {lowStockItems.slice(0, 5).map((item) => {
                         const stock = Number(item.current_stock);
                         const out = stock <= 0;
                         const percent = Math.min((stock / (item.minimum_stock * 2)) * 100, 100);
                         return (
-                          <div key={item.product_id} className="rounded-xl border border-zinc-200 p-3 transition-all duration-200 hover:bg-zinc-50">
-                            <div className="flex items-start justify-between gap-3">
+                          <div key={item.product_id} className="rounded-xl border border-zinc-200 p-4 transition-all duration-200 hover:bg-zinc-50 active:scale-[0.98] tap-target">
+                            <div className="flex items-start justify-between gap-4">
                               <div className="min-w-0">
-                                <p className="truncate text-lg font-bold text-zinc-900">{item.name}</p>
-                                <p className="mt-0.5 text-base text-zinc-400">{item.sku}</p>
+                                <p className="truncate text-xl font-bold text-zinc-900">{item.name}</p>
+                                <p className="mt-0.5 text-lg text-zinc-400">{item.sku}</p>
                               </div>
                               <div className="text-right">
-                                <p className={`text-xl font-black ${out ? "text-red-600" : "text-amber-600"}`}>
+                                <p className={`text-2xl font-black ${out ? "text-red-600" : "text-amber-600"}`}>
                                   {item.current_stock}
                                 </p>
-                                <p className="text-base text-zinc-400">min {item.minimum_stock}</p>
+                                <p className="text-lg text-zinc-400">min {item.minimum_stock}</p>
                               </div>
                             </div>
-                            <div className="mt-2 w-full">
-                              <div className="h-1.5 w-full bg-zinc-100 rounded-full overflow-hidden">
+                            <div className="mt-3 w-full">
+                              <div className="h-2 w-full bg-zinc-100 rounded-full overflow-hidden">
                                 <div
                                   className={`h-full rounded-full transition-all duration-1000 ${out ? 'bg-red-500' :
                                     stock <= item.minimum_stock ? 'bg-amber-500' :
@@ -772,7 +775,7 @@ export default function DashboardPage() {
                         );
                       })}
                       {lowStockItems.length > 5 && (
-                        <Link to="/inventory" className="block pt-1 text-center text-base font-bold text-zinc-500 hover:text-black">
+                        <Link to="/inventory" className="block pt-2 text-center text-lg font-bold text-zinc-500 hover:text-black tap-target">
                           View all {lowStockItems.length} low-stock products →
                         </Link>
                       )}
@@ -783,35 +786,37 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Best Selling Days */}
+          {/* Best Selling Days - Larger */}
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm animate-fade-in-up">
-            <div className="border-b border-zinc-200 p-6">
-              <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Analytics</p>
-              <h2 className="mt-0.5 text-2xl font-black text-zinc-950">Best Selling Days</h2>
-              <p className="mt-0.5 text-base text-zinc-400">Revenue distribution by day of the week (last 30 days)</p>
+            <div className="border-b border-zinc-200 p-8">
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Analytics</p>
+              <h2 className="mt-0.5 text-3xl font-black text-zinc-950">Best Selling Days</h2>
+              <p className="mt-0.5 text-xl text-zinc-400">Revenue distribution by day of the week (last 30 days)</p>
             </div>
-            <div className="p-6">
-              <div className="flex h-44 items-end gap-2">
+            <div className="p-8">
+              <div className="flex h-64 items-end gap-3">
                 {dayOfWeekSales.map((day) => {
                   const height = Math.max((day.total / day.max) * 100, day.total > 0 ? 4 : 0);
                   const isWeekend = day.day === "Sat" || day.day === "Sun";
                   return (
-                    <div key={day.day} className="flex-1 flex flex-col items-center gap-2 group">
-                      <div className="relative flex w-full items-end justify-center h-36">
+                    <div key={day.day} className="flex-1 flex flex-col items-center gap-3 group">
+                      <div className="relative flex w-full items-end justify-center h-52">
                         {day.total > 0 && (
-                          <span className="absolute -top-6 text-base font-bold text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="absolute -top-7 text-xl font-bold text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
                             {formatCurrency(day.total)}
                           </span>
                         )}
                         <div
-                          className="w-full max-w-12 rounded-t-lg transition-all duration-500 hover:opacity-80"
+                          className="w-full max-w-14 rounded-t-lg transition-all duration-500 hover:opacity-80 active:scale-[0.98]"
                           style={{
                             height: `${height}%`,
                             background: isWeekend ? "var(--accent)" : "#e4e4e7",
                           }}
+                          role="img"
+                          aria-label={`${day.day}: ${formatCurrency(day.total)}`}
                         />
                       </div>
-                      <p className={`text-base font-bold ${isWeekend ? "text-zinc-950" : "text-zinc-400"}`}>
+                      <p className={`text-xl font-bold ${isWeekend ? "text-zinc-950" : "text-zinc-400"}`}>
                         {day.day}
                       </p>
                     </div>
@@ -821,51 +826,51 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Top Selling Products */}
+          {/* Top Selling Products - Larger */}
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm animate-fade-in-up">
-            <div className="flex flex-col gap-2 border-b border-zinc-200 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 border-b border-zinc-200 p-8 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Performance</p>
-                <h2 className="mt-0.5 text-2xl font-black text-zinc-950">Top Selling Products</h2>
-                <p className="mt-0.5 text-base text-zinc-400">Based on the last 30 days of sales.</p>
+                <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Performance</p>
+                <h2 className="mt-0.5 text-3xl font-black text-zinc-950">Top Selling Products</h2>
+                <p className="mt-0.5 text-xl text-zinc-400">Based on the last 30 days of sales.</p>
               </div>
               <Link
                 to="/sales/history"
-                className="self-start rounded-lg border border-zinc-300 px-3 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target sm:self-auto"
+                className="self-start rounded-lg border border-zinc-300 px-4 py-3 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target sm:self-auto"
               >
                 Sales History
               </Link>
             </div>
             {topProducts.length === 0 ? (
-              <div className="p-8 text-center animate-bounce-slow">
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-zinc-100">
-                  <svg className="h-10 w-10 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="p-12 text-center animate-bounce-slow">
+                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-zinc-100">
+                  <svg className="h-12 w-12 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" />
                   </svg>
                 </div>
-                <p className="mt-4 text-lg font-medium text-zinc-500">No product sales yet</p>
-                <Link to="/sales" className="mt-3 inline-flex h-[44px] items-center rounded-xl bg-black px-5 text-sm font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target">
+                <p className="mt-5 text-xl font-medium text-zinc-500">No product sales yet</p>
+                <Link to="/sales" className="mt-4 inline-flex h-[52px] items-center rounded-xl bg-black px-6 text-lg font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target">
                   Create Sale
                 </Link>
               </div>
             ) : (
               <div className="divide-y divide-zinc-100">
                 {topProducts.map((product, index) => (
-                  <div key={product.product_id} className="flex items-center gap-4 p-6 transition-all duration-200 hover:bg-zinc-50">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-lg font-black text-zinc-500 transition-all duration-200 group-hover:scale-110">
+                  <div key={product.product_id} className="flex items-center gap-6 p-8 transition-all duration-200 hover:bg-zinc-50 active:scale-[0.99] tap-target">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-xl font-black text-zinc-500 transition-all duration-200 group-hover:scale-110">
                       {index + 1}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-lg font-black text-zinc-950">{product.name}</p>
-                      <p className="mt-0.5 text-base text-zinc-400">{product.sku}</p>
+                      <p className="truncate text-xl font-black text-zinc-950">{product.name}</p>
+                      <p className="mt-0.5 text-lg text-zinc-400">{product.sku}</p>
                     </div>
                     <div className="hidden text-right sm:block">
-                      <p className="text-base font-bold uppercase tracking-wider text-zinc-400">Revenue</p>
-                      <p className="mt-0.5 text-lg font-black text-zinc-950">{formatCurrency(product.revenue)}</p>
+                      <p className="text-lg font-bold uppercase tracking-wider text-zinc-400">Revenue</p>
+                      <p className="mt-0.5 text-xl font-black text-zinc-950">{formatCurrency(product.revenue)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-base font-bold uppercase tracking-wider text-zinc-400">Sold</p>
-                      <p className="mt-0.5 text-lg font-black text-zinc-950">{product.quantity}</p>
+                      <p className="text-lg font-bold uppercase tracking-wider text-zinc-400">Sold</p>
+                      <p className="mt-0.5 text-xl font-black text-zinc-950">{product.quantity}</p>
                     </div>
                   </div>
                 ))}
@@ -873,52 +878,52 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Recent Sales */}
+          {/* Recent Sales - Larger */}
           <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm animate-fade-in-up">
-            <div className="flex items-center justify-between border-b border-zinc-200 p-6">
+            <div className="flex items-center justify-between border-b border-zinc-200 p-8">
               <div>
-                <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Sales</p>
-                <h2 className="mt-0.5 text-2xl font-black text-zinc-950">Recent Sales</h2>
+                <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Sales</p>
+                <h2 className="mt-0.5 text-3xl font-black text-zinc-950">Recent Sales</h2>
               </div>
               <Link
                 to="/sales/history"
-                className="rounded-lg border border-zinc-300 px-3 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
+                className="rounded-lg border border-zinc-300 px-4 py-3 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
               >
                 View All
               </Link>
             </div>
             {recentSales.length === 0 ? (
-              <div className="p-8 text-center animate-bounce-slow">
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-zinc-100">
-                  <svg className="h-10 w-10 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="p-12 text-center animate-bounce-slow">
+                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-zinc-100">
+                  <svg className="h-12 w-12 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v1m0-1c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2" />
                   </svg>
                 </div>
-                <p className="mt-4 text-lg font-medium text-zinc-500">No sales recorded yet</p>
-                <Link to="/sales" className="mt-3 inline-flex h-[44px] items-center rounded-xl bg-black px-5 text-sm font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target">
+                <p className="mt-5 text-xl font-medium text-zinc-500">No sales recorded yet</p>
+                <Link to="/sales" className="mt-4 inline-flex h-[52px] items-center rounded-xl bg-black px-6 text-lg font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target">
                   Create Sale
                 </Link>
               </div>
             ) : (
               <div className="divide-y divide-zinc-100">
                 {recentSales.map((sale) => (
-                  <div key={sale.id} className="flex items-center justify-between p-6 transition-all duration-200 hover:bg-zinc-50">
+                  <div key={sale.id} className="flex items-center justify-between p-8 transition-all duration-200 hover:bg-zinc-50 active:scale-[0.99] tap-target">
                     <div className="min-w-0">
-                      <Link to={`/sales/${sale.id}`} className="text-lg font-black text-zinc-950 hover:underline">
+                      <Link to={`/sales/${sale.id}`} className="text-xl font-black text-zinc-950 hover:underline">
                         {sale.reference || `SALE-${String(sale.id).padStart(6, "0")}`}
                       </Link>
-                      <p className="mt-0.5 text-base text-zinc-400">{formatDate(sale.sale_date)}</p>
+                      <p className="mt-0.5 text-lg text-zinc-400">{formatDate(sale.sale_date)}</p>
                     </div>
-                    <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <p className="text-base font-bold text-zinc-500">
+                        <p className="text-lg font-bold text-zinc-500">
                           {getItemCount(sale)} {getItemCount(sale) === 1 ? "item" : "items"}
                         </p>
-                        <p className="mt-0.5 text-base text-zinc-400">{sale.payment_method}</p>
+                        <p className="mt-0.5 text-lg text-zinc-400">{sale.payment_method}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-black text-zinc-950">{formatCurrency(Number(sale.total))}</p>
-                        <Link to={`/sales/${sale.id}`} className="mt-0.5 inline-block text-base font-bold text-zinc-500 hover:text-black">
+                        <p className="text-xl font-black text-zinc-950">{formatCurrency(Number(sale.total))}</p>
+                        <Link to={`/sales/${sale.id}`} className="mt-0.5 inline-block text-lg font-bold text-zinc-500 hover:text-black tap-target">
                           Details →
                         </Link>
                       </div>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 
 type Product = {
@@ -11,7 +11,6 @@ type Product = {
   selling_price: number;
   minimum_stock: number;
 };
-
 type InventoryItem = {
   product_id: number;
   sku: string;
@@ -19,7 +18,6 @@ type InventoryItem = {
   current_stock: number;
   minimum_stock: number;
 };
-
 type SaleItem = {
   id: number;
   sale_id: number;
@@ -33,7 +31,6 @@ type SaleItem = {
   unit_price: number;
   subtotal: number;
 };
-
 type Sale = {
   id: number;
   reference?: string;
@@ -45,18 +42,15 @@ type Sale = {
   created_at: string;
   items?: SaleItem[];
 };
-
 type CartItem = {
   product: Product;
   quantity: number;
 };
 
 const API_URL = import.meta.env.VITE_API_URL;
-
 const RECEIPT_COMPANY_NAME = "";
 const RECEIPT_COMPANY_ADDRESS = "";
 const RECEIPT_MESSAGE = "Thank you for your purchase!";
-
 const PAYMENT_METHODS = [
   "CASH",
   "GCASH",
@@ -65,11 +59,7 @@ const PAYMENT_METHODS = [
   "BANK_TRANSFER",
   "CARD",
 ] as const;
-
 type PaymentMethod = (typeof PAYMENT_METHODS)[number];
-
-// Quick quantity presets for faster input
-const QUICK_QUANTITIES = [1, 2, 3, 5, 10];
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-PH", {
@@ -78,14 +68,12 @@ function formatCurrency(value: number) {
     minimumFractionDigits: 2,
   }).format(value);
 }
-
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
 }
-
 function formatReceiptDate(value: string) {
   return new Intl.DateTimeFormat("en-PH", {
     month: "short",
@@ -95,11 +83,9 @@ function formatReceiptDate(value: string) {
     minute: "2-digit",
   }).format(new Date(value));
 }
-
 function receiptMoney(value: number) {
   return `₱${Number(value || 0).toFixed(2)}`;
 }
-
 function toDateTimeLocalValue(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -108,7 +94,6 @@ function toDateTimeLocalValue(date: Date) {
   const minutes = String(date.getMinutes()).padStart(2, "0");
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
-
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -117,18 +102,15 @@ function escapeHtml(value: string) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-
 function getItemCount(sale: Sale) {
   return (sale.items ?? []).reduce(
     (total, item) => total + Number(item.quantity || 0),
     0,
   );
 }
-
 function getSaleReference(sale: Sale) {
   return sale.reference ?? `SALE-${String(sale.id).padStart(6, "0")}`;
 }
-
 function getProductDetails(item: SaleItem) {
   return [item.version, item.flavor]
     .filter(
@@ -138,12 +120,10 @@ function getProductDetails(item: SaleItem) {
     .map((value) => String(value).trim())
     .join(" • ");
 }
-
 function printReceipt(sale: Sale) {
   const reference = getSaleReference(sale);
   const companyLines = [RECEIPT_COMPANY_NAME.trim(), RECEIPT_COMPANY_ADDRESS.trim()].filter(Boolean);
   const companyBlock = companyLines.map((line) => `<div>${escapeHtml(line)}</div>`).join("");
-
   const itemsHtml = (sale.items ?? [])
     .map((item) => {
       const details = getProductDetails(item);
@@ -160,7 +140,6 @@ function printReceipt(sale: Sale) {
       `;
     })
     .join("");
-
   const html = `
     <!doctype html>
     <html>
@@ -217,7 +196,6 @@ function printReceipt(sale: Sale) {
       </body>
     </html>
   `;
-
   const printWindow = window.open("", "_blank", "width=420,height=700");
   if (!printWindow) {
     alert("Please allow pop-ups to print the receipt.");
@@ -228,6 +206,86 @@ function printReceipt(sale: Sale) {
   printWindow.document.close();
 }
 
+// ============================================================
+// TOAST COMPONENT
+// ============================================================
+type ToastProps = {
+  message: string;
+  type?: "success" | "error" | "info";
+  duration?: number;
+  onDismiss?: () => void;
+};
+
+function Toast({
+  message,
+  type = "success",
+  duration = 3500,
+  onDismiss,
+}: ToastProps) {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVisible(false);
+      if (onDismiss) {
+        setTimeout(onDismiss, 300);
+      }
+    }, duration);
+
+    return () => clearTimeout(timer);
+  }, [duration, onDismiss]);
+
+  if (!visible) return null;
+
+  const styles = {
+    success: "border-emerald-500 bg-emerald-50",
+    error: "border-red-500 bg-red-50",
+    info: "border-blue-500 bg-blue-50",
+  };
+
+  const iconStyles = {
+    success: "text-emerald-600",
+    error: "text-red-600",
+    info: "text-blue-600",
+  };
+
+  return (
+    <div
+      className={`
+        fixed bottom-6 right-6 z-300 max-w-md w-full
+        rounded-2xl border-l-8 shadow-lg p-5
+        animate-slide-up
+        ${styles[type]}
+      `}
+      role="alert"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <span className={`text-2xl ${iconStyles[type]}`}>
+            {type === "success" && "✅"}
+            {type === "error" && "❌"}
+            {type === "info" && "ℹ️"}
+          </span>
+          <p className="text-lg font-bold text-zinc-900 leading-tight">
+            {message}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setVisible(false);
+            if (onDismiss) setTimeout(onDismiss, 300);
+          }}
+          className="min-h-9 min-w-9 flex items-center justify-center text-xl text-zinc-400 hover:text-zinc-600 transition shrink-0"
+          aria-label="Dismiss notification"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function SalesPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -236,7 +294,6 @@ export default function SalesPage() {
   const [loadingSales, setLoadingSales] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [receiptSale, setReceiptSale] = useState<Sale | null>(null);
@@ -245,10 +302,12 @@ export default function SalesPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
   const [discount, setDiscount] = useState("0");
   const [isRefreshing, setIsRefreshing] = useState(false);
-
-  // Modal states
   const [showClearCartModal, setShowClearCartModal] = useState(false);
   const [showConfirmSaleModal, setShowConfirmSaleModal] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+
+  // Track if submission is in progress
+  const isSubmittingRef = useRef(false);
 
   function getStock(productID: number) {
     const item = inventory.find((inventoryItem) => inventoryItem.product_id === productID);
@@ -274,7 +333,6 @@ export default function SalesPage() {
       setLoading(false);
     }
   }
-
   async function loadSales() {
     try {
       setLoadingSales(true);
@@ -288,32 +346,20 @@ export default function SalesPage() {
       setLoadingSales(false);
     }
   }
-
-  // Combined refresh function like Dashboard
   async function handleRefresh() {
     setIsRefreshing(true);
     await Promise.all([loadProducts(), loadSales()]);
     setTimeout(() => setIsRefreshing(false), 500);
   }
-
   useEffect(() => {
     loadProducts();
     loadSales();
   }, []);
 
-  // Keyboard Shortcuts
+  // Escape key handler only
   useEffect(() => {
     if (!showForm) return;
-
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+Enter or Cmd+Enter to complete sale
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        if (cart.length > 0) {
-          e.preventDefault();
-          setShowConfirmSaleModal(true);
-        }
-      }
-      // Escape to close form
       if (e.key === 'Escape') {
         if (showClearCartModal) {
           setShowClearCartModal(false);
@@ -324,10 +370,9 @@ export default function SalesPage() {
         }
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showForm, cart, showClearCartModal, showConfirmSaleModal]);
+  }, [showForm, showClearCartModal, showConfirmSaleModal]);
 
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -338,37 +383,31 @@ export default function SalesPage() {
         .some((value) => value!.toLowerCase().includes(query));
     });
   }, [products, search]);
-
   const recentSales = useMemo(() => {
     return [...sales]
       .sort((a, b) => new Date(b.sale_date).getTime() - new Date(a.sale_date).getTime())
       .slice(0, 5);
   }, [sales]);
-
   const cartSubtotal = useMemo(() => {
     return cart.reduce((total, item) => total + Number(item.product.selling_price) * item.quantity, 0);
   }, [cart]);
-
   const discountAmount = useMemo(() => {
     const value = Number(discount);
     if (!Number.isFinite(value) || value < 0) return 0;
     return value;
   }, [discount]);
-
   const cartTotal = Math.max(0, cartSubtotal - discountAmount);
 
   function openNewSale() {
     setError("");
-    setSuccessMessage("");
     setCart([]);
     setSearch("");
     setDiscount("0");
     setPaymentMethod("CASH");
     setSaleDate(toDateTimeLocalValue(new Date()));
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    isSubmittingRef.current = false;
   }
-
   function closeForm() {
     if (submitting) return;
     setShowForm(false);
@@ -379,39 +418,18 @@ export default function SalesPage() {
     setError("");
     setShowClearCartModal(false);
     setShowConfirmSaleModal(false);
+    isSubmittingRef.current = false;
   }
-
   function clearCart() {
     if (cart.length === 0) return;
     setShowClearCartModal(true);
   }
-
   function confirmClearCart() {
     setCart([]);
     setShowClearCartModal(false);
   }
-
-  function handleCompleteSale() {
-    if (cart.length === 0) return;
-    setShowConfirmSaleModal(true);
-  }
-
-  async function confirmCompleteSale() {
-    setShowConfirmSaleModal(false);
-    const form = document.querySelector('form');
-    if (form) {
-      if (typeof form.requestSubmit === 'function') {
-        form.requestSubmit();
-      } else {
-        const submitEvent = new Event('submit', { cancelable: true, bubbles: true });
-        form.dispatchEvent(submitEvent);
-      }
-    }
-  }
-
   function addToCart(product: Product) {
     setError("");
-    setSuccessMessage("");
     const stock = getStock(product.id);
     if (stock <= 0) {
       setError(`${product.name} is out of stock.`);
@@ -434,7 +452,6 @@ export default function SalesPage() {
     }
     setCart((current) => [...current, { product, quantity: 1 }]);
   }
-
   function changeQuantity(productID: number, quantity: number) {
     if (quantity <= 0) {
       removeFromCart(productID);
@@ -450,49 +467,23 @@ export default function SalesPage() {
       current.map((item) => (item.product.id === productID ? { ...item, quantity } : item)),
     );
   }
-
   function removeFromCart(productID: number) {
     setCart((current) => current.filter((item) => item.product.id !== productID));
   }
-
-  // Swipe to remove handlers
-  const [swipeStartX, setSwipeStartX] = useState<number | null>(null);
-  const [swipeOffset, setSwipeOffset] = useState<{ [key: number]: number }>({});
-
-  function handleTouchStart(event: React.TouchEvent, productId: number) {
-    setSwipeStartX(event.touches[0].clientX);
-    setSwipeOffset((prev) => ({ ...prev, [productId]: 0 }));
-  }
-
-  function handleTouchMove(event: React.TouchEvent, productId: number) {
-    if (swipeStartX === null) return;
-    const currentX = event.touches[0].clientX;
-    const diff = currentX - swipeStartX;
-    if (diff < 0) {
-      const offset = Math.max(diff, -80);
-      setSwipeOffset((prev) => ({ ...prev, [productId]: offset }));
-    }
-  }
-
-  function handleTouchEnd(productId: number) {
-    setSwipeStartX(null);
-    const offset = swipeOffset[productId] || 0;
-    if (offset < -40) {
-      removeFromCart(productId);
-    }
-    setSwipeOffset((prev) => ({ ...prev, [productId]: 0 }));
-  }
-
-  async function createSale(event: React.FormEvent) {
+  async function createSale(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    // Prevent double submission
+    if (submitting || isSubmittingRef.current) {
+      return;
+    }
+
     setError("");
-    setSuccessMessage("");
 
     if (cart.length === 0) {
       setError("Add at least one product to the sale.");
       return;
     }
-
     for (const item of cart) {
       const currentStock = getStock(item.product.id);
       if (item.quantity > currentStock) {
@@ -504,7 +495,6 @@ export default function SalesPage() {
         return;
       }
     }
-
     const numericDiscount = Number(discount);
     if (!Number.isFinite(numericDiscount) || numericDiscount < 0) {
       setError("Discount cannot be negative.");
@@ -518,7 +508,6 @@ export default function SalesPage() {
       setError("Payment method is required.");
       return;
     }
-
     const selectedDate = new Date(saleDate);
     if (Number.isNaN(selectedDate.getTime())) {
       setError("Invalid sale date.");
@@ -526,6 +515,7 @@ export default function SalesPage() {
     }
 
     setSubmitting(true);
+    isSubmittingRef.current = true;
 
     try {
       const body = {
@@ -537,19 +527,15 @@ export default function SalesPage() {
         discount: numericDiscount,
         payment_method: paymentMethod,
       };
-
       const response = await fetch(`${API_URL}/api/sales`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-
       if (!response.ok) {
         throw new Error(await response.text());
       }
-
       const createdSale: Sale = await response.json();
-
       const receiptItems: SaleItem[] = cart.map((cartItem, index) => {
         const returnedItem = (createdSale.items ?? []).find(
           (item) => Number(item.product_id) === cartItem.product.id,
@@ -557,7 +543,6 @@ export default function SalesPage() {
         const quantity = returnedItem ? Number(returnedItem.quantity) : cartItem.quantity;
         const unitPrice = returnedItem ? Number(returnedItem.unit_price) : Number(cartItem.product.selling_price);
         const subtotal = returnedItem ? Number(returnedItem.subtotal) : unitPrice * quantity;
-
         return {
           id: returnedItem?.id ?? index + 1,
           sale_id: createdSale.id,
@@ -572,7 +557,6 @@ export default function SalesPage() {
           subtotal,
         };
       });
-
       const saleForReceipt: Sale = {
         ...createdSale,
         items: receiptItems,
@@ -582,7 +566,6 @@ export default function SalesPage() {
         payment_method: createdSale.payment_method ?? paymentMethod,
         sale_date: createdSale.sale_date ?? selectedDate.toISOString(),
       };
-
       await Promise.all([loadProducts(), loadSales()]);
       setShowForm(false);
       setCart([]);
@@ -590,21 +573,41 @@ export default function SalesPage() {
       setDiscount("0");
       setPaymentMethod("CASH");
       setSaleDate(toDateTimeLocalValue(new Date()));
-      setSuccessMessage(`Sale ${getSaleReference(saleForReceipt)} created successfully.`);
+
+      // Show toast notification
+      setToast({
+        message: `Sale ${getSaleReference(saleForReceipt)} created successfully!`,
+        type: "success",
+      });
+
       setReceiptSale(saleForReceipt);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to create sale.");
     } finally {
       setSubmitting(false);
+      isSubmittingRef.current = false;
     }
   }
+  function confirmCompleteSale() {
+    if (submitting || isSubmittingRef.current) {
+      return;
+    }
 
+    setShowConfirmSaleModal(false);
+    const form = document.querySelector('form');
+    if (form) {
+      if (typeof form.requestSubmit === 'function') {
+        form.requestSubmit();
+      } else {
+        const submitEvent = new Event('submit', { cancelable: true, bubbles: true });
+        form.dispatchEvent(submitEvent);
+      }
+    }
+  }
   const totalSales = useMemo(() => {
     return sales.reduce((total, sale) => total + Number(sale.total || 0), 0);
   }, [sales]);
-
   const transactionCount = sales.length;
-
   const todaySales = useMemo(() => {
     const today = new Date();
     return sales
@@ -618,163 +621,144 @@ export default function SalesPage() {
       })
       .reduce((total, sale) => total + Number(sale.total || 0), 0);
   }, [sales]);
-
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="h-full flex flex-col gpu">
-      {/* Header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 shrink-0">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-950 sm:text-3xl">Sales</h1>
-          <p className="mt-1 text-lg text-zinc-500">Record sales and track your transaction history.</p>
-        </div>
-        <div className="flex gap-2">
-          {!showForm && (
-            <button
-              type="button"
-              onClick={openNewSale}
-              className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-4 text-sm font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-            >
-              + New Sale
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={loading || loadingSales || isRefreshing}
-            className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
-          >
-            {isRefreshing ? (
-              <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-            ) : (
-              "Refresh"
-            )}
-          </button>
-        </div>
-      </header>
-
-      {/* Success */}
-      {successMessage && (
-        <div className="rounded-xl border border-zinc-200 bg-white p-4 text-base font-medium text-zinc-900 shadow-sm mb-3 shrink-0 animate-fade-in gpu">
-          <span className="mr-2 inline-block h-2 w-2 rounded-full bg-black" />
-          {successMessage}
-        </div>
-      )}
-
-      {/* Error */}
-      {error && !showForm && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-base font-medium text-red-700 mb-3 shrink-0 animate-fade-in gpu">
-          {error}
-        </div>
-      )}
-
-      {/* Statistics - Plain Colors (like old design) */}
+    <div className="h-full flex flex-col overflow-x-hidden min-h-0">
       {!showForm && (
-        <div className="grid grid-cols-3 gap-3 mb-4 shrink-0 animate-fade-in-up">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
-            <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Sales Today</p>
-            <p className="mt-2 text-3xl font-black text-zinc-950 number-transition">{formatCurrency(todaySales)}</p>
-            <p className="mt-1 text-lg text-zinc-400">Today's revenue</p>
+        <>
+          <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 shrink-0">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
+              <h1 className="mt-1.5 text-4xl font-black tracking-tight text-zinc-950 sm:text-5xl">Sales</h1>
+              <p className="mt-1.5 text-xl text-zinc-500">Record sales and track your transaction history.</p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={openNewSale}
+                className="inline-flex min-h-14 items-center justify-center rounded-xl bg-black px-8 text-xl font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target"
+              >
+                + New Sale
+              </button>
+              <button
+                type="button"
+                onClick={handleRefresh}
+                disabled={loading || loadingSales || isRefreshing}
+                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
+              >
+                {isRefreshing ? (
+                  <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                ) : (
+                  "⟳ Refresh"
+                )}
+              </button>
+            </div>
+          </header>
+          {error && !showForm && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-xl font-medium text-red-700 mb-4 shrink-0 animate-fade-in overflow-hidden">
+              {error}
+            </div>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8 shrink-0 animate-fade-in-up">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 active:scale-[0.98] tap-target">
+              <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Sales Today</p>
+              <p className="mt-3 text-5xl font-black text-zinc-950 number-transition">{formatCurrency(todaySales)}</p>
+              <p className="mt-2 text-xl text-zinc-400">Today's revenue</p>
+            </div>
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 active:scale-[0.98] tap-target">
+              <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Total Sales</p>
+              <p className="mt-3 text-5xl font-black text-zinc-950 number-transition">{formatCurrency(totalSales)}</p>
+              <p className="mt-2 text-xl text-zinc-400">All time revenue</p>
+            </div>
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 active:scale-[0.98] tap-target">
+              <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Transactions</p>
+              <p className="mt-3 text-5xl font-black text-zinc-950 number-transition">{transactionCount}</p>
+              <p className="mt-2 text-xl text-zinc-400">Total sales</p>
+            </div>
           </div>
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
-            <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Total Sales</p>
-            <p className="mt-2 text-3xl font-black text-zinc-950 number-transition">{formatCurrency(totalSales)}</p>
-            <p className="mt-1 text-lg text-zinc-400">All time revenue</p>
-          </div>
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
-            <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Transactions</p>
-            <p className="mt-2 text-3xl font-black text-zinc-950 number-transition">{transactionCount}</p>
-            <p className="mt-1 text-lg text-zinc-400">Total sales</p>
-          </div>
-        </div>
+        </>
       )}
 
-      {/* New Sale Form */}
+      {/* ============================================================
+          FULLSCREEN NEW SALE FORM
+          ============================================================ */}
       {showForm && (
-        <div className="flex-1 min-h-0 flex flex-col">
-          <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm flex-1 flex flex-col overflow-hidden gpu">
-            <form onSubmit={createSale} className="flex flex-col h-full">
-              {/* Header */}
-              <div className="flex items-start justify-between border-b border-zinc-200 p-5 shrink-0">
-                <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">Transaction</p>
-                  <h2 className="mt-0.5 text-xl font-black text-zinc-950">New Sale</h2>
-                  <p className="mt-0.5 text-base text-zinc-500">
-                    {cart.length} items • {totalCartItems} units • Total: {formatCurrency(cartTotal)}
-                  </p>
-                  <p className="mt-0.5 text-xs text-zinc-400">
-                    ⌘+Enter to complete • Esc to close
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={closeForm}
-                  disabled={submitting}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-zinc-200 text-xl text-zinc-500 transition hover:bg-zinc-100 disabled:opacity-50 touch-feedback gpu"
-                  aria-label="Close"
-                >
-                  ×
-                </button>
+        <div className="fixed inset-0 z-100 bg-zinc-100 flex flex-col safe-area overflow-x-hidden">
+          {/* Header */}
+          <div className="bg-white border-b border-zinc-200 p-6 shrink-0 flex items-center justify-between safe-area-top">
+            <div className="flex items-center gap-6 min-w-0">
+              <button
+                type="button"
+                onClick={closeForm}
+                disabled={submitting}
+                className="flex min-h-13 min-w-13 items-center justify-center rounded-xl border border-zinc-200 text-2xl text-zinc-500 hover:bg-zinc-100 active:scale-95 transition shrink-0 tap-target font-bold"
+              >
+                ←
+              </button>
+              <div className="min-w-0">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">Transaction</p>
+                <h2 className="text-3xl font-black text-zinc-950 truncate">New Sale</h2>
+                <p className="text-base text-zinc-500 mt-0.5">
+                  {cart.length} items • {totalCartItems} units • Total: {formatCurrency(cartTotal)}
+                </p>
               </div>
+            </div>
+            <div className="flex items-center gap-4 shrink-0">
+              <span className="text-base text-zinc-400 hidden md:inline font-medium">Esc to close</span>
+              <button
+                type="button"
+                onClick={closeForm}
+                disabled={submitting}
+                className="flex min-h-13 min-w-13 items-center justify-center rounded-xl border border-zinc-200 text-2xl text-zinc-500 hover:bg-zinc-100 active:scale-95 transition disabled:opacity-50 shrink-0 tap-target font-bold"
+                aria-label="Close sale form"
+              >
+                ×
+              </button>
+            </div>
+          </div>
 
-              {error && (
-                <div className="mx-5 mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-base font-medium text-red-700 shrink-0 animate-fade-in gpu">
-                  {error}
-                </div>
-              )}
+          {/* Error */}
+          {error && (
+            <div className="mx-6 mt-4 rounded-xl border border-red-200 bg-red-50 p-5 text-lg font-medium text-red-700 shrink-0 animate-fade-in overflow-hidden">
+              {error}
+            </div>
+          )}
 
-              {/* Main Form */}
-              <div className="flex-1 overflow-hidden grid gap-5 p-5 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px]">
-                {/* Left: Product Selection */}
-                <div className="flex flex-col min-h-0">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between shrink-0">
-                    <div>
-                      <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Products</p>
-                      <h3 className="mt-0.5 text-lg font-black text-zinc-950">Add Products</h3>
-                    </div>
-                    <div className="relative w-full sm:max-w-xs">
-                      <svg className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
+          {/* Main Form */}
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-8 gpu-scroll">
+            <form onSubmit={createSale} className="max-w-7xl mx-auto w-full h-full">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+
+                {/* LEFT: Products */}
+                <div className="flex flex-col border border-zinc-200 rounded-2xl bg-white overflow-hidden min-w-0 h-full">
+                  <div className="border-b border-zinc-200 p-5 shrink-0 bg-zinc-50">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Products</p>
+                        <h3 className="mt-1 text-2xl font-black text-zinc-950 truncate">Add Products</h3>
+                        <p className="text-sm text-zinc-400 mt-0.5">{filteredProducts.length} available</p>
+                      </div>
                       <input
                         type="search"
                         value={search}
-                        onChange={(event) => setSearch(event.target.value)}
+                        onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search products..."
-                        className="w-full rounded-xl border border-zinc-300 bg-white pl-11 pr-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+                        className="w-48 md:w-56 rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-base outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 shrink-0 tap-target"
+                        style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+                        aria-label="Search products"
                       />
-                      {search && (
-                        <button
-                          onClick={() => setSearch("")}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 hover:bg-zinc-100 touch-feedback"
-                        >
-                          <svg className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      )}
                     </div>
                   </div>
-
-                  {/* Product Grid */}
-                  <div className="mt-3 flex-1 overflow-y-auto pr-1 space-y-2 gpu-scroll">
+                  <div className="flex-1 p-5 space-y-3 overflow-y-auto overflow-x-hidden gpu-scroll">
                     {loading ? (
-                      <div className="rounded-xl border border-zinc-200 p-8 text-center gpu">
-                        <div className="relative mx-auto mb-3">
-                          <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 gpu">
-                            <div className="absolute inset-0 rounded-full border-4 border-black border-t-transparent animate-spin gpu"></div>
-                          </div>
-                        </div>
-                        <p className="text-base text-zinc-500">Loading products...</p>
-                      </div>
+                      <div className="text-center p-8 text-lg text-zinc-500 font-bold">Loading products...</div>
                     ) : filteredProducts.length === 0 ? (
-                      <div className="rounded-xl border border-zinc-200 p-8 text-center">
-                        <p className="text-base font-medium text-zinc-500">No products found.</p>
+                      <div className="text-center p-8 text-lg text-zinc-500 font-bold">
+                        {search ? "No products match your search" : "No products available"}
                       </div>
                     ) : (
                       filteredProducts.map((product) => {
@@ -782,7 +766,10 @@ export default function SalesPage() {
                         const cartItem = cart.find((item) => item.product.id === product.id);
                         const remainingStock = Math.max(0, stock - (cartItem?.quantity ?? 0));
                         const isOutOfStock = stock <= 0;
-                        const isLowStock = stock <= Number(product.minimum_stock || 0);
+
+                        const productDetails = [product.brand, product.version, product.flavor]
+                          .filter(Boolean)
+                          .join(" • ");
 
                         return (
                           <button
@@ -790,67 +777,35 @@ export default function SalesPage() {
                             type="button"
                             onClick={() => addToCart(product)}
                             disabled={isOutOfStock || remainingStock <= 0}
-                            className={[
-                              "w-full rounded-xl border bg-white p-4 text-left transition touch-feedback gpu card-hover",
-                              isOutOfStock || remainingStock <= 0
-                                ? "cursor-not-allowed border-zinc-200 bg-zinc-50 opacity-60"
-                                : "border-zinc-200 hover:border-zinc-400 hover:bg-zinc-50",
-                            ].join(" ")}
+                            className="w-full min-h-22 rounded-xl border border-zinc-200 bg-white p-5 text-left transition hover:bg-zinc-50 active:scale-[0.98] disabled:opacity-50 hover:shadow-sm tap-target"
                           >
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="min-w-0">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <h4 className="truncate text-base font-black text-zinc-950">{product.name}</h4>
-                                  {product.version && (
-                                    <span className="rounded bg-black px-2 py-0.5 text-xs font-bold uppercase text-white">
-                                      {product.version}
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="mt-1 text-sm text-zinc-500">
-                                  {product.sku}
-                                  {product.flavor ? ` • ${product.flavor}` : ""}
-                                </p>
-                                <div className="mt-2 flex flex-wrap items-center gap-2">
-                                  <div className="flex items-center gap-1.5">
-                                    <div className={`h-2 w-2 rounded-full ${isOutOfStock ? 'bg-red-500 animate-pulse' : isLowStock ? 'bg-amber-500' : 'bg-emerald-500'}`} />
-                                    <span className="text-sm font-bold uppercase tracking-wider text-zinc-400">Available</span>
+                            <div className="flex justify-between items-center gap-4">
+                              <div className="min-w-0 flex-1">
+                                <div className="font-bold text-lg truncate">{product.name}</div>
+                                {productDetails && (
+                                  <div className="text-base text-zinc-600 truncate mt-0.5">
+                                    {productDetails}
                                   </div>
-                                  <span
-                                    className={[
-                                      "rounded px-2 py-0.5 text-sm font-black status-badge",
-                                      isOutOfStock
-                                        ? "bg-red-100 text-red-700 status-out-of-stock"
-                                        : isLowStock
-                                          ? "bg-amber-100 text-amber-700 status-low-stock"
-                                          : "bg-emerald-100 text-emerald-700 status-in-stock",
-                                    ].join(" ")}
-                                  >
-                                    {isOutOfStock ? "Out of stock" : stock}
+                                )}
+                                <div className="flex items-center gap-3 mt-1">
+                                  <span className="text-sm text-zinc-400 truncate font-medium">{product.sku}</span>
+                                  <span className="text-sm text-zinc-400">•</span>
+                                  <span className={`text-sm font-medium ${stock <= product.minimum_stock ? 'text-amber-600' : 'text-zinc-500'}`}>
+                                    Stock: {stock}
                                   </span>
-                                  {cartItem && !isOutOfStock && (
-                                    <span className="text-sm font-semibold text-zinc-400">
-                                      {cartItem.quantity} in cart
-                                    </span>
-                                  )}
                                 </div>
                               </div>
-                              <div className="shrink-0 text-right">
-                                <p className="text-base font-black text-zinc-950">
-                                  {formatCurrency(Number(product.selling_price))}
-                                </p>
-                                <p
-                                  className={[
-                                    "mt-0.5 text-sm font-bold uppercase tracking-wider",
-                                    isOutOfStock
-                                      ? "text-red-600"
-                                      : remainingStock <= 0
-                                        ? "text-zinc-400"
-                                        : "text-zinc-500",
-                                  ].join(" ")}
-                                >
-                                  {isOutOfStock ? "Unavailable" : remainingStock <= 0 ? "Max" : cartItem ? "+1" : "Add"}
-                                </p>
+                              <div className="text-right shrink-0">
+                                <div className="font-bold text-xl">{formatCurrency(product.selling_price)}</div>
+                                <div className="text-base font-bold mt-0.5">
+                                  {isOutOfStock ? (
+                                    <span className="text-red-500 font-bold">Out of Stock</span>
+                                  ) : cartItem ? (
+                                    <span className="text-emerald-600 font-bold">{cartItem.quantity} in cart</span>
+                                  ) : (
+                                    <span className="text-zinc-500 font-bold">Add to Cart</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </button>
@@ -860,25 +815,21 @@ export default function SalesPage() {
                   </div>
                 </div>
 
-                {/* Right: Cart & Checkout */}
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 flex flex-col h-full min-h-0 gpu">
-                  {/* Cart Header */}
-                  <div className="border-b border-zinc-200 p-4 shrink-0">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Cart</p>
-                        <p className="mt-0.5 text-xl font-black text-zinc-950">
-                          {totalCartItems}{" "}
-                          <span className="font-normal text-zinc-400">units</span>
-                          <span className="mx-2 text-zinc-300">•</span>
-                          {cart.length} <span className="font-normal text-zinc-400">items</span>
-                        </p>
+                {/* RIGHT: Cart */}
+                <div className="flex flex-col border border-zinc-200 rounded-2xl bg-zinc-50 overflow-hidden min-w-0 h-full">
+                  <div className="border-b border-zinc-200 p-5 shrink-0 bg-white">
+                    <div className="flex justify-between items-center gap-3">
+                      <div className="min-w-0">
+                        <div className="text-base font-bold uppercase text-zinc-400">Shopping Cart</div>
+                        <div className="text-2xl font-black truncate">
+                          {totalCartItems} units • {cart.length} items
+                        </div>
                       </div>
                       {cart.length > 0 && (
                         <button
                           type="button"
                           onClick={clearCart}
-                          className="text-sm font-bold text-red-600 hover:text-red-800 tap-target touch-feedback gpu"
+                          className="min-h-12 px-5 text-base font-bold text-red-600 hover:text-red-800 active:scale-95 transition shrink-0 tap-target"
                         >
                           Clear All
                         </button>
@@ -886,253 +837,199 @@ export default function SalesPage() {
                     </div>
                   </div>
 
-                  {/* Cart Items - Scrollable */}
-                  <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0 gpu-scroll">
-                    {cart.length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-zinc-300 bg-white p-6 text-center animate-fade-in gpu">
-                        <p className="text-base font-semibold text-zinc-500">Cart is empty</p>
-                        <p className="mt-1 text-sm text-zinc-400">Select a product to add it.</p>
-                      </div>
-                    ) : (
-                      cart.map((item) => {
-                        const stock = getStock(item.product.id);
-                        const offset = swipeOffset[item.product.id] || 0;
+                  <div className="flex-1 p-5 space-y-4 overflow-y-auto overflow-x-hidden gpu-scroll">
+                    {/* Cart Items */}
+                    <div className="space-y-3">
+                      {cart.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center p-12 text-center">
+                          <div className="text-6xl mb-4">🛒</div>
+                          <p className="text-xl text-zinc-500 font-bold">Your cart is empty</p>
+                          <p className="text-base text-zinc-400 mt-1">Add products to start a sale</p>
+                        </div>
+                      ) : (
+                        cart.map((item) => {
+                          const stock = getStock(item.product.id);
+                          const productDetails = [item.product.brand, item.product.version, item.product.flavor]
+                            .filter(Boolean)
+                            .join(" • ");
 
-                        return (
-                          <div
-                            key={item.product.id}
-                            className="relative overflow-hidden rounded-xl border border-zinc-200 bg-white transition-transform duration-200 gpu"
-                            style={{ transform: `translateX(${offset}px)` }}
-                            onTouchStart={(e) => handleTouchStart(e, item.product.id)}
-                            onTouchMove={(e) => handleTouchMove(e, item.product.id)}
-                            onTouchEnd={() => handleTouchEnd(item.product.id)}
-                          >
-                            <div className="absolute right-0 top-0 flex h-full w-20 items-center justify-center bg-red-500">
-                              <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </div>
-
-                            <div className="relative bg-white p-4">
-                              <div className="flex justify-between gap-3">
-                                <div className="min-w-0">
-                                  <p className="truncate text-base font-bold text-zinc-950">{item.product.name}</p>
-                                  <p className="mt-0.5 text-sm text-zinc-400">{item.product.sku}</p>
-                                  {(item.product.version || item.product.flavor) && (
-                                    <p className="mt-0.5 text-sm text-zinc-500">
-                                      {[item.product.version, item.product.flavor].filter(Boolean).join(" • ")}
-                                    </p>
+                          return (
+                            <div key={item.product.id} className="bg-white rounded-xl border border-zinc-200 p-6 shadow-sm hover:shadow-md transition">
+                              <div className="flex justify-between items-start gap-3">
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-bold text-lg truncate">{item.product.name}</div>
+                                  {productDetails && (
+                                    <div className="text-sm text-zinc-500 truncate mt-0.5">{productDetails}</div>
                                   )}
-                                  <p className="mt-0.5 text-sm font-bold text-zinc-400">
-                                    Available:{" "}
-                                    <span
-                                      className={
-                                        stock <= Number(item.product.minimum_stock || 0) ? "text-amber-600" : "text-zinc-600"
-                                      }
-                                    >
-                                      {stock}
-                                    </span>
-                                  </p>
-                                  {/* Stock Progress Bar */}
-                                  <div className="mt-2">
-                                    <div className="flex justify-between text-xs text-zinc-400">
-                                      <span>Stock: {stock}</span>
-                                      <span>{Math.round((item.quantity / stock) * 100)}% used</span>
-                                    </div>
-                                    <div className="mt-1 h-1 w-full rounded-full bg-zinc-100 overflow-hidden">
-                                      <div
-                                        className="h-full rounded-full bg-black transition-all duration-300 gpu"
-                                        style={{ width: `${Math.min((item.quantity / stock) * 100, 100)}%` }}
-                                      />
-                                    </div>
-                                  </div>
+                                  <div className="text-sm text-zinc-400 truncate font-medium">{item.product.sku}</div>
                                 </div>
                                 <button
                                   type="button"
                                   onClick={() => removeFromCart(item.product.id)}
-                                  className="text-sm font-bold text-red-600 hover:text-red-800 tap-target touch-feedback gpu"
+                                  className="min-h-12 min-w-12 text-2xl font-bold text-red-500 hover:text-red-700 flex items-center justify-center rounded-lg active:scale-90 transition shrink-0 tap-target"
+                                  aria-label={`Remove ${item.product.name} from cart`}
                                 >
-                                  Remove
+                                  ×
                                 </button>
                               </div>
-
-                              <div className="mt-3 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <div className="flex items-center rounded-lg border border-zinc-200">
-                                    <button
-                                      type="button"
-                                      onClick={() => changeQuantity(item.product.id, item.quantity - 1)}
-                                      className="px-3 py-1.5 text-base font-bold text-zinc-600 hover:bg-zinc-100 tap-target touch-feedback gpu"
-                                    >
-                                      −
-                                    </button>
-                                    <span className="min-w-10 text-center text-base font-black number-transition">{item.quantity}</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => changeQuantity(item.product.id, item.quantity + 1)}
-                                      disabled={item.quantity >= stock}
-                                      className="px-3 py-1.5 text-base font-bold text-zinc-600 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-30 tap-target touch-feedback gpu"
-                                    >
-                                      +
-                                    </button>
-                                  </div>
-
-                                  <div className="hidden gap-1 sm:flex">
-                                    {QUICK_QUANTITIES.map((qty) => (
-                                      <button
-                                        key={qty}
-                                        type="button"
-                                        onClick={() => changeQuantity(item.product.id, qty)}
-                                        disabled={qty > stock}
-                                        className="rounded border border-zinc-200 px-2.5 py-1 text-sm font-bold text-zinc-600 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-30 tap-target touch-feedback gpu"
-                                      >
-                                        {qty}
-                                      </button>
-                                    ))}
-                                  </div>
+                              <div className="flex justify-between items-center mt-4 gap-3">
+                                <div className="flex items-center gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => changeQuantity(item.product.id, item.quantity - 1)}
+                                    className="min-h-12 min-w-12 rounded-xl border border-zinc-200 flex items-center justify-center text-2xl font-bold hover:bg-zinc-50 active:scale-90 transition tap-target"
+                                    aria-label="Decrease quantity"
+                                  >
+                                    −
+                                  </button>
+                                  <span className="w-12 text-center font-bold text-xl">{item.quantity}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => changeQuantity(item.product.id, item.quantity + 1)}
+                                    disabled={item.quantity >= stock}
+                                    className="min-h-12 min-w-12 rounded-xl border border-zinc-200 flex items-center justify-center text-2xl font-bold hover:bg-zinc-50 active:scale-90 disabled:opacity-30 transition tap-target"
+                                    aria-label="Increase quantity"
+                                  >
+                                    +
+                                  </button>
                                 </div>
-                                <p className="text-base font-black text-zinc-950 number-transition">
-                                  {formatCurrency(Number(item.product.selling_price) * item.quantity)}
-                                </p>
+                                <div className="font-bold text-xl shrink-0">
+                                  {formatCurrency(item.product.selling_price * item.quantity)}
+                                </div>
                               </div>
+                              {stock > 0 && stock <= item.product.minimum_stock && (
+                                <div className="mt-2 text-sm text-amber-600 font-bold">
+                                  ⚠️ Low stock: {stock} remaining
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
+                          );
+                        })
+                      )}
+                    </div>
 
-                  {/* Cart Footer */}
-                  <div className="border-t border-zinc-200 p-4 shrink-0">
-                    <label className="block">
-                      <span className="mb-1.5 block text-sm font-bold uppercase tracking-wider text-zinc-400">
-                        Sale Date
-                      </span>
-                      <input
-                        required
-                        type="datetime-local"
-                        value={saleDate}
-                        onChange={(event) => setSaleDate(event.target.value)}
-                        disabled={submitting}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 disabled:opacity-50 tap-target gpu"
-                      />
-                    </label>
+                    {/* Sale Details */}
+                    <div className="space-y-4 pt-2">
+                      <div>
+                        <label className="text-sm font-bold uppercase text-zinc-400 block mb-2">Sale Date</label>
+                        <input
+                          type="datetime-local"
+                          value={saleDate}
+                          onChange={(e) => setSaleDate(e.target.value)}
+                          className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+                          style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+                        />
+                      </div>
 
-                    {/* Payment Method - Enhanced with Quick Select */}
-                    <div className="mt-3">
-                      <span className="mb-1.5 block text-sm font-bold uppercase tracking-wider text-zinc-400">
-                        Payment Method
-                      </span>
-
-                      {/* Quick Payment Buttons */}
-                      <div className="grid grid-cols-3 gap-2 mb-2">
-                        {['CASH', 'GCASH', 'MAYA'].map((method) => (
-                          <button
-                            key={method}
-                            type="button"
-                            onClick={() => setPaymentMethod(method as PaymentMethod)}
-                            className={[
-                              "rounded-xl border-2 p-3 text-center font-bold transition tap-target touch-feedback gpu",
-                              paymentMethod === method
+                      <div>
+                        <label className="text-sm font-bold uppercase text-zinc-400 block mb-2">Payment Method</label>
+                        <div className="grid grid-cols-3 gap-2 mb-2">
+                          {['CASH', 'GCASH', 'MAYA'].map((method) => (
+                            <button
+                              key={method}
+                              type="button"
+                              onClick={() => setPaymentMethod(method as PaymentMethod)}
+                              aria-pressed={paymentMethod === method}
+                              className={`min-h-14 rounded-xl border-2 p-3 text-center font-bold transition text-base ${paymentMethod === method
                                 ? "border-black bg-black text-white"
-                                : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400",
-                            ].join(" ")}
-                          >
-                            <span className="block text-lg">{method === 'CASH' ? '💵' : method === 'GCASH' ? '📱' : '🏦'}</span>
-                            <span className="text-sm">{method}</span>
-                          </button>
-                        ))}
+                                : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
+                                } active:scale-95 tap-target`}
+                            >
+                              <span className="block text-2xl" aria-hidden="true">
+                                {method === 'CASH' ? '💵' : method === 'GCASH' ? '📱' : '🏦'}
+                              </span>
+                              <span className="text-sm">{method}</span>
+                            </button>
+                          ))}
+                        </div>
+                        <select
+                          value={paymentMethod}
+                          onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                          className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu font-bold"
+                          style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+                        >
+                          {PAYMENT_METHODS.map((m) => (
+                            <option key={m} value={m} className="font-bold">{m}</option>
+                          ))}
+                        </select>
                       </div>
 
-                      {/* Full dropdown */}
-                      <select
-                        value={paymentMethod}
-                        onChange={(event) => setPaymentMethod(event.target.value as PaymentMethod)}
-                        disabled={submitting}
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base font-semibold outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 disabled:opacity-50 tap-target gpu"
-                      >
-                        {PAYMENT_METHODS.map((method) => (
-                          <option key={method} value={method}>
-                            {method}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Discount - Enhanced with Quick Presets */}
-                    <div className="mt-3">
-                      <span className="mb-1.5 block text-sm font-bold uppercase tracking-wider text-zinc-400">
-                        Discount
-                      </span>
-
-                      {/* Quick discount presets */}
-                      <div className="flex gap-2 mb-2 flex-wrap">
-                        {[0, 50, 100, 200].map((amount) => (
-                          <button
-                            key={amount}
-                            type="button"
-                            onClick={() => setDiscount(String(amount))}
-                            className={`rounded-lg border px-3 py-1.5 text-sm font-bold transition tap-target touch-feedback gpu ${Number(discount) === amount
-                              ? "border-black bg-black text-white"
-                              : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
-                              }`}
-                          >
-                            ₱{amount}
-                          </button>
-                        ))}
+                      <div>
+                        <label className="text-sm font-bold uppercase text-zinc-400 block mb-2">Discount</label>
+                        <div className="flex gap-2 mb-2 flex-wrap">
+                          {[0, 50, 100, 200].map((amt) => (
+                            <button
+                              key={amt}
+                              type="button"
+                              onClick={() => setDiscount(String(amt))}
+                              aria-pressed={Number(discount) === amt}
+                              className={`min-h-12 px-5 py-2.5 text-base rounded-xl border font-bold ${Number(discount) === amt ? 'bg-black text-white border-black' : 'border-zinc-200 bg-white'
+                                } active:scale-95 transition tap-target`}
+                            >
+                              ₱{amt}
+                            </button>
+                          ))}
+                        </div>
+                        <input
+                          type="number"
+                          min="0"
+                          value={discount}
+                          onChange={(e) => setDiscount(e.target.value)}
+                          className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+                          placeholder="Enter discount amount"
+                          style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+                        />
                       </div>
 
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={discount}
-                        onChange={(event) => setDiscount(event.target.value)}
-                        disabled={submitting}
-                        placeholder="0.00"
-                        className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 font-mono text-base outline-none focus:border-black focus:ring-2 focus:ring-zinc-200 disabled:opacity-50 tap-target gpu"
-                      />
-                    </div>
+                      {/* Totals */}
+                      <div className="pt-4 border-t border-zinc-200 space-y-2.5 bg-white rounded-xl p-5">
+                        <div className="flex justify-between text-lg">
+                          <span className="text-zinc-500 font-medium">Subtotal</span>
+                          <span className="font-bold">{formatCurrency(cartSubtotal)}</span>
+                        </div>
+                        <div className="flex justify-between text-lg">
+                          <span className="text-zinc-500 font-medium">Discount</span>
+                          <span className="font-bold text-red-600">-{formatCurrency(discountAmount)}</span>
+                        </div>
+                        <div className="flex justify-between text-3xl font-black pt-3 border-t border-zinc-200">
+                          <span>Total</span>
+                          <span className="text-emerald-700">{formatCurrency(cartTotal)}</span>
+                        </div>
+                      </div>
 
-                    <div className="mt-4 space-y-2 border-t border-zinc-200 pt-4">
-                      <div className="flex justify-between text-base">
-                        <span className="text-zinc-500">Subtotal</span>
-                        <span className="font-bold text-zinc-900 number-transition">{formatCurrency(cartSubtotal)}</span>
+                      {/* Action Buttons */}
+                      <div className="grid gap-3 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (cart.length > 0 && !submitting && !isSubmittingRef.current) {
+                              setShowConfirmSaleModal(true);
+                            }
+                          }}
+                          disabled={cart.length === 0 || submitting || isSubmittingRef.current}
+                          className="min-h-16 w-full rounded-xl bg-black text-white font-bold text-xl disabled:opacity-50 hover:bg-zinc-800 active:scale-[0.98] transition shadow-lg tap-target"
+                        >
+                          {submitting || isSubmittingRef.current ? (
+                            <span className="flex items-center justify-center gap-3">
+                              <svg className="h-6 w-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                              Processing...
+                            </span>
+                          ) : (
+                            `✅ Complete Sale — ${formatCurrency(cartTotal)}`
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={closeForm}
+                          disabled={submitting}
+                          className="min-h-14 w-full rounded-xl border border-zinc-300 bg-white text-zinc-700 font-bold text-lg hover:bg-zinc-50 active:scale-[0.98] transition tap-target"
+                        >
+                          Cancel
+                        </button>
                       </div>
-                      <div className="flex justify-between text-base">
-                        <span className="text-zinc-500">Discount</span>
-                        <span className="font-bold text-zinc-900 number-transition">− {formatCurrency(discountAmount)}</span>
-                      </div>
-                      <div className="flex items-end justify-between border-t border-zinc-200 pt-3">
-                        <span className="text-base font-bold uppercase tracking-wider text-zinc-500">Total</span>
-                        <span className="text-2xl font-black text-zinc-950 number-transition">{formatCurrency(cartTotal)}</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 grid gap-2">
-                      <button
-                        type="button"
-                        onClick={handleCompleteSale}
-                        disabled={submitting || cart.length === 0}
-                        className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target btn-ripple gpu"
-                        onMouseDown={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect();
-                          const x = e.clientX - rect.left;
-                          const y = e.clientY - rect.top;
-                          e.currentTarget.style.setProperty('--x', x + 'px');
-                          e.currentTarget.style.setProperty('--y', y + 'px');
-                        }}
-                      >
-                        {submitting ? "Creating Sale..." : "Complete Sale"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={closeForm}
-                        disabled={submitting}
-                        className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
-                      >
-                        Cancel
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -1142,23 +1039,23 @@ export default function SalesPage() {
         </div>
       )}
 
-      {/* Recent Sales - Enhanced with Status Indicators */}
+      {/* Recent Sales */}
       {!showForm && (
-        <section className="flex-1 min-h-0 flex flex-col">
-          <div className="shrink-0 flex items-center justify-between mb-3">
+        <section className="flex-1 min-h-0 flex flex-col overflow-x-hidden">
+          <div className="shrink-0 flex items-center justify-between mb-4">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Transactions</p>
-              <h2 className="mt-0.5 text-xl font-black text-zinc-950">Recent Sales</h2>
+              <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Transactions</p>
+              <h2 className="mt-0.5 text-2xl font-black text-zinc-950">Recent Sales</h2>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3 shrink-0">
               <button
                 type="button"
                 onClick={loadSales}
                 disabled={loadingSales}
-                className="rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                className="min-h-12 rounded-xl border border-zinc-300 bg-white px-5 py-3 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 active:scale-95 tap-target"
               >
                 {loadingSales ? (
-                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
@@ -1168,43 +1065,32 @@ export default function SalesPage() {
               </button>
               <Link
                 to="/sales/history"
-                className="rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                className="min-h-12 rounded-xl border border-zinc-300 bg-white px-5 py-3 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 active:scale-95 tap-target"
               >
                 View All
               </Link>
             </div>
           </div>
-
-          <div className="flex-1 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm gpu-scroll">
+          <div className="flex-1 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm gpu-scroll overflow-x-hidden">
             {loadingSales ? (
-              <div className="flex items-center justify-center p-8 gpu">
+              <div className="flex items-center justify-center p-12">
                 <div className="relative">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 gpu">
-                    <div className="absolute inset-0 rounded-full border-4 border-black border-t-transparent animate-spin gpu"></div>
+                  <div className="h-10 w-10 animate-spin rounded-full border-4 border-zinc-200">
+                    <div className="absolute inset-0 rounded-full border-4 border-black border-t-transparent animate-spin"></div>
                   </div>
-                  <p className="mt-3 text-base text-zinc-500">Loading sales...</p>
+                  <p className="mt-4 text-lg text-zinc-500 font-bold">Loading sales...</p>
                 </div>
               </div>
             ) : recentSales.length === 0 ? (
-              <div className="flex-1 rounded-2xl border border-zinc-200 bg-gradient-to-br from-zinc-50 to-white shadow-sm flex flex-col items-center justify-center p-10 animate-fade-in-up">
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center justify-center opacity-5">
-                    <svg viewBox="0 0 24 24" fill="none" className="h-48 w-48 text-zinc-900">
-                      <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                      <path d="M9 8h6M9 12h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                    </svg>
-                  </div>
-                  <div className="relative">
-                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 shadow-lg animate-bounce-slow">
-                      <svg viewBox="0 0 24 24" fill="none" className="h-10 w-10 text-white">
-                        <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                        <path d="M9 8h6M9 12h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                      </svg>
-                    </div>
-                    <h3 className="mt-5 text-2xl font-black text-zinc-950">No sales yet</h3>
-                    <p className="mt-1 text-base text-zinc-500">Create your first sale above to see it here.</p>
-                  </div>
+              <div className="flex flex-col items-center justify-center p-16 text-center">
+                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-linear-to-br from-zinc-900 to-zinc-700 shadow-lg">
+                  <svg viewBox="0 0 24 24" fill="none" className="h-12 w-12 text-white">
+                    <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                    <path d="M9 8h6M9 12h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                  </svg>
                 </div>
+                <h3 className="mt-6 text-3xl font-black text-zinc-950">No sales yet</h3>
+                <p className="mt-2 text-lg text-zinc-500 font-bold">Create your first sale above.</p>
               </div>
             ) : (
               <div className="divide-y divide-zinc-100">
@@ -1212,24 +1098,24 @@ export default function SalesPage() {
                   <Link
                     key={sale.id}
                     to={`/sales/${sale.id}`}
-                    className="flex items-center justify-between p-5 transition hover:bg-zinc-50 card-hover gpu"
+                    className="flex items-center justify-between p-7 transition hover:bg-zinc-50 active:bg-zinc-100 gap-3 tap-target"
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
-                        <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50">
+                        <svg className="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-3">
-                          <p className="font-mono text-lg font-black text-zinc-950">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <p className="font-mono text-xl font-black text-zinc-950 truncate">
                             {getSaleReference(sale)}
                           </p>
-                          <span className="rounded-full bg-zinc-100 px-3 py-1 text-sm font-black text-zinc-700">
+                          <span className="rounded-full bg-zinc-100 px-3 py-1.5 text-base font-black text-zinc-700 shrink-0">
                             {sale.payment_method}
                           </span>
                         </div>
-                        <div className="mt-1 flex flex-wrap items-center gap-3 text-base text-zinc-400">
+                        <div className="mt-1 flex flex-wrap items-center gap-3 text-lg text-zinc-400">
                           <span>{formatDate(sale.sale_date)}</span>
                           <span>•</span>
                           <span className="font-medium">
@@ -1239,10 +1125,10 @@ export default function SalesPage() {
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-xl font-black text-zinc-950 number-transition">
+                      <p className="text-2xl font-black text-zinc-950 number-transition">
                         {formatCurrency(Number(sale.total))}
                       </p>
-                      <span className="inline-block rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700">
+                      <span className="inline-block rounded-full bg-emerald-50 px-3 py-1 text-sm font-bold text-emerald-700">
                         Completed
                       </span>
                     </div>
@@ -1256,37 +1142,24 @@ export default function SalesPage() {
 
       {/* Clear Cart Confirmation Modal */}
       {showClearCartModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in backdrop-gpu gpu">
-          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden animate-scale-in gpu">
-            <div className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-zinc-950">Clear Cart?</h3>
-                  <p className="mt-1 text-base text-zinc-500">
-                    This will remove all {totalCartItems} items from your cart. This action cannot be undone.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col-reverse gap-2 border-t border-zinc-200 bg-zinc-50 p-4 sm:flex-row sm:justify-end">
+        <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/50 p-4 overflow-x-hidden">
+          <div className="bg-white rounded-2xl p-8 max-w-lg w-full animate-scale-in">
+            <h3 className="text-2xl font-black">Clear Cart?</h3>
+            <p className="text-lg text-zinc-500 mt-2 font-bold">Remove all {totalCartItems} items?</p>
+            <div className="flex gap-3 mt-6 justify-end">
               <button
                 type="button"
                 onClick={() => setShowClearCartModal(false)}
-                className="inline-flex h-[48px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                className="min-h-12 px-6 py-3 border rounded-xl text-base font-bold hover:bg-zinc-50 active:scale-95 transition tap-target"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={confirmClearCart}
-                className="inline-flex h-[48px] items-center justify-center rounded-xl bg-red-600 px-6 text-base font-bold text-white transition hover:bg-red-700 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                className="min-h-12 px-6 py-3 bg-red-600 text-white rounded-xl text-base font-bold hover:bg-red-700 active:scale-95 transition tap-target"
               >
-                Clear Cart
+                Clear
               </button>
             </div>
           </div>
@@ -1295,91 +1168,51 @@ export default function SalesPage() {
 
       {/* Confirm Sale Modal */}
       {showConfirmSaleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in backdrop-gpu gpu">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl flex flex-col animate-slide-up gpu">
-            <div className="border-b border-zinc-200 p-5 shrink-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-black text-zinc-950">Review Order</h3>
-                  <p className="mt-0.5 text-base text-zinc-500">
-                    Please review the items before completing the sale.
-                  </p>
+        <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/50 p-4 overflow-x-hidden">
+          <div className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+            <h3 className="text-2xl font-black">Review Order</h3>
+            <p className="text-base text-zinc-500 mt-1 font-bold">Please review the items before confirming.</p>
+            <div className="mt-4 space-y-3">
+              {cart.map((item) => (
+                <div key={item.product.id} className="flex justify-between border-b border-zinc-100 py-3 gap-3">
+                  <span className="text-lg font-medium truncate">{item.product.name} × {item.quantity}</span>
+                  <span className="font-bold text-lg shrink-0">{formatCurrency(item.product.selling_price * item.quantity)}</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmSaleModal(false)}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-xl text-zinc-500 hover:bg-zinc-100 touch-feedback gpu"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-5 gpu-scroll">
-              <div className="space-y-3">
-                {cart.map((item) => (
-                  <div key={item.product.id} className="flex items-center justify-between rounded-xl border border-zinc-200 p-4 card-hover gpu">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-base font-black text-zinc-950">{item.product.name}</p>
-                      <p className="mt-0.5 text-sm text-zinc-500">
-                        {item.product.sku}
-                        {item.product.version && ` • ${item.product.version}`}
-                        {item.product.flavor && ` • ${item.product.flavor}`}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-zinc-400">{item.quantity} × {formatCurrency(item.product.selling_price)}</p>
-                      <p className="text-base font-black text-zinc-950 number-transition">{formatCurrency(item.product.selling_price * item.quantity)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 rounded-xl bg-zinc-50 p-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-base">
-                    <span className="text-zinc-500">Subtotal</span>
-                    <span className="font-bold text-zinc-900 number-transition">{formatCurrency(cartSubtotal)}</span>
-                  </div>
-                  <div className="flex justify-between text-base">
-                    <span className="text-zinc-500">Discount</span>
-                    <span className="font-bold text-zinc-900 number-transition">− {formatCurrency(discountAmount)}</span>
-                  </div>
-                  <div className="border-t border-zinc-200 pt-2">
-                    <div className="flex justify-between text-lg">
-                      <span className="font-bold text-zinc-900">Total</span>
-                      <span className="text-2xl font-black text-zinc-950 number-transition">{formatCurrency(cartTotal)}</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between text-base text-zinc-500">
-                    <span>Payment Method</span>
-                    <span className="font-semibold text-zinc-700">{paymentMethod}</span>
-                  </div>
+              ))}
+              <div className="pt-4 border-t border-zinc-200 space-y-2">
+                <div className="flex justify-between text-lg">
+                  <span className="text-zinc-500 font-medium">Subtotal</span>
+                  <span className="font-bold">{formatCurrency(cartSubtotal)}</span>
+                </div>
+                <div className="flex justify-between text-lg">
+                  <span className="text-zinc-500 font-medium">Discount</span>
+                  <span className="font-bold text-red-600">-{formatCurrency(discountAmount)}</span>
+                </div>
+                <div className="flex justify-between text-2xl font-black pt-2 border-t border-zinc-200">
+                  <span>Total</span>
+                  <span>{formatCurrency(cartTotal)}</span>
+                </div>
+                <div className="flex justify-between text-base text-zinc-500">
+                  <span className="font-medium">Payment</span>
+                  <span className="font-bold text-zinc-700">{paymentMethod}</span>
                 </div>
               </div>
             </div>
-
-            <div className="flex flex-col-reverse gap-2 border-t border-zinc-200 bg-zinc-50 p-4 sm:flex-row sm:justify-end">
+            <div className="flex gap-3 mt-6 justify-end">
               <button
                 type="button"
                 onClick={() => setShowConfirmSaleModal(false)}
-                className="inline-flex h-[48px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                className="min-h-12 px-6 py-3 border rounded-xl text-base font-bold hover:bg-zinc-50 active:scale-95 transition tap-target bg-transparent"
               >
                 Back
               </button>
               <button
                 type="button"
                 onClick={confirmCompleteSale}
-                className="inline-flex h-[48px] items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target btn-ripple gpu"
-                onMouseDown={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const y = e.clientY - rect.top;
-                  e.currentTarget.style.setProperty('--x', x + 'px');
-                  e.currentTarget.style.setProperty('--y', y + 'px');
-                }}
+                disabled={submitting || isSubmittingRef.current}
+                className="min-h-12 px-6 py-3 bg-black text-white rounded-xl text-base font-bold hover:bg-zinc-800 active:scale-95 transition tap-target disabled:opacity-50"
               >
-                Confirm Sale
+                {submitting || isSubmittingRef.current ? "Processing..." : "Confirm Sale"}
               </button>
             </div>
           </div>
@@ -1388,102 +1221,67 @@ export default function SalesPage() {
 
       {/* Receipt Modal */}
       {receiptSale && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in backdrop-gpu gpu">
-          <div className="max-h-[90vh] w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl animate-slide-up gpu">
-            <div className="flex items-center justify-between border-b border-zinc-200 p-5">
-              <div>
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Completed</p>
-                <h2 className="mt-0.5 text-xl font-black text-zinc-950">Sale Receipt</h2>
-              </div>
+        <div className="fixed inset-0 z-200 flex items-center justify-center bg-black/50 p-4 overflow-x-hidden">
+          <div className="bg-white rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto animate-scale-in">
+            <div className="flex items-start justify-between">
+              <h3 className="text-2xl font-black">Receipt</h3>
               <button
                 type="button"
                 onClick={() => setReceiptSale(null)}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-xl text-zinc-500 hover:bg-zinc-100 touch-feedback gpu"
+                className="text-2xl text-zinc-400 hover:text-zinc-600 tap-target font-bold"
+                aria-label="Close receipt"
               >
                 ×
               </button>
             </div>
-
-            <div className="max-h-[65vh] overflow-y-auto p-5 gpu-scroll">
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 font-mono text-sm text-zinc-900">
-                {RECEIPT_COMPANY_NAME && <div className="text-center font-bold">{RECEIPT_COMPANY_NAME}</div>}
-                {RECEIPT_COMPANY_ADDRESS && <div className="mt-1 text-center text-zinc-500">{RECEIPT_COMPANY_ADDRESS}</div>}
-                <div className="py-3 text-center text-lg font-black">RECEIPT</div>
-                <div className="border-t border-dashed border-zinc-400 pt-3">
-                  <div className="flex justify-between gap-3">
-                    <span>Sale Reference:</span>
-                    <span className="text-right font-bold">{getSaleReference(receiptSale)}</span>
+            <div className="mt-4 border-t border-zinc-200 pt-4">
+              <div className="font-mono text-base space-y-2">
+                <div className="break-all"><span className="font-bold">Reference:</span> {getSaleReference(receiptSale)}</div>
+                <div><span className="font-bold">Date:</span> {formatReceiptDate(receiptSale.sale_date)}</div>
+                <div><span className="font-bold">Payment:</span> {receiptSale.payment_method}</div>
+                <div className="border-t border-zinc-200 my-3"></div>
+                {receiptSale.items?.map((item) => (
+                  <div key={item.id} className="flex justify-between py-1 gap-3">
+                    <span className="truncate font-medium">{item.product_name} × {item.quantity}</span>
+                    <span className="shrink-0 font-bold">{receiptMoney(item.subtotal)}</span>
                   </div>
-                  <div className="mt-1 flex justify-between gap-3">
-                    <span>Transaction ID:</span>
-                    <span>#{receiptSale.id}</span>
-                  </div>
-                  <div className="mt-1 flex justify-between gap-3">
-                    <span>Date:</span>
-                    <span className="text-right">{formatReceiptDate(receiptSale.sale_date)}</span>
-                  </div>
-                  <div className="mt-1 flex justify-between gap-3">
-                    <span>Payment:</span>
-                    <span>{receiptSale.payment_method}</span>
-                  </div>
-                </div>
-                <div className="my-3 border-t border-dashed border-zinc-400" />
-                <p className="font-black">ITEMS</p>
-                <div className="mt-2 space-y-4">
-                  {(receiptSale.items ?? []).map((item) => {
-                    const details = getProductDetails(item);
-                    return (
-                      <div key={item.id}>
-                        <p className="font-bold">{item.product_name || "Product"}</p>
-                        {details && <p className="mt-0.5 text-sm font-semibold text-zinc-500">{details}</p>}
-                        <p className="mt-1 text-sm text-zinc-500">Item Code: {item.sku || "-"}</p>
-                        <div className="mt-1 flex justify-between gap-3">
-                          <span>
-                            {Number(item.quantity)} x {receiptMoney(Number(item.unit_price))}
-                          </span>
-                          <span className="font-bold">{receiptMoney(Number(item.subtotal))}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="my-3 border-t border-dashed border-zinc-400" />
-                <div className="flex justify-between">
-                  <span>Subtotal:</span>
-                  <span>{receiptMoney(Number(receiptSale.subtotal))}</span>
-                </div>
-                <div className="mt-1 flex justify-between">
-                  <span>Discount:</span>
-                  <span>-{receiptMoney(Number(receiptSale.discount))}</span>
-                </div>
-                <div className="mt-2 flex justify-between border-t border-dashed border-zinc-400 pt-2 text-base font-bold">
-                  <span>TOTAL:</span>
-                  <span>{receiptMoney(Number(receiptSale.total))}</span>
-                </div>
-                <div className="mt-4 text-center text-sm font-semibold text-zinc-600">
-                  {RECEIPT_MESSAGE}
+                ))}
+                <div className="border-t border-zinc-200 my-3"></div>
+                <div className="flex justify-between"><span className="font-medium">Subtotal</span><span className="font-bold">{receiptMoney(receiptSale.subtotal)}</span></div>
+                <div className="flex justify-between"><span className="font-medium">Discount</span><span className="font-bold text-red-600">-{receiptMoney(receiptSale.discount)}</span></div>
+                <div className="flex justify-between text-2xl font-black pt-2 border-t border-zinc-200">
+                  <span>Total</span>
+                  <span>{receiptMoney(receiptSale.total)}</span>
                 </div>
               </div>
             </div>
-
-            <div className="border-t border-zinc-200 p-4 shrink-0 flex flex-col gap-2 sm:flex-row">
+            <div className="flex gap-3 mt-6">
               <button
                 type="button"
                 onClick={() => printReceipt(receiptSale)}
-                className="inline-flex h-[48px] flex-1 items-center justify-center rounded-xl bg-black px-6 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                className="flex-1 min-h-13 py-3 bg-black text-white rounded-xl text-lg font-bold hover:bg-zinc-800 active:scale-95 transition tap-target"
               >
-                🖨️ Print Receipt
+                🖨️ Print
               </button>
               <button
                 type="button"
                 onClick={() => setReceiptSale(null)}
-                className="inline-flex h-[48px] flex-1 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                className="flex-1 min-h-13 py-3 border rounded-xl text-lg font-bold hover:bg-zinc-50 active:scale-95 transition tap-target"
               >
                 Done
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onDismiss={() => setToast(null)}
+        />
       )}
     </div>
   );

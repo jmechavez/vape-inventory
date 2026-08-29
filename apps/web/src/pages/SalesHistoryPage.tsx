@@ -137,22 +137,22 @@ function isDateInRange(
 function SalesHistorySkeleton() {
   return (
     <div className="flex-1 rounded-2xl border border-zinc-200 bg-white shadow-sm divide-y divide-zinc-100 gpu">
-      {[...Array(5)].map((_, i) => (
-        <div key={i} className="flex items-center justify-between p-5 animate-pulse">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="flex items-center justify-between p-7 animate-pulse">
           <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <div className="h-6 w-40 bg-zinc-200 rounded"></div>
-              <div className="h-6 w-20 bg-zinc-200 rounded-full"></div>
+            <div className="flex items-center gap-4">
+              <div className="h-7 w-48 bg-zinc-200 rounded"></div>
+              <div className="h-7 w-24 bg-zinc-200 rounded-full"></div>
             </div>
-            <div className="mt-2 flex items-center gap-3">
-              <div className="h-5 w-32 bg-zinc-200 rounded"></div>
-              <div className="h-5 w-4 bg-zinc-200 rounded-full"></div>
-              <div className="h-5 w-20 bg-zinc-200 rounded"></div>
+            <div className="mt-2.5 flex items-center gap-4">
+              <div className="h-6 w-40 bg-zinc-200 rounded"></div>
+              <div className="h-6 w-4 bg-zinc-200 rounded-full"></div>
+              <div className="h-6 w-24 bg-zinc-200 rounded"></div>
             </div>
           </div>
           <div className="text-right">
-            <div className="h-6 w-24 bg-zinc-200 rounded ml-auto"></div>
-            <div className="mt-1 h-4 w-20 bg-zinc-200 rounded ml-auto"></div>
+            <div className="h-7 w-28 bg-zinc-200 rounded ml-auto"></div>
+            <div className="mt-1.5 h-5 w-24 bg-zinc-200 rounded ml-auto"></div>
           </div>
         </div>
       ))}
@@ -163,9 +163,9 @@ function SalesHistorySkeleton() {
 // Summary Card Skeleton
 function SummaryCardSkeleton() {
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm animate-pulse gpu">
-      <div className="h-4 w-20 bg-zinc-200 rounded"></div>
-      <div className="mt-1 h-8 w-24 bg-zinc-200 rounded"></div>
+    <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm animate-pulse gpu">
+      <div className="h-5 w-24 bg-zinc-200 rounded"></div>
+      <div className="mt-1.5 h-10 w-28 bg-zinc-200 rounded"></div>
     </div>
   );
 }
@@ -215,7 +215,6 @@ export default function SalesHistoryPage() {
     loadSales();
   }, []);
 
-  // Client-side filtering
   const filteredSales = useMemo(() => {
     const query = search.trim().toLowerCase();
     return sales.filter((sale) => {
@@ -235,7 +234,6 @@ export default function SalesHistoryPage() {
     });
   }, [sales, search, paymentFilter, dateFilter, customDate]);
 
-  // Pagination
   const paginatedSales = useMemo(() => {
     const start = (page - 1) * limit;
     const end = start + limit;
@@ -265,12 +263,10 @@ export default function SalesHistoryPage() {
     setPage(1);
   }
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
   }, [search, paymentFilter, dateFilter, customDate]);
 
-  // Get unique payment methods from sales data
   const availablePaymentMethods = useMemo(() => {
     const methods = new Set<string>();
     sales.forEach((sale) => {
@@ -282,41 +278,41 @@ export default function SalesHistoryPage() {
   }, [sales]);
 
   return (
-    <div className="h-full flex flex-col gpu">
+    <div className="h-full flex flex-col min-h-0 gpu overflow-x-hidden">
       {/* Header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 shrink-0">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 shrink-0">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-950 sm:text-3xl">Sales History</h1>
-          <p className="mt-1 text-lg text-zinc-500">View previous sales and transaction details.</p>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
+          <h1 className="mt-1.5 text-4xl font-black tracking-tight text-zinc-950 sm:text-5xl">Sales History</h1>
+          <p className="mt-1.5 text-xl text-zinc-500">View previous sales and transaction details.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
+          <Link
+            to="/sales"
+            className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-lg font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+          >
+            + New Sale
+          </Link>
           <button
             type="button"
             onClick={handleRefresh}
             disabled={loading || isRefreshing}
-            className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
+            className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target touch-feedback gpu"
           >
             {isRefreshing ? (
-              <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
             ) : (
-              "Refresh"
+              "⟳ Refresh"
             )}
           </button>
-          <Link
-            to="/sales"
-            className="inline-flex h-[44px] items-center justify-center rounded-xl bg-black px-4 text-sm font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-          >
-            + New Sale
-          </Link>
         </div>
       </header>
 
-      {/* Summary Cards - Extra Large */}
-      <div className="grid grid-cols-3 gap-3 mb-4 shrink-0 animate-fade-in-up">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-3 gap-4 mb-6 shrink-0 animate-fade-in-up">
         {loading ? (
           <>
             <SummaryCardSkeleton />
@@ -325,27 +321,27 @@ export default function SalesHistoryPage() {
           </>
         ) : (
           <>
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
-              <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Transactions</p>
-              <p className="mt-1.5 text-2xl font-black text-zinc-950 number-transition">{totalFiltered}</p>
+            <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Transactions</p>
+              <p className="mt-2 text-4xl font-black text-zinc-950 number-transition">{totalFiltered}</p>
             </div>
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
-              <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Items Sold</p>
-              <p className="mt-1.5 text-2xl font-black text-zinc-950 number-transition">{totalItems}</p>
+            <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Items Sold</p>
+              <p className="mt-2 text-4xl font-black text-zinc-950 number-transition">{totalItems}</p>
             </div>
-            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
-              <p className="text-base font-bold uppercase tracking-[0.2em] text-zinc-400">Total Sales</p>
-              <p className="mt-1.5 text-2xl font-black text-zinc-950 number-transition">{formatCurrency(totalSales)}</p>
+            <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300">
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Total Sales</p>
+              <p className="mt-2 text-4xl font-black text-zinc-950 number-transition">{formatCurrency(totalSales)}</p>
             </div>
           </>
         )}
       </div>
 
-      {/* Filters - Extra Large */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm mb-4 shrink-0 card-hover gpu transition-all duration-200 hover:shadow-md hover:border-zinc-300">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+      {/* Filters */}
+      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm mb-6 shrink-0 card-hover gpu transition-all duration-200 hover:shadow-md hover:border-zinc-300">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end">
           <label className="flex-1">
-            <span className="mb-1.5 block text-base font-bold uppercase tracking-wider text-zinc-500">
+            <span className="mb-2 block text-lg font-bold uppercase tracking-wider text-zinc-500">
               Search
             </span>
             <input
@@ -353,18 +349,21 @@ export default function SalesHistoryPage() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search sale reference..."
-              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+              className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+              style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+              aria-label="Search sales by reference"
             />
           </label>
 
-          <label className="lg:w-52">
-            <span className="mb-1.5 block text-base font-bold uppercase tracking-wider text-zinc-500">
+          <label className="lg:w-56">
+            <span className="mb-2 block text-lg font-bold uppercase tracking-wider text-zinc-500">
               Payment Method
             </span>
             <select
               value={paymentFilter}
               onChange={(event) => setPaymentFilter(event.target.value)}
-              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base font-medium outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+              className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg font-medium outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+              aria-label="Filter by payment method"
             >
               <option value="ALL">All Methods</option>
               {availablePaymentMethods.length > 0 ? (
@@ -383,8 +382,8 @@ export default function SalesHistoryPage() {
             </select>
           </label>
 
-          <label className="lg:w-52">
-            <span className="mb-1.5 block text-base font-bold uppercase tracking-wider text-zinc-500">
+          <label className="lg:w-56">
+            <span className="mb-2 block text-lg font-bold uppercase tracking-wider text-zinc-500">
               Date
             </span>
             <select
@@ -396,7 +395,8 @@ export default function SalesHistoryPage() {
                   setCustomDate("");
                 }
               }}
-              className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base font-medium outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+              className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg font-medium outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+              aria-label="Filter by date range"
             >
               <option value="ALL">All Dates</option>
               <option value="TODAY">Today</option>
@@ -408,15 +408,17 @@ export default function SalesHistoryPage() {
           </label>
 
           {dateFilter === "CUSTOM" && (
-            <label className="lg:w-52">
-              <span className="mb-1.5 block text-base font-bold uppercase tracking-wider text-zinc-500">
+            <label className="lg:w-56">
+              <span className="mb-2 block text-lg font-bold uppercase tracking-wider text-zinc-500">
                 Custom Date
               </span>
               <input
                 type="date"
                 value={customDate}
                 onChange={(event) => setCustomDate(event.target.value)}
-                className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base font-medium outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+                className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg font-medium outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target gpu"
+                style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+                aria-label="Select custom date"
               />
             </label>
           )}
@@ -425,7 +427,7 @@ export default function SalesHistoryPage() {
             <button
               type="button"
               onClick={clearFilters}
-              className="rounded-xl border border-zinc-300 bg-white px-5 py-3 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+              className="rounded-xl border border-zinc-300 bg-white px-6 py-3.5 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
             >
               Clear
             </button>
@@ -433,9 +435,9 @@ export default function SalesHistoryPage() {
         </div>
       </div>
 
-      {/* Active Filter Info - Extra Large */}
+      {/* Active Filter Info */}
       {dateFilter !== "ALL" && (
-        <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-5 py-3 text-base text-zinc-600 mb-4 shrink-0 animate-fade-in gpu">
+        <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-6 py-4 text-xl text-zinc-600 mb-6 shrink-0 animate-fade-in gpu">
           Showing sales for{" "}
           <span className="font-bold text-zinc-950">
             {dateFilter === "TODAY" && "Today"}
@@ -448,21 +450,21 @@ export default function SalesHistoryPage() {
         </div>
       )}
 
-      {/* Error - Extra Large */}
+      {/* Error */}
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-base font-medium text-red-700 mb-3 shrink-0 animate-fade-in gpu">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-xl font-medium text-red-700 mb-4 shrink-0 animate-fade-in gpu">
           {error}
         </div>
       )}
 
-      {/* Loading / Results - Extra Large */}
+      {/* Loading / Results */}
       <div className="flex-1 min-h-0 flex flex-col">
         {loading ? (
           <SalesHistorySkeleton />
         ) : filteredSales.length === 0 ? (
-          <div className="flex-1 rounded-2xl border border-zinc-200 bg-white shadow-sm flex flex-col items-center justify-center p-10 animate-fade-in-up gpu">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 shadow-sm animate-bounce-slow">
-              <svg viewBox="0 0 24 24" fill="none" className="h-10 w-10 text-white">
+          <div className="flex-1 rounded-2xl border border-zinc-200 bg-white shadow-sm flex flex-col items-center justify-center p-12 animate-fade-in-up gpu">
+            <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-linear-to-br from-zinc-900 to-zinc-700 shadow-sm animate-bounce-slow">
+              <svg viewBox="0 0 24 24" fill="none" className="h-12 w-12 text-white">
                 <path
                   d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"
                   stroke="currentColor"
@@ -477,8 +479,8 @@ export default function SalesHistoryPage() {
                 />
               </svg>
             </div>
-            <h2 className="mt-5 text-2xl font-black text-zinc-950">No sales found</h2>
-            <p className="mt-1 text-base text-zinc-500">
+            <h2 className="mt-6 text-3xl font-black text-zinc-950">No sales found</h2>
+            <p className="mt-1.5 text-xl text-zinc-500">
               {hasFilters
                 ? "No sales match your filters."
                 : "No sales have been recorded yet."}
@@ -487,7 +489,7 @@ export default function SalesHistoryPage() {
               <button
                 type="button"
                 onClick={clearFilters}
-                className="mt-4 rounded-xl bg-black px-6 py-3 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                className="mt-5 rounded-xl bg-black px-8 py-3.5 text-lg font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
                 Clear Filters
               </button>
@@ -501,18 +503,18 @@ export default function SalesHistoryPage() {
                   <Link
                     key={sale.id}
                     to={`/sales/${sale.id}`}
-                    className="flex items-center justify-between p-5 transition hover:bg-zinc-50 card-hover gpu"
+                    className="flex items-center justify-between p-7 transition hover:bg-zinc-50 card-hover gpu min-h-[88px]"
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-3">
-                        <p className="font-mono text-base font-black text-zinc-950">
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <p className="font-mono text-xl font-black text-zinc-950">
                           {sale.reference ?? `SALE-${String(sale.id).padStart(6, "0")}`}
                         </p>
-                        <span className="rounded-full bg-zinc-100 px-3 py-1 text-sm font-black text-zinc-700">
+                        <span className="rounded-full bg-zinc-100 px-4 py-1.5 text-lg font-black text-zinc-700">
                           {sale.payment_method}
                         </span>
                       </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-3 text-base text-zinc-400">
+                      <div className="mt-1.5 flex flex-wrap items-center gap-4 text-lg text-zinc-400">
                         <span>{formatDate(sale.sale_date)}</span>
                         <span>•</span>
                         <span>{getItemCount(sale)} {getItemCount(sale) === 1 ? "item" : "items"}</span>
@@ -525,10 +527,10 @@ export default function SalesHistoryPage() {
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-base font-black text-zinc-950 number-transition">
+                      <p className="text-xl font-black text-zinc-950 number-transition">
                         {formatCurrency(Number(sale.total))}
                       </p>
-                      <p className="mt-0.5 text-base text-zinc-400">
+                      <p className="mt-0.5 text-lg text-zinc-400">
                         {sale.items.length} product{sale.items.length === 1 ? "" : "s"}
                       </p>
                     </div>
@@ -537,20 +539,20 @@ export default function SalesHistoryPage() {
               </div>
             </div>
 
-            {/* Pagination - Extra Large */}
+            {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex flex-col gap-2 border-t border-zinc-200 bg-white px-5 py-4 mt-3 rounded-2xl shadow-sm sm:flex-row sm:items-center sm:justify-between shrink-0 gpu">
-                <p className="text-base text-zinc-500">
+              <div className="flex flex-col gap-3 border-t border-zinc-200 bg-white px-6 py-5 mt-4 rounded-2xl shadow-sm sm:flex-row sm:items-center sm:justify-between shrink-0 gpu">
+                <p className="text-lg text-zinc-500">
                   {filteredSales.length === 0
                     ? "No results"
                     : `Page ${page} of ${totalPages} · ${filteredSales.length} total sales`}
                 </p>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     type="button"
                     disabled={page <= 1}
                     onClick={() => setPage((current) => Math.max(1, current - 1))}
-                    className="rounded-xl border border-zinc-200 bg-white px-5 py-2.5 text-base font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:scale-[1.02] active:scale-95 disabled:opacity-30 tap-target touch-feedback gpu"
+                    className="rounded-xl border border-zinc-200 bg-white px-6 py-3 text-lg font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:scale-[1.02] active:scale-95 disabled:opacity-30 tap-target touch-feedback gpu"
                   >
                     Previous
                   </button>
@@ -558,7 +560,7 @@ export default function SalesHistoryPage() {
                     type="button"
                     disabled={page >= totalPages}
                     onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-                    className="rounded-xl border border-zinc-200 bg-white px-5 py-2.5 text-base font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:scale-[1.02] active:scale-95 disabled:opacity-30 tap-target touch-feedback gpu"
+                    className="rounded-xl border border-zinc-200 bg-white px-6 py-3 text-lg font-semibold text-zinc-700 transition hover:bg-zinc-50 hover:scale-[1.02] active:scale-95 disabled:opacity-30 tap-target touch-feedback gpu"
                   >
                     Next
                   </button>

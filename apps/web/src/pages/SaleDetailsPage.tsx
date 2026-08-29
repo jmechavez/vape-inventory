@@ -204,7 +204,7 @@ function SaleDetailsSkeleton() {
 
       {/* Main Card Skeleton */}
       <div className="flex-1 rounded-2xl border border-zinc-200 bg-white shadow-sm">
-        <div className="p-5 border-b border-zinc-200 animate-pulse">
+        <div className="p-7 border-b border-zinc-200 animate-pulse">
           <div className="flex justify-between">
             <div>
               <div className="h-4 w-28 bg-zinc-200 rounded"></div>
@@ -229,7 +229,7 @@ function SaleDetailsSkeleton() {
         </div>
 
         {/* Items List Skeleton */}
-        <div className="p-5">
+        <div className="p-7">
           <div className="h-4 w-24 bg-zinc-200 rounded animate-pulse"></div>
           <div className="mt-3 space-y-3">
             {[...Array(3)].map((_, i) => (
@@ -293,7 +293,7 @@ export default function SaleDetailsPage() {
 
   if (loading) {
     return (
-      <div className="h-full flex flex-col">
+      <div className="h-full flex flex-col min-h-0">
         <SaleDetailsSkeleton />
       </div>
     );
@@ -301,18 +301,18 @@ export default function SaleDetailsPage() {
 
   if (error || !sale) {
     return (
-      <div className="h-full flex flex-col gpu">
+      <div className="h-full flex flex-col min-h-0 gpu">
         <header className="mb-4 shrink-0">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
-          <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-950 sm:text-3xl">Sale Details</h1>
-          <p className="mt-1 text-lg text-zinc-500">View transaction information and receipt.</p>
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
+          <h1 className="mt-1 text-4xl font-black tracking-tight text-zinc-950">Sale Details</h1>
+          <p className="mt-1 text-xl text-zinc-500">View transaction information and receipt.</p>
         </header>
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 mb-4 shrink-0 animate-fade-in gpu">
-          <p className="text-base font-medium text-red-700">{error || "Sale not found."}</p>
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-5 mb-4 shrink-0 animate-fade-in gpu">
+          <p className="text-xl font-medium text-red-700">{error || "Sale not found."}</p>
         </div>
         <Link
           to="/sales"
-          className="inline-flex h-[44px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+          className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
         >
           ← Back to Sales
         </Link>
@@ -321,64 +321,64 @@ export default function SaleDetailsPage() {
   }
 
   return (
-    <div className="h-full flex flex-col gpu">
+    <div className="h-full flex flex-col min-h-0 gpu overflow-x-hidden">
       {/* Header */}
       <header className="mb-4 shrink-0">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
-        <h1 className="mt-1 text-2xl font-black tracking-tight text-zinc-950 sm:text-3xl">Sale Details</h1>
-        <p className="mt-1 text-lg text-zinc-500">View transaction information and receipt.</p>
+        <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
+        <h1 className="mt-1 text-4xl font-black tracking-tight text-zinc-950">Sale Details</h1>
+        <p className="mt-1 text-xl text-zinc-500">View transaction information and receipt.</p>
       </header>
 
       {/* Sale Summary */}
       <div className="flex-1 min-h-0 flex flex-col gap-4">
         <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm card-hover gpu">
-          <div className="flex flex-col gap-3 border-b border-zinc-200 p-5 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-3 border-b border-zinc-200 p-7 md:flex-row md:items-start md:justify-between">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Transaction</p>
-              <h2 className="mt-0.5 font-mono text-xl font-black text-zinc-950">
+              <h2 className="mt-0.5 font-mono text-2xl font-black text-zinc-950">
                 {getSaleReference(sale)}
               </h2>
-              <p className="mt-0.5 text-base text-zinc-400">Transaction ID #{sale.id}</p>
+              <p className="mt-0.5 text-lg text-zinc-400">Transaction ID #{sale.id}</p>
             </div>
-            <div className="text-left sm:text-right">
+            <div className="text-left md:text-right">
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Total</p>
-              <p className="mt-0.5 text-3xl font-black text-zinc-950 number-transition">
+              <p className="mt-0.5 text-4xl font-black text-zinc-950 number-transition">
                 {formatCurrency(Number(sale.total))}
               </p>
             </div>
           </div>
 
           {/* Transaction Information */}
-          <div className="grid grid-cols-2 gap-px border-b border-zinc-200 bg-zinc-200 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-px border-b border-zinc-200 bg-zinc-200 md:grid-cols-4">
             <div className="bg-white p-4">
               <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">Date</p>
-              <p className="mt-1 text-base font-bold text-zinc-900">{formatDate(sale.sale_date)}</p>
+              <p className="mt-1 text-lg font-bold text-zinc-900">{formatDate(sale.sale_date)}</p>
             </div>
             <div className="bg-white p-4">
               <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">Payment</p>
-              <p className="mt-1 text-base font-bold text-zinc-900">{sale.payment_method}</p>
+              <p className="mt-1 text-lg font-bold text-zinc-900">{sale.payment_method}</p>
             </div>
             <div className="bg-white p-4">
               <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">Items</p>
-              <p className="mt-1 text-base font-bold text-zinc-900">
+              <p className="mt-1 text-lg font-bold text-zinc-900">
                 {itemCount} {itemCount === 1 ? "item" : "items"}
               </p>
             </div>
             <div className="bg-white p-4">
               <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">Created</p>
-              <p className="mt-1 text-base font-bold text-zinc-900">{formatDate(sale.created_at)}</p>
+              <p className="mt-1 text-lg font-bold text-zinc-900">{formatDate(sale.created_at)}</p>
             </div>
           </div>
 
           {/* Items */}
-          <div className="p-5">
+          <div className="p-7">
             <div className="mb-3">
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Products</p>
-              <h3 className="mt-0.5 text-lg font-black text-zinc-950">Purchased Products</h3>
+              <h3 className="mt-0.5 text-xl font-black text-zinc-950">Purchased Products</h3>
             </div>
 
             <div className="overflow-hidden rounded-xl border border-zinc-200">
-              <div className="hidden grid-cols-[1fr_140px_120px_140px] border-b border-zinc-200 bg-zinc-50 px-4 py-3 text-base font-bold uppercase tracking-wider text-zinc-400 sm:grid">
+              <div className="hidden grid-cols-[1fr_140px_120px_140px] border-b border-zinc-200 bg-zinc-50 px-4 py-3 text-base font-bold uppercase tracking-wider text-zinc-400 md:grid">
                 <span>Product</span>
                 <span>Unit Price</span>
                 <span>Quantity</span>
@@ -389,13 +389,13 @@ export default function SaleDetailsPage() {
                 {(sale.items ?? []).map((item) => (
                   <div
                     key={item.id}
-                    className="grid gap-2 px-4 py-4 sm:grid-cols-[1fr_140px_120px_140px] sm:items-center hover:bg-zinc-50 transition-colors duration-150 gpu"
+                    className="grid gap-2 px-4 py-5 md:grid-cols-[1fr_140px_120px_140px] md:items-center hover:bg-zinc-50 transition-colors duration-150 gpu"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-base font-black text-zinc-950">
+                      <p className="truncate text-lg font-black text-zinc-950">
                         {item.product_name || "Product"}
                       </p>
-                      <p className="mt-0.5 font-mono text-sm text-zinc-400">
+                      <p className="mt-0.5 font-mono text-base text-zinc-400">
                         {item.sku || "-"}
                       </p>
                       {getProductDetails(item) && (
@@ -406,28 +406,28 @@ export default function SaleDetailsPage() {
                     </div>
 
                     <div>
-                      <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 sm:hidden">
+                      <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 md:hidden">
                         Unit Price
                       </p>
-                      <p className="mt-0.5 text-base font-bold text-zinc-900 sm:mt-0">
+                      <p className="mt-0.5 text-lg font-bold text-zinc-900 md:mt-0">
                         {formatCurrency(Number(item.unit_price))}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 sm:hidden">
+                      <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 md:hidden">
                         Quantity
                       </p>
-                      <p className="mt-0.5 text-base font-bold text-zinc-900 sm:mt-0">
+                      <p className="mt-0.5 text-lg font-bold text-zinc-900 md:mt-0">
                         {Number(item.quantity)}
                       </p>
                     </div>
 
-                    <div className="sm:text-right">
-                      <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 sm:hidden">
+                    <div className="md:text-right">
+                      <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 md:hidden">
                         Subtotal
                       </p>
-                      <p className="mt-0.5 text-base font-black text-zinc-950 sm:mt-0 number-transition">
+                      <p className="mt-0.5 text-lg font-black text-zinc-950 md:mt-0 number-transition">
                         {formatCurrency(Number(item.subtotal))}
                       </p>
                     </div>
@@ -447,22 +447,22 @@ export default function SaleDetailsPage() {
         {/* Totals + Actions */}
         <div className="grid gap-4 lg:grid-cols-[1fr_360px] shrink-0">
           {/* Receipt Action */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Receipt</p>
-            <h2 className="mt-0.5 text-lg font-black text-zinc-950">Transaction Receipt</h2>
-            <p className="mt-1 text-base text-zinc-500">View the receipt for this completed transaction.</p>
+            <h2 className="mt-0.5 text-xl font-black text-zinc-950">Transaction Receipt</h2>
+            <p className="mt-1 text-lg text-zinc-500">View the receipt for this completed transaction.</p>
 
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/sales"
-                className="inline-flex h-[48px] flex-1 items-center justify-center rounded-xl border border-zinc-300 bg-white px-5 text-base font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                className="inline-flex h-[52px] flex-1 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
                 ← Back
               </Link>
               <button
                 type="button"
                 onClick={viewReceipt}
-                className="inline-flex h-[48px] flex-1 items-center justify-center rounded-xl bg-black px-5 text-base font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target btn-ripple gpu"
+                className="inline-flex h-[52px] flex-1 items-center justify-center rounded-xl bg-black px-6 text-lg font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target btn-ripple gpu"
                 onMouseDown={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const x = e.clientX - rect.left;
@@ -477,16 +477,16 @@ export default function SaleDetailsPage() {
           </div>
 
           {/* Totals */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Summary</p>
-            <div className="mt-3 space-y-2">
-              <div className="flex items-center justify-between text-base">
+            <div className="mt-3 space-y-3">
+              <div className="flex items-center justify-between text-lg">
                 <span className="text-zinc-500">Subtotal</span>
                 <span className="font-bold text-zinc-900 number-transition">
                   {formatCurrency(Number(sale.subtotal))}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-base">
+              <div className="flex items-center justify-between text-lg">
                 <span className="text-zinc-500">Discount</span>
                 <span className="font-bold text-zinc-900 number-transition">
                   − {formatCurrency(Number(sale.discount))}
@@ -510,7 +510,7 @@ export default function SaleDetailsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in backdrop-gpu gpu">
           <div className="max-h-[90vh] w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl animate-slide-up gpu">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-zinc-200 p-5">
+            <div className="flex items-center justify-between border-b border-zinc-200 p-7 shrink-0">
               <div>
                 <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Completed</p>
                 <h2 className="mt-0.5 text-xl font-black text-zinc-950">Sale Receipt</h2>
@@ -518,15 +518,16 @@ export default function SaleDetailsPage() {
               <button
                 type="button"
                 onClick={() => setShowReceipt(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 text-xl text-zinc-500 hover:bg-zinc-100 touch-feedback gpu"
+                className="flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-200 text-2xl text-zinc-500 hover:bg-zinc-100 touch-feedback gpu tap-target"
+                aria-label="Close receipt"
               >
                 ×
               </button>
             </div>
 
             {/* Receipt */}
-            <div className="max-h-[65vh] overflow-y-auto p-5 gpu-scroll">
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 font-mono text-sm text-zinc-900">
+            <div className="max-h-[55vh] overflow-y-auto p-7 gpu-scroll">
+              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 font-mono text-base text-zinc-900">
                 {RECEIPT_COMPANY_NAME && (
                   <div className="text-center font-bold">{RECEIPT_COMPANY_NAME}</div>
                 )}
@@ -597,11 +598,11 @@ export default function SaleDetailsPage() {
             </div>
 
             {/* Actions */}
-            <div className="grid gap-2 border-t border-zinc-200 p-5 sm:grid-cols-2">
+            <div className="grid gap-3 border-t border-zinc-200 p-7 sm:grid-cols-2 shrink-0">
               <button
                 type="button"
                 onClick={() => printReceipt(sale)}
-                className="inline-flex h-[48px] items-center justify-center rounded-xl bg-black px-5 text-base font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target btn-ripple gpu"
+                className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-lg font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target btn-ripple gpu"
                 onMouseDown={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const x = e.clientX - rect.left;
@@ -615,7 +616,7 @@ export default function SaleDetailsPage() {
               <button
                 type="button"
                 onClick={() => setShowReceipt(false)}
-                className="inline-flex h-[48px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-5 text-base font-bold text-zinc-700 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-bold text-zinc-700 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
                 Done
               </button>
