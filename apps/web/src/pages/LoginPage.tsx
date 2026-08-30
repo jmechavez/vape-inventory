@@ -50,8 +50,12 @@ export default function LoginPage() {
         <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg animate-scale-in">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-zinc-900 to-zinc-700 text-2xl font-black text-white shadow-lg">
-              VI
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-lg overflow-hidden">
+              <img
+                src="/logo.png"
+                alt="Vape Inventory"
+                className="h-16 w-16 object-contain"
+              />
             </div>
             <h1 className="mt-4 text-3xl font-black text-zinc-950">Vape Inventory</h1>
             <p className="text-lg text-zinc-500">Management System</p>

@@ -187,14 +187,16 @@ export default function Layout({ children }: LayoutProps) {
     <div className="h-dvh min-h-dvh bg-zinc-100 text-zinc-950 overflow-hidden">
       <div className="flex h-full min-h-0">
 
-        {/* Sidebar */}
+        {/* ============================================================
+            SIDEBAR
+            ============================================================ */}
         <aside
           className={[
             "momentum-scroll hidden border-r border-zinc-200/50 bg-white/95 backdrop-blur-sm transition-all duration-300 ease-in-out lg:flex lg:flex-col lg:overflow-y-auto lg:shrink-0 gpu",
             collapsed ? "w-16" : "w-64",
           ].join(" ")}
         >
-          {/* Brand - Simplified */}
+          {/* Brand */}
           <div
             className={[
               "border-b border-zinc-200/50 transition-all duration-300 shrink-0",
@@ -202,8 +204,12 @@ export default function Layout({ children }: LayoutProps) {
             ].join(" ")}
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-zinc-900 to-zinc-700 text-sm font-black text-white shadow-sm transition-transform duration-300 active:scale-95 touch-feedback">
-                VI
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm overflow-hidden">
+                <img
+                  src="/logo.png"
+                  alt="Vape Inventory"
+                  className="h-8 w-8 object-contain"
+                />
               </div>
               {!collapsed && (
                 <div className="overflow-hidden transition-all duration-300">
@@ -218,7 +224,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </div>
 
-          {/* Navigation - Cleaner */}
+          {/* Navigation */}
           <nav className="flex-1 space-y-0.5 px-3 py-4 overflow-y-auto gpu-scroll">
             {!collapsed && (
               <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 animate-fade-in">
@@ -269,9 +275,8 @@ export default function Layout({ children }: LayoutProps) {
             })}
           </nav>
 
-          {/* Footer - Simplified with Logout */}
+          {/* Sidebar Footer - Logout + Version */}
           <div className="border-t border-zinc-200/50 p-3 shrink-0">
-            {/* Logout Button */}
             <button
               onClick={handleLogout}
               className={[
@@ -286,29 +291,23 @@ export default function Layout({ children }: LayoutProps) {
               {!collapsed && <span>Logout</span>}
             </button>
 
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-200/50">
+            <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-200/50">
               <p className="text-xs text-zinc-400">
                 {collapsed ? "v1.0" : "v1.0.0"}
               </p>
-              <div className="flex items-center gap-2">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                {!collapsed && (
-                  <span className="text-xs font-medium text-emerald-600">Ready</span>
-                )}
-              </div>
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
             </div>
-            {!collapsed && (
-              <p className="mt-1 text-[10px] text-zinc-400">
-                © {new Date().getFullYear()}
-              </p>
-            )}
           </div>
         </aside>
 
-        {/* Main Content */}
+        {/* ============================================================
+            MAIN CONTENT
+            ============================================================ */}
         <div className="flex min-w-0 flex-1 flex-col h-full overflow-hidden">
 
-          {/* Mobile Header - Cleaner */}
+          {/* ============================================================
+              MOBILE HEADER
+              ============================================================ */}
           <header className="sticky top-0 z-30 border-b border-zinc-200/50 bg-white/95 backdrop-blur-sm shrink-0 lg:hidden safe-area-top">
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-3">
@@ -327,8 +326,12 @@ export default function Layout({ children }: LayoutProps) {
                   </svg>
                 </button>
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-zinc-900 to-zinc-700 text-[10px] font-black text-white shadow-sm">
-                    VI
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm overflow-hidden">
+                    <img
+                      src="/logo.png"
+                      alt="Vape Inventory"
+                      className="h-6 w-6 object-contain"
+                    />
                   </div>
                   <div>
                     <p className="text-sm font-black text-zinc-950 leading-none">Vape Inventory</p>
@@ -383,7 +386,9 @@ export default function Layout({ children }: LayoutProps) {
             )}
           </header>
 
-          {/* Desktop Top Bar - Cleaner */}
+          {/* ============================================================
+              DESKTOP TOP BAR
+              ============================================================ */}
           <header className="sticky top-0 z-30 hidden h-14 items-center justify-between border-b border-zinc-200/50 bg-white/95 backdrop-blur-sm px-6 lg:flex shrink-0 safe-area-top">
             <div className="flex items-center gap-4">
               <button
@@ -405,17 +410,6 @@ export default function Layout({ children }: LayoutProps) {
               </p>
             </div>
             <div className="flex items-center gap-4">
-              {/* Desktop Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200 active:scale-95 touch-feedback"
-                aria-label="Logout"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                <span>Logout</span>
-              </button>
               <span className="text-xs text-zinc-400 hidden md:inline">
                 {formatDate(currentTime)}
               </span>
@@ -426,7 +420,9 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </header>
 
-          {/* Page Content */}
+          {/* ============================================================
+              PAGE CONTENT (No Watermark to fix overlapping)
+              ============================================================ */}
           <main className="flex-1 overflow-y-auto min-h-0 momentum-scroll">
             <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
               {children}
