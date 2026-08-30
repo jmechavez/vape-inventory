@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { PageHeader } from "../components/ui";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -113,7 +115,7 @@ function ComingSoonOverlay() {
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/92 backdrop-blur-md animate-fade-in gpu pointer-events-auto">
       <div className="text-center p-10 max-w-lg">
         {/* Animated Icon */}
-        <div className="mx-auto mb-8 flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-zinc-900 to-zinc-700 shadow-lg animate-bounce-slow">
+        <div className="mx-auto mb-8 flex h-28 w-28 items-center justify-center rounded-full bg-linear-to-br from-zinc-900 to-zinc-700 shadow-lg animate-bounce-slow">
           <svg className="h-14 w-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
@@ -150,7 +152,7 @@ function ComingSoonOverlay() {
           </div>
           <div className="h-2.5 w-full rounded-full bg-zinc-100 overflow-hidden">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-zinc-700 to-zinc-900 transition-all duration-1000 ease-out"
+              className="h-full rounded-full bg-linear-to-r from-zinc-700 to-zinc-900 transition-all duration-1000 ease-out"
               style={{ width: "65%" }}
             />
           </div>
@@ -366,344 +368,216 @@ export default function ReportsPage() {
 
   if (error) {
     return (
-      <div className="space-y-8 gpu">
-        <div>
-          <h1 className="text-4xl font-black text-zinc-950">
-            Reports
-          </h1>
+      <>
+        <Helmet>
+          <title>Reports - Vape Inventory</title>
+        </Helmet>
+        <div className="space-y-8 gpu">
+          <PageHeader
+            label="Analytics"
+            title="Reports"
+            description="Sales performance and business overview."
+          />
 
-          <p className="mt-1.5 text-xl text-zinc-500">
-            Sales performance and business overview.
-          </p>
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 animate-fade-in gpu">
+            <p className="text-xl font-semibold text-red-700">
+              Failed to load reports
+            </p>
+
+            <p className="mt-1.5 text-lg text-red-600">
+              {error}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mt-5 rounded-lg bg-red-600 px-5 py-3 text-lg font-semibold text-white transition hover:bg-red-700 touch-feedback gpu"
+            >
+              Retry
+            </button>
+          </div>
         </div>
-
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 animate-fade-in gpu">
-          <p className="text-xl font-semibold text-red-700">
-            Failed to load reports
-          </p>
-
-          <p className="mt-1.5 text-lg text-red-600">
-            {error}
-          </p>
-
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="mt-5 rounded-lg bg-red-600 px-5 py-3 text-lg font-semibold text-white transition hover:bg-red-700 touch-feedback gpu"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
+      </>
     );
   }
 
   if (sales.length === 0) {
     return (
-      <div className="space-y-8 gpu">
-        <div>
-          <h1 className="text-4xl font-black text-zinc-950">
-            Reports
-          </h1>
+      <>
+        <Helmet>
+          <title>Reports - Vape Inventory</title>
+        </Helmet>
+        <div className="space-y-8 gpu">
+          <PageHeader
+            label="Analytics"
+            title="Reports"
+            description="Sales performance and business overview."
+          />
 
-          <p className="mt-1.5 text-xl text-zinc-500">
-            Sales performance and business overview.
-          </p>
+          <EmptyState message="No sales data available yet." />
         </div>
-
-        <EmptyState message="No sales data available yet." />
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="h-full flex flex-col min-h-0 gpu overflow-x-hidden relative">
-      <div className="flex-1 overflow-y-auto space-y-8 pb-8 gpu-scroll relative">
-        {/* Coming Soon Overlay - Fixed and covers everything */}
-        <ComingSoonOverlay />
+    <>
+      <Helmet>
+        <title>Reports - Vape Inventory</title>
+        <meta name="description" content="Sales performance and business overview" />
+      </Helmet>
 
-        {/* ============================================================
-            BLURRED CONTENT BEHIND THE OVERLAY
-            This shows what the Reports page will look like when complete
-            ============================================================ */}
+      <div className="h-full flex flex-col min-h-0 gpu overflow-x-hidden relative">
+        <div className="flex-1 overflow-y-auto space-y-8 pb-8 gpu-scroll relative">
+          {/* Coming Soon Overlay - Fixed and covers everything */}
+          <ComingSoonOverlay />
 
-        {/* Header - Blurred */}
-        <div className="blur-sm select-none pointer-events-none shrink-0">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">Analytics</p>
-          <h1 className="mt-1.5 text-4xl font-black tracking-tight text-zinc-950 sm:text-5xl">Reports</h1>
-          <p className="mt-1.5 text-xl text-zinc-500">Sales performance and business overview.</p>
-        </div>
+          {/* ============================================================
+              BLURRED CONTENT BEHIND THE OVERLAY
+              This shows what the Reports page will look like when complete
+              ============================================================ */}
 
-        {/* Summary Cards - Blurred */}
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 blur-sm select-none pointer-events-none">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 animate-fade-in-up [animation-delay:0ms]">
-            <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">
-              Total Revenue
-            </p>
-
-            <p className="mt-2.5 text-5xl font-black text-zinc-950 number-transition">
-              {formatCurrency(metrics.totalRevenue)}
-            </p>
-
-            <p className="mt-1.5 text-xl text-zinc-400">
-              Across all completed sales
-            </p>
+          {/* Header - Blurred */}
+          <div className="blur-sm select-none pointer-events-none shrink-0">
+            <PageHeader
+              label="Analytics"
+              title="Reports"
+              description="Sales performance and business overview."
+            />
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 animate-fade-in-up [animation-delay:75ms]">
-            <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">
-              Transactions
-            </p>
+          {/* Summary Cards - Blurred */}
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 blur-sm select-none pointer-events-none">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 animate-fade-in-up [animation-delay:0ms]">
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">
+                Total Revenue
+              </p>
 
-            <p className="mt-2.5 text-5xl font-black text-zinc-950 number-transition">
-              {metrics.totalTransactions.toLocaleString()}
-            </p>
+              <p className="mt-2.5 text-5xl font-black text-zinc-950 number-transition">
+                {formatCurrency(metrics.totalRevenue)}
+              </p>
 
-            <p className="mt-1.5 text-xl text-zinc-400">
-              Completed sales
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 animate-fade-in-up [animation-delay:150ms]">
-            <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">
-              Units Sold
-            </p>
-
-            <p className="mt-2.5 text-5xl font-black text-zinc-950 number-transition">
-              {metrics.totalUnits.toLocaleString()}
-            </p>
-
-            <p className="mt-1.5 text-xl text-zinc-400">
-              Total quantity sold
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 animate-fade-in-up [animation-delay:225ms]">
-            <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">
-              Average Sale
-            </p>
-
-            <p className="mt-2.5 text-5xl font-black text-zinc-950 number-transition">
-              {formatCurrency(metrics.averageSale)}
-            </p>
-
-            <p className="mt-1.5 text-xl text-zinc-400">
-              Average transaction value
-            </p>
-          </div>
-        </div>
-
-        {/* Secondary Summary - Blurred */}
-        <div className="grid gap-5 sm:grid-cols-2 animate-fade-in-up blur-sm select-none pointer-events-none">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
-            <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">
-              Total Discounts
-            </p>
-
-            <p className="mt-2.5 text-4xl font-black text-zinc-950 number-transition">
-              {formatCurrency(metrics.totalDiscount)}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
-            <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">
-              Products Sold
-            </p>
-
-            <p className="mt-2.5 text-4xl font-black text-zinc-950 number-transition">
-              {productReport.length.toLocaleString()}
-            </p>
-
-            <p className="mt-1.5 text-xl text-zinc-400">
-              Unique products appearing in sales
-            </p>
-          </div>
-        </div>
-
-        {/* Product + Payment - Blurred */}
-        <div className="grid gap-6 lg:grid-cols-2 blur-sm select-none pointer-events-none">
-          {/* Top Products */}
-          <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm gpu">
-            <div className="border-b border-zinc-100 p-8">
-              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Products</p>
-              <h2 className="mt-0.5 text-3xl font-black text-zinc-950">
-                Top Products
-              </h2>
-
-              <p className="mt-0.5 text-xl text-zinc-400">
-                Products ranked by sales revenue.
+              <p className="mt-1.5 text-xl text-zinc-400">
+                Across all completed sales
               </p>
             </div>
 
-            <div className="p-8">
-              {productReport.length === 0 ? (
-                <EmptyState message="No product sales available." />
-              ) : (
-                <div className="space-y-6">
-                  {productReport.slice(0, 8).map((product) => {
-                    const percentage =
-                      maxProductRevenue > 0
-                        ? (product.revenue / maxProductRevenue) * 100
-                        : 0;
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 animate-fade-in-up [animation-delay:75ms]">
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">
+                Transactions
+              </p>
 
-                    return (
-                      <div key={product.productId} className="gpu">
-                        <div className="flex items-start justify-between gap-5">
-                          <div className="min-w-0">
-                            <p className="truncate text-xl font-bold text-zinc-950">
-                              {product.name}
-                            </p>
+              <p className="mt-2.5 text-5xl font-black text-zinc-950 number-transition">
+                {metrics.totalTransactions.toLocaleString()}
+              </p>
 
-                            <p className="mt-0.5 text-lg text-zinc-500">
-                              {product.sku} ·{" "}
-                              {product.quantity.toLocaleString()} sold
-                            </p>
-                          </div>
-
-                          <p className="shrink-0 text-xl font-black text-zinc-950 number-transition">
-                            {formatCurrency(product.revenue)}
-                          </p>
-                        </div>
-
-                        <div className="mt-3 h-3 overflow-hidden rounded-full bg-zinc-100">
-                          <div
-                            className="h-full rounded-full bg-zinc-900 transition-all duration-700 ease-out gpu"
-                            style={{
-                              width: `${percentage}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Payment Methods */}
-          <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm gpu">
-            <div className="border-b border-zinc-100 p-8">
-              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Payments</p>
-              <h2 className="mt-0.5 text-3xl font-black text-zinc-950">
-                Payment Methods
-              </h2>
-
-              <p className="mt-0.5 text-xl text-zinc-400">
-                Revenue grouped by payment method.
+              <p className="mt-1.5 text-xl text-zinc-400">
+                Completed sales
               </p>
             </div>
 
-            <div className="p-8">
-              {paymentReport.length === 0 ? (
-                <EmptyState message="No payment data available." />
-              ) : (
-                <div className="space-y-6">
-                  {paymentReport.map((payment) => {
-                    const percentage =
-                      maxPaymentRevenue > 0
-                        ? (payment.revenue /
-                          maxPaymentRevenue) *
-                        100
-                        : 0;
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 animate-fade-in-up [animation-delay:150ms]">
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">
+                Units Sold
+              </p>
 
-                    return (
-                      <div key={payment.paymentMethod} className="gpu">
-                        <div className="flex items-center justify-between gap-5">
-                          <div>
-                            <p className="text-xl font-bold text-zinc-950">
-                              {payment.paymentMethod}
-                            </p>
+              <p className="mt-2.5 text-5xl font-black text-zinc-950 number-transition">
+                {metrics.totalUnits.toLocaleString()}
+              </p>
 
-                            <p className="mt-0.5 text-lg text-zinc-500">
-                              {payment.transactions.toLocaleString()}{" "}
-                              transaction
-                              {payment.transactions !== 1
-                                ? "s"
-                                : ""}
-                            </p>
-                          </div>
-
-                          <p className="text-xl font-black text-zinc-950 number-transition">
-                            {formatCurrency(payment.revenue)}
-                          </p>
-                        </div>
-
-                        <div className="mt-3 h-3 overflow-hidden rounded-full bg-zinc-100">
-                          <div
-                            className="h-full rounded-full bg-zinc-700 transition-all duration-700 ease-out gpu"
-                            style={{
-                              width: `${percentage}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <p className="mt-1.5 text-xl text-zinc-400">
+                Total quantity sold
+              </p>
             </div>
-          </section>
-        </div>
 
-        {/* Daily Sales - Blurred */}
-        <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm gpu blur-sm select-none pointer-events-none">
-          <div className="border-b border-zinc-100 p-8">
-            <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Activity</p>
-            <h2 className="mt-0.5 text-3xl font-black text-zinc-950">
-              Daily Sales
-            </h2>
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.02] hover:border-zinc-300 animate-fade-in-up [animation-delay:225ms]">
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">
+                Average Sale
+              </p>
 
-            <p className="mt-0.5 text-xl text-zinc-400">
-              Revenue and transaction activity by day.
-            </p>
+              <p className="mt-2.5 text-5xl font-black text-zinc-950 number-transition">
+                {formatCurrency(metrics.averageSale)}
+              </p>
+
+              <p className="mt-1.5 text-xl text-zinc-400">
+                Average transaction value
+              </p>
+            </div>
           </div>
 
-          <div className="overflow-x-auto gpu-scroll">
-            {dailyReport.length === 0 ? (
-              <div className="p-8">
-                <EmptyState message="No daily sales available." />
+          {/* Secondary Summary - Blurred */}
+          <div className="grid gap-5 sm:grid-cols-2 animate-fade-in-up blur-sm select-none pointer-events-none">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">
+                Total Discounts
+              </p>
+
+              <p className="mt-2.5 text-4xl font-black text-zinc-950 number-transition">
+                {formatCurrency(metrics.totalDiscount)}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">
+                Products Sold
+              </p>
+
+              <p className="mt-2.5 text-4xl font-black text-zinc-950 number-transition">
+                {productReport.length.toLocaleString()}
+              </p>
+
+              <p className="mt-1.5 text-xl text-zinc-400">
+                Unique products appearing in sales
+              </p>
+            </div>
+          </div>
+
+          {/* Product + Payment - Blurred */}
+          <div className="grid gap-6 lg:grid-cols-2 blur-sm select-none pointer-events-none">
+            {/* Top Products */}
+            <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm gpu">
+              <div className="border-b border-zinc-100 p-8">
+                <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Products</p>
+                <h2 className="mt-0.5 text-3xl font-black text-zinc-950">
+                  Top Products
+                </h2>
+
+                <p className="mt-0.5 text-xl text-zinc-400">
+                  Products ranked by sales revenue.
+                </p>
               </div>
-            ) : (
-              <table className="w-full min-w-[700px] text-left">
-                <thead>
-                  <tr className="border-b border-zinc-100 text-lg uppercase tracking-wide text-zinc-500">
-                    <th className="px-8 py-6 font-bold">
-                      Date
-                    </th>
 
-                    <th className="px-8 py-6 text-right font-bold">
-                      Transactions
-                    </th>
+              <div className="p-8">
+                {productReport.length === 0 ? (
+                  <EmptyState message="No product sales available." />
+                ) : (
+                  <div className="space-y-6">
+                    {productReport.slice(0, 8).map((product) => {
+                      const percentage =
+                        maxProductRevenue > 0
+                          ? (product.revenue / maxProductRevenue) * 100
+                          : 0;
 
-                    <th className="px-8 py-6 text-right font-bold">
-                      Units
-                    </th>
+                      return (
+                        <div key={product.productId} className="gpu">
+                          <div className="flex items-start justify-between gap-5">
+                            <div className="min-w-0">
+                              <p className="truncate text-xl font-bold text-zinc-950">
+                                {product.name}
+                              </p>
 
-                    <th className="px-8 py-6 text-right font-bold">
-                      Revenue
-                    </th>
-                  </tr>
-                </thead>
+                              <p className="mt-0.5 text-lg text-zinc-500">
+                                {product.sku} ·{" "}
+                                {product.quantity.toLocaleString()} sold
+                              </p>
+                            </div>
 
-                <tbody>
-                  {dailyReport.map((day) => {
-                    const percentage =
-                      maxDailyRevenue > 0
-                        ? (day.revenue / maxDailyRevenue) * 100
-                        : 0;
+                            <p className="shrink-0 text-xl font-black text-zinc-950 number-transition">
+                              {formatCurrency(product.revenue)}
+                            </p>
+                          </div>
 
-                    return (
-                      <tr
-                        key={day.date}
-                        className="border-b border-zinc-50 last:border-0 hover:bg-zinc-50 transition-colors duration-150 gpu"
-                      >
-                        <td className="px-8 py-6">
-                          <p className="text-xl font-bold text-zinc-950">
-                            {formatDate(day.date)}
-                          </p>
-
-                          <div className="mt-2.5 h-3 max-w-56 overflow-hidden rounded-full bg-zinc-100">
+                          <div className="mt-3 h-3 overflow-hidden rounded-full bg-zinc-100">
                             <div
                               className="h-full rounded-full bg-zinc-900 transition-all duration-700 ease-out gpu"
                               style={{
@@ -711,100 +585,239 @@ export default function ReportsPage() {
                               }}
                             />
                           </div>
-                        </td>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </section>
 
-                        <td className="px-8 py-6 text-right text-xl text-zinc-700 number-transition">
-                          {day.transactions.toLocaleString()}
-                        </td>
+            {/* Payment Methods */}
+            <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm gpu">
+              <div className="border-b border-zinc-100 p-8">
+                <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Payments</p>
+                <h2 className="mt-0.5 text-3xl font-black text-zinc-950">
+                  Payment Methods
+                </h2>
 
-                        <td className="px-8 py-6 text-right text-xl text-zinc-700 number-transition">
-                          {day.units.toLocaleString()}
-                        </td>
+                <p className="mt-0.5 text-xl text-zinc-400">
+                  Revenue grouped by payment method.
+                </p>
+              </div>
 
-                        <td className="px-8 py-6 text-right text-xl font-bold text-zinc-950 number-transition">
-                          {formatCurrency(day.revenue)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
+              <div className="p-8">
+                {paymentReport.length === 0 ? (
+                  <EmptyState message="No payment data available." />
+                ) : (
+                  <div className="space-y-6">
+                    {paymentReport.map((payment) => {
+                      const percentage =
+                        maxPaymentRevenue > 0
+                          ? (payment.revenue /
+                            maxPaymentRevenue) *
+                          100
+                          : 0;
+
+                      return (
+                        <div key={payment.paymentMethod} className="gpu">
+                          <div className="flex items-center justify-between gap-5">
+                            <div>
+                              <p className="text-xl font-bold text-zinc-950">
+                                {payment.paymentMethod}
+                              </p>
+
+                              <p className="mt-0.5 text-lg text-zinc-500">
+                                {payment.transactions.toLocaleString()}{" "}
+                                transaction
+                                {payment.transactions !== 1
+                                  ? "s"
+                                  : ""}
+                              </p>
+                            </div>
+
+                            <p className="text-xl font-black text-zinc-950 number-transition">
+                              {formatCurrency(payment.revenue)}
+                            </p>
+                          </div>
+
+                          <div className="mt-3 h-3 overflow-hidden rounded-full bg-zinc-100">
+                            <div
+                              className="h-full rounded-full bg-zinc-700 transition-all duration-700 ease-out gpu"
+                              style={{
+                                width: `${percentage}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </section>
           </div>
-        </section>
 
-        {/* Recent Sales - Blurred */}
-        <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm gpu blur-sm select-none pointer-events-none">
-          <div className="flex items-center justify-between gap-5 border-b border-zinc-100 p-8">
-            <div>
-              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Recent</p>
+          {/* Daily Sales - Blurred */}
+          <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm gpu blur-sm select-none pointer-events-none">
+            <div className="border-b border-zinc-100 p-8">
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Activity</p>
               <h2 className="mt-0.5 text-3xl font-black text-zinc-950">
-                Recent Sales
+                Daily Sales
               </h2>
 
               <p className="mt-0.5 text-xl text-zinc-400">
-                Latest transactions recorded in the system.
+                Revenue and transaction activity by day.
               </p>
             </div>
 
-            <a
-              href="/sales/history"
-              className="rounded-lg border border-zinc-300 px-5 py-3 text-xl font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-            >
-              View all
-            </a>
-          </div>
+            <div className="overflow-x-auto gpu-scroll">
+              {dailyReport.length === 0 ? (
+                <div className="p-8">
+                  <EmptyState message="No daily sales available." />
+                </div>
+              ) : (
+                <table className="w-full min-w-[700px] text-left">
+                  <thead>
+                    <tr className="border-b border-zinc-100 text-lg uppercase tracking-wide text-zinc-500">
+                      <th className="px-8 py-6 font-bold">
+                        Date
+                      </th>
 
-          <div className="divide-y divide-zinc-100">
-            {sales.slice(0, 5).map((sale) => (
+                      <th className="px-8 py-6 text-right font-bold">
+                        Transactions
+                      </th>
+
+                      <th className="px-8 py-6 text-right font-bold">
+                        Units
+                      </th>
+
+                      <th className="px-8 py-6 text-right font-bold">
+                        Revenue
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {dailyReport.map((day) => {
+                      const percentage =
+                        maxDailyRevenue > 0
+                          ? (day.revenue / maxDailyRevenue) * 100
+                          : 0;
+
+                      return (
+                        <tr
+                          key={day.date}
+                          className="border-b border-zinc-50 last:border-0 hover:bg-zinc-50 transition-colors duration-150 gpu"
+                        >
+                          <td className="px-8 py-6">
+                            <p className="text-xl font-bold text-zinc-950">
+                              {formatDate(day.date)}
+                            </p>
+
+                            <div className="mt-2.5 h-3 max-w-56 overflow-hidden rounded-full bg-zinc-100">
+                              <div
+                                className="h-full rounded-full bg-zinc-900 transition-all duration-700 ease-out gpu"
+                                style={{
+                                  width: `${percentage}%`,
+                                }}
+                              />
+                            </div>
+                          </td>
+
+                          <td className="px-8 py-6 text-right text-xl text-zinc-700 number-transition">
+                            {day.transactions.toLocaleString()}
+                          </td>
+
+                          <td className="px-8 py-6 text-right text-xl text-zinc-700 number-transition">
+                            {day.units.toLocaleString()}
+                          </td>
+
+                          <td className="px-8 py-6 text-right text-xl font-bold text-zinc-950 number-transition">
+                            {formatCurrency(day.revenue)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </section>
+
+          {/* Recent Sales - Blurred */}
+          <section className="rounded-2xl border border-zinc-200 bg-white shadow-sm gpu blur-sm select-none pointer-events-none">
+            <div className="flex items-center justify-between gap-5 border-b border-zinc-100 p-8">
+              <div>
+                <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-400">Recent</p>
+                <h2 className="mt-0.5 text-3xl font-black text-zinc-950">
+                  Recent Sales
+                </h2>
+
+                <p className="mt-0.5 text-xl text-zinc-400">
+                  Latest transactions recorded in the system.
+                </p>
+              </div>
+
               <a
-                key={sale.id}
-                href={`/sales/${sale.id}`}
-                className="flex items-center justify-between gap-5 p-7 transition hover:bg-zinc-50 card-hover gpu"
+                href="/sales/history"
+                className="rounded-lg border border-zinc-300 px-5 py-3 text-xl font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
               >
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-4">
-                    <span className="text-2xl font-bold text-zinc-950">
-                      {sale.reference ||
-                        `SALE-${String(sale.id).padStart(6, "0")}`}
-                    </span>
-
-                    <span className="rounded-full bg-emerald-50 px-4 py-1.5 text-xl font-bold text-emerald-700 status-badge status-in-stock">
-                      {sale.status || "COMPLETED"}
-                    </span>
-                  </div>
-
-                  <div className="mt-1.5 flex flex-wrap gap-4 text-lg text-zinc-500">
-                    <span>{formatDate(sale.sale_date)}</span>
-                    <span>·</span>
-                    <span>
-                      {getItemCount(sale)} unit
-                      {getItemCount(sale) !== 1 ? "s" : ""}
-                    </span>
-                    <span>·</span>
-                    <span className="font-medium text-zinc-700">
-                      {sale.payment_method}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="shrink-0 text-right">
-                  <p className="text-3xl font-black text-zinc-950 number-transition">
-                    {formatCurrency(sale.total)}
-                  </p>
-
-                  {Number(sale.discount || 0) > 0 && (
-                    <p className="mt-0.5 text-lg text-zinc-500">
-                      Discount:{" "}
-                      {formatCurrency(sale.discount)}
-                    </p>
-                  )}
-                </div>
+                View all
               </a>
-            ))}
-          </div>
-        </section>
+            </div>
+
+            <div className="divide-y divide-zinc-100">
+              {sales.slice(0, 5).map((sale) => (
+                <a
+                  key={sale.id}
+                  href={`/sales/${sale.id}`}
+                  className="flex items-center justify-between gap-5 p-7 transition hover:bg-zinc-50 card-hover gpu"
+                >
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <span className="text-2xl font-bold text-zinc-950">
+                        {sale.reference ||
+                          `SALE-${String(sale.id).padStart(6, "0")}`}
+                      </span>
+
+                      <span className="rounded-full bg-emerald-50 px-4 py-1.5 text-xl font-bold text-emerald-700 status-badge status-in-stock">
+                        {sale.status || "COMPLETED"}
+                      </span>
+                    </div>
+
+                    <div className="mt-1.5 flex flex-wrap gap-4 text-lg text-zinc-500">
+                      <span>{formatDate(sale.sale_date)}</span>
+                      <span>·</span>
+                      <span>
+                        {getItemCount(sale)} unit
+                        {getItemCount(sale) !== 1 ? "s" : ""}
+                      </span>
+                      <span>·</span>
+                      <span className="font-medium text-zinc-700">
+                        {sale.payment_method}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="shrink-0 text-right">
+                    <p className="text-3xl font-black text-zinc-950 number-transition">
+                      {formatCurrency(sale.total)}
+                    </p>
+
+                    {Number(sale.discount || 0) > 0 && (
+                      <p className="mt-0.5 text-lg text-zinc-500">
+                        Discount:{" "}
+                        {formatCurrency(sale.discount)}
+                      </p>
+                    )}
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

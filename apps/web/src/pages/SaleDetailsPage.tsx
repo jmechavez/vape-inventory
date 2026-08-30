@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { Button } from "../components/ui";
 
 type SaleItem = {
   id: number;
@@ -186,7 +188,7 @@ function printReceipt(sale: Sale) {
     return;
   }
 
-  printWindow.document.open();
+  // @ts-ignore - document.write is deprecated but still needed for printing
   printWindow.document.write(html);
   printWindow.document.close();
 }
@@ -301,329 +303,337 @@ export default function SaleDetailsPage() {
 
   if (error || !sale) {
     return (
-      <div className="h-full flex flex-col min-h-0 gpu">
+      <>
+        <Helmet>
+          <title>Sale Not Found - Vape Inventory</title>
+        </Helmet>
+        <div className="h-full flex flex-col min-h-0 gpu">
+          <header className="mb-4 shrink-0">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
+            <h1 className="mt-1 text-4xl font-black tracking-tight text-zinc-950">Sale Details</h1>
+            <p className="mt-1 text-xl text-zinc-500">View transaction information and receipt.</p>
+          </header>
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-5 mb-4 shrink-0 animate-fade-in gpu">
+            <p className="text-xl font-medium text-red-700">{error || "Sale not found."}</p>
+          </div>
+          <Link
+            to="/sales"
+            className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+          >
+            ← Back to Sales
+          </Link>
+        </div>
+      </>
+    );
+  }
+
+  const saleReference = getSaleReference(sale);
+
+  return (
+    <>
+      <Helmet>
+        <title>Sale {saleReference} - Vape Inventory</title>
+        <meta name="description" content={`View details for sale ${saleReference}`} />
+      </Helmet>
+
+      <div className="h-full flex flex-col min-h-0 gpu overflow-x-hidden">
+        {/* Header */}
         <header className="mb-4 shrink-0">
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
           <h1 className="mt-1 text-4xl font-black tracking-tight text-zinc-950">Sale Details</h1>
           <p className="mt-1 text-xl text-zinc-500">View transaction information and receipt.</p>
         </header>
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-5 mb-4 shrink-0 animate-fade-in gpu">
-          <p className="text-xl font-medium text-red-700">{error || "Sale not found."}</p>
-        </div>
-        <Link
-          to="/sales"
-          className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-        >
-          ← Back to Sales
-        </Link>
-      </div>
-    );
-  }
 
-  return (
-    <div className="h-full flex flex-col min-h-0 gpu overflow-x-hidden">
-      {/* Header */}
-      <header className="mb-4 shrink-0">
-        <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">Sales</p>
-        <h1 className="mt-1 text-4xl font-black tracking-tight text-zinc-950">Sale Details</h1>
-        <p className="mt-1 text-xl text-zinc-500">View transaction information and receipt.</p>
-      </header>
-
-      {/* Sale Summary */}
-      <div className="flex-1 min-h-0 flex flex-col gap-4">
-        <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm card-hover gpu">
-          <div className="flex flex-col gap-3 border-b border-zinc-200 p-7 md:flex-row md:items-start md:justify-between">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Transaction</p>
-              <h2 className="mt-0.5 font-mono text-2xl font-black text-zinc-950">
-                {getSaleReference(sale)}
-              </h2>
-              <p className="mt-0.5 text-lg text-zinc-400">Transaction ID #{sale.id}</p>
-            </div>
-            <div className="text-left md:text-right">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Total</p>
-              <p className="mt-0.5 text-4xl font-black text-zinc-950 number-transition">
-                {formatCurrency(Number(sale.total))}
-              </p>
-            </div>
-          </div>
-
-          {/* Transaction Information */}
-          <div className="grid grid-cols-2 gap-px border-b border-zinc-200 bg-zinc-200 md:grid-cols-4">
-            <div className="bg-white p-4">
-              <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">Date</p>
-              <p className="mt-1 text-lg font-bold text-zinc-900">{formatDate(sale.sale_date)}</p>
-            </div>
-            <div className="bg-white p-4">
-              <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">Payment</p>
-              <p className="mt-1 text-lg font-bold text-zinc-900">{sale.payment_method}</p>
-            </div>
-            <div className="bg-white p-4">
-              <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">Items</p>
-              <p className="mt-1 text-lg font-bold text-zinc-900">
-                {itemCount} {itemCount === 1 ? "item" : "items"}
-              </p>
-            </div>
-            <div className="bg-white p-4">
-              <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">Created</p>
-              <p className="mt-1 text-lg font-bold text-zinc-900">{formatDate(sale.created_at)}</p>
-            </div>
-          </div>
-
-          {/* Items */}
-          <div className="p-7">
-            <div className="mb-3">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Products</p>
-              <h3 className="mt-0.5 text-xl font-black text-zinc-950">Purchased Products</h3>
+        {/* Sale Summary */}
+        <div className="flex-1 min-h-0 flex flex-col gap-4">
+          <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm card-hover gpu">
+            <div className="flex flex-col gap-3 border-b border-zinc-200 p-7 md:flex-row md:items-start md:justify-between">
+              <div>
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Transaction</p>
+                <h2 className="mt-0.5 font-mono text-2xl font-black text-zinc-950">
+                  {saleReference}
+                </h2>
+                <p className="mt-0.5 text-lg text-zinc-400">Transaction ID #{sale.id}</p>
+              </div>
+              <div className="text-left md:text-right">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Total</p>
+                <p className="mt-0.5 text-4xl font-black text-zinc-950 number-transition">
+                  {formatCurrency(Number(sale.total))}
+                </p>
+              </div>
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-zinc-200">
-              <div className="hidden grid-cols-[1fr_140px_120px_140px] border-b border-zinc-200 bg-zinc-50 px-4 py-3 text-base font-bold uppercase tracking-wider text-zinc-400 md:grid">
-                <span>Product</span>
-                <span>Unit Price</span>
-                <span>Quantity</span>
-                <span className="text-right">Subtotal</span>
+            {/* Transaction Information */}
+            <div className="grid grid-cols-2 gap-px border-b border-zinc-200 bg-zinc-200 md:grid-cols-4">
+              <div className="bg-white p-4">
+                <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">Date</p>
+                <p className="mt-1 text-lg font-bold text-zinc-900">{formatDate(sale.sale_date)}</p>
+              </div>
+              <div className="bg-white p-4">
+                <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">Payment</p>
+                <p className="mt-1 text-lg font-bold text-zinc-900">{sale.payment_method}</p>
+              </div>
+              <div className="bg-white p-4">
+                <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">Items</p>
+                <p className="mt-1 text-lg font-bold text-zinc-900">
+                  {itemCount} {itemCount === 1 ? "item" : "items"}
+                </p>
+              </div>
+              <div className="bg-white p-4">
+                <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">Created</p>
+                <p className="mt-1 text-lg font-bold text-zinc-900">{formatDate(sale.created_at)}</p>
+              </div>
+            </div>
+
+            {/* Items */}
+            <div className="p-7">
+              <div className="mb-3">
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Products</p>
+                <h3 className="mt-0.5 text-xl font-black text-zinc-950">Purchased Products</h3>
               </div>
 
-              <div className="divide-y divide-zinc-100">
-                {(sale.items ?? []).map((item) => (
-                  <div
-                    key={item.id}
-                    className="grid gap-2 px-4 py-5 md:grid-cols-[1fr_140px_120px_140px] md:items-center hover:bg-zinc-50 transition-colors duration-150 gpu"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-lg font-black text-zinc-950">
-                        {item.product_name || "Product"}
-                      </p>
-                      <p className="mt-0.5 font-mono text-base text-zinc-400">
-                        {item.sku || "-"}
-                      </p>
-                      {getProductDetails(item) && (
-                        <p className="mt-0.5 text-base text-zinc-500">
-                          {getProductDetails(item)}
+              <div className="overflow-hidden rounded-xl border border-zinc-200">
+                <div className="hidden grid-cols-[1fr_140px_120px_140px] border-b border-zinc-200 bg-zinc-50 px-4 py-3 text-base font-bold uppercase tracking-wider text-zinc-400 md:grid">
+                  <span>Product</span>
+                  <span>Unit Price</span>
+                  <span>Quantity</span>
+                  <span className="text-right">Subtotal</span>
+                </div>
+
+                <div className="divide-y divide-zinc-100">
+                  {(sale.items ?? []).map((item) => (
+                    <div
+                      key={item.id}
+                      className="grid gap-2 px-4 py-5 md:grid-cols-[1fr_140px_120px_140px] md:items-center hover:bg-zinc-50 transition-colors duration-150 gpu"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-lg font-black text-zinc-950">
+                          {item.product_name || "Product"}
                         </p>
-                      )}
-                    </div>
+                        <p className="mt-0.5 font-mono text-base text-zinc-400">
+                          {item.sku || "-"}
+                        </p>
+                        {getProductDetails(item) && (
+                          <p className="mt-0.5 text-base text-zinc-500">
+                            {getProductDetails(item)}
+                          </p>
+                        )}
+                      </div>
 
-                    <div>
-                      <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 md:hidden">
-                        Unit Price
-                      </p>
-                      <p className="mt-0.5 text-lg font-bold text-zinc-900 md:mt-0">
-                        {formatCurrency(Number(item.unit_price))}
-                      </p>
-                    </div>
+                      <div>
+                        <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 md:hidden">
+                          Unit Price
+                        </p>
+                        <p className="mt-0.5 text-lg font-bold text-zinc-900 md:mt-0">
+                          {formatCurrency(Number(item.unit_price))}
+                        </p>
+                      </div>
 
-                    <div>
-                      <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 md:hidden">
-                        Quantity
-                      </p>
-                      <p className="mt-0.5 text-lg font-bold text-zinc-900 md:mt-0">
-                        {Number(item.quantity)}
-                      </p>
-                    </div>
+                      <div>
+                        <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 md:hidden">
+                          Quantity
+                        </p>
+                        <p className="mt-0.5 text-lg font-bold text-zinc-900 md:mt-0">
+                          {Number(item.quantity)}
+                        </p>
+                      </div>
 
-                    <div className="md:text-right">
-                      <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 md:hidden">
-                        Subtotal
-                      </p>
-                      <p className="mt-0.5 text-lg font-black text-zinc-950 md:mt-0 number-transition">
-                        {formatCurrency(Number(item.subtotal))}
-                      </p>
+                      <div className="md:text-right">
+                        <p className="text-sm font-bold uppercase tracking-wider text-zinc-400 md:hidden">
+                          Subtotal
+                        </p>
+                        <p className="mt-0.5 text-lg font-black text-zinc-950 md:mt-0 number-transition">
+                          {formatCurrency(Number(item.subtotal))}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-                {(sale.items ?? []).length === 0 && (
-                  <div className="px-4 py-6 text-center text-base text-zinc-400">
-                    No items on this sale.
-                  </div>
-                )}
+                  {(sale.items ?? []).length === 0 && (
+                    <div className="px-4 py-6 text-center text-base text-zinc-400">
+                      No items on this sale.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Totals + Actions */}
-        <div className="grid gap-4 lg:grid-cols-[1fr_360px] shrink-0">
-          {/* Receipt Action */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Receipt</p>
-            <h2 className="mt-0.5 text-xl font-black text-zinc-950">Transaction Receipt</h2>
-            <p className="mt-1 text-lg text-zinc-500">View the receipt for this completed transaction.</p>
+          {/* Totals + Actions */}
+          <div className="grid gap-4 lg:grid-cols-[1fr_360px] shrink-0">
+            {/* Receipt Action */}
+            <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Receipt</p>
+              <h2 className="mt-0.5 text-xl font-black text-zinc-950">Transaction Receipt</h2>
+              <p className="mt-1 text-lg text-zinc-500">View the receipt for this completed transaction.</p>
 
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-              <Link
-                to="/sales"
-                className="inline-flex h-[52px] flex-1 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-              >
-                ← Back
-              </Link>
-              <button
-                type="button"
-                onClick={viewReceipt}
-                className="inline-flex h-[52px] flex-1 items-center justify-center rounded-xl bg-black px-6 text-lg font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target btn-ripple gpu"
-                onMouseDown={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const y = e.clientY - rect.top;
-                  e.currentTarget.style.setProperty('--x', x + 'px');
-                  e.currentTarget.style.setProperty('--y', y + 'px');
-                }}
-              >
-                View Receipt
-              </button>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  to="/sales"
+                  className="inline-flex h-[52px] flex-1 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
+                >
+                  ← Back
+                </Link>
+                <button
+                  type="button"
+                  onClick={viewReceipt}
+                  className="inline-flex h-[52px] flex-1 items-center justify-center rounded-xl bg-black px-6 text-lg font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target btn-ripple gpu"
+                  onMouseDown={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    e.currentTarget.style.setProperty('--x', x + 'px');
+                    e.currentTarget.style.setProperty('--y', y + 'px');
+                  }}
+                >
+                  View Receipt
+                </button>
+              </div>
             </div>
-          </div>
 
-          {/* Totals */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Summary</p>
-            <div className="mt-3 space-y-3">
-              <div className="flex items-center justify-between text-lg">
-                <span className="text-zinc-500">Subtotal</span>
-                <span className="font-bold text-zinc-900 number-transition">
-                  {formatCurrency(Number(sale.subtotal))}
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-lg">
-                <span className="text-zinc-500">Discount</span>
-                <span className="font-bold text-zinc-900 number-transition">
-                  − {formatCurrency(Number(sale.discount))}
-                </span>
-              </div>
-              <div className="border-t border-zinc-200 pt-3">
-                <div className="flex items-end justify-between">
-                  <span className="text-sm font-bold uppercase tracking-wider text-zinc-500">Total</span>
-                  <span className="text-2xl font-black text-zinc-950 number-transition">
-                    {formatCurrency(Number(sale.total))}
+            {/* Totals */}
+            <div className="rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm card-hover gpu transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-zinc-300">
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Summary</p>
+              <div className="mt-3 space-y-3">
+                <div className="flex items-center justify-between text-lg">
+                  <span className="text-zinc-500">Subtotal</span>
+                  <span className="font-bold text-zinc-900 number-transition">
+                    {formatCurrency(Number(sale.subtotal))}
                   </span>
                 </div>
+                <div className="flex items-center justify-between text-lg">
+                  <span className="text-zinc-500">Discount</span>
+                  <span className="font-bold text-zinc-900 number-transition">
+                    − {formatCurrency(Number(sale.discount))}
+                  </span>
+                </div>
+                <div className="border-t border-zinc-200 pt-3">
+                  <div className="flex items-end justify-between">
+                    <span className="text-sm font-bold uppercase tracking-wider text-zinc-500">Total</span>
+                    <span className="text-2xl font-black text-zinc-950 number-transition">
+                      {formatCurrency(Number(sale.total))}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Receipt Modal */}
-      {showReceipt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in backdrop-gpu gpu">
-          <div className="max-h-[90vh] w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl animate-slide-up gpu">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-zinc-200 p-7 shrink-0">
-              <div>
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Completed</p>
-                <h2 className="mt-0.5 text-xl font-black text-zinc-950">Sale Receipt</h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowReceipt(false)}
-                className="flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-200 text-2xl text-zinc-500 hover:bg-zinc-100 touch-feedback gpu tap-target"
-                aria-label="Close receipt"
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Receipt */}
-            <div className="max-h-[55vh] overflow-y-auto p-7 gpu-scroll">
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 font-mono text-base text-zinc-900">
-                {RECEIPT_COMPANY_NAME && (
-                  <div className="text-center font-bold">{RECEIPT_COMPANY_NAME}</div>
-                )}
-                {RECEIPT_COMPANY_ADDRESS && (
-                  <div className="mt-1 text-center text-zinc-500">{RECEIPT_COMPANY_ADDRESS}</div>
-                )}
-                <div className="py-3 text-center text-lg font-black">RECEIPT</div>
-
-                <div className="border-t border-dashed border-zinc-400 pt-3">
-                  <div className="flex justify-between gap-3">
-                    <span>Sale Reference:</span>
-                    <span className="text-right font-bold">{getSaleReference(sale)}</span>
-                  </div>
-                  <div className="mt-1 flex justify-between gap-3">
-                    <span>Transaction ID:</span>
-                    <span>#{sale.id}</span>
-                  </div>
-                  <div className="mt-1 flex justify-between gap-3">
-                    <span>Date:</span>
-                    <span className="text-right">{formatReceiptDate(sale.sale_date)}</span>
-                  </div>
-                  <div className="mt-1 flex justify-between gap-3">
-                    <span>Payment:</span>
-                    <span>{sale.payment_method}</span>
-                  </div>
+        {/* Receipt Modal */}
+        {showReceipt && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in backdrop-gpu gpu">
+            <div className="max-h-[90vh] w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl animate-slide-up gpu">
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-zinc-200 p-7 shrink-0">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-400">Completed</p>
+                  <h2 className="mt-0.5 text-xl font-black text-zinc-950">Sale Receipt</h2>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowReceipt(false)}
+                  className="flex h-12 w-12 items-center justify-center rounded-lg border border-zinc-200 text-2xl text-zinc-500 hover:bg-zinc-100 touch-feedback gpu tap-target"
+                  aria-label="Close receipt"
+                >
+                  ×
+                </button>
+              </div>
 
-                <div className="my-3 border-t border-dashed border-zinc-400" />
-                <p className="font-black">ITEMS</p>
-                <div className="mt-2 space-y-4">
-                  {(sale.items ?? []).map((item) => {
-                    const details = getProductDetails(item);
-                    return (
-                      <div key={item.id}>
-                        <p className="font-bold">{item.product_name || "Product"}</p>
-                        {details && (
-                          <p className="mt-0.5 text-sm font-semibold text-zinc-500">{details}</p>
-                        )}
-                        <p className="mt-1 text-sm text-zinc-500">Item Code: {item.sku || "-"}</p>
-                        <div className="mt-1 flex justify-between gap-3">
-                          <span>
-                            {Number(item.quantity)} x {receiptMoney(Number(item.unit_price))}
-                          </span>
-                          <span className="font-bold">{receiptMoney(Number(item.subtotal))}</span>
+              {/* Receipt */}
+              <div className="max-h-[55vh] overflow-y-auto p-7 gpu-scroll">
+                <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-5 font-mono text-base text-zinc-900">
+                  {RECEIPT_COMPANY_NAME && (
+                    <div className="text-center font-bold">{RECEIPT_COMPANY_NAME}</div>
+                  )}
+                  {RECEIPT_COMPANY_ADDRESS && (
+                    <div className="mt-1 text-center text-zinc-500">{RECEIPT_COMPANY_ADDRESS}</div>
+                  )}
+                  <div className="py-3 text-center text-lg font-black">RECEIPT</div>
+
+                  <div className="border-t border-dashed border-zinc-400 pt-3">
+                    <div className="flex justify-between gap-3">
+                      <span>Sale Reference:</span>
+                      <span className="text-right font-bold">{getSaleReference(sale)}</span>
+                    </div>
+                    <div className="mt-1 flex justify-between gap-3">
+                      <span>Transaction ID:</span>
+                      <span>#{sale.id}</span>
+                    </div>
+                    <div className="mt-1 flex justify-between gap-3">
+                      <span>Date:</span>
+                      <span className="text-right">{formatReceiptDate(sale.sale_date)}</span>
+                    </div>
+                    <div className="mt-1 flex justify-between gap-3">
+                      <span>Payment:</span>
+                      <span>{sale.payment_method}</span>
+                    </div>
+                  </div>
+
+                  <div className="my-3 border-t border-dashed border-zinc-400" />
+                  <p className="font-black">ITEMS</p>
+                  <div className="mt-2 space-y-4">
+                    {(sale.items ?? []).map((item) => {
+                      const details = getProductDetails(item);
+                      return (
+                        <div key={item.id}>
+                          <p className="font-bold">{item.product_name || "Product"}</p>
+                          {details && (
+                            <p className="mt-0.5 text-sm font-semibold text-zinc-500">{details}</p>
+                          )}
+                          <p className="mt-1 text-sm text-zinc-500">Item Code: {item.sku || "-"}</p>
+                          <div className="mt-1 flex justify-between gap-3">
+                            <span>
+                              {Number(item.quantity)} x {receiptMoney(Number(item.unit_price))}
+                            </span>
+                            <span className="font-bold">{receiptMoney(Number(item.subtotal))}</span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
 
-                <div className="my-3 border-t border-dashed border-zinc-400" />
-                <div className="flex justify-between">
-                  <span>Subtotal:</span>
-                  <span>{receiptMoney(Number(sale.subtotal))}</span>
+                  <div className="my-3 border-t border-dashed border-zinc-400" />
+                  <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>{receiptMoney(Number(sale.subtotal))}</span>
+                  </div>
+                  <div className="mt-1 flex justify-between">
+                    <span>Discount:</span>
+                    <span>-{receiptMoney(Number(sale.discount))}</span>
+                  </div>
+                  <div className="my-3 border-t-2 border-zinc-900" />
+                  <div className="flex justify-between text-base font-black">
+                    <span>TOTAL:</span>
+                    <span>{receiptMoney(Number(sale.total))}</span>
+                  </div>
+                  <div className="my-3 border-t-2 border-zinc-900" />
+                  <p className="text-center font-bold">{RECEIPT_MESSAGE}</p>
                 </div>
-                <div className="mt-1 flex justify-between">
-                  <span>Discount:</span>
-                  <span>-{receiptMoney(Number(sale.discount))}</span>
-                </div>
-                <div className="my-3 border-t-2 border-zinc-900" />
-                <div className="flex justify-between text-base font-black">
-                  <span>TOTAL:</span>
-                  <span>{receiptMoney(Number(sale.total))}</span>
-                </div>
-                <div className="my-3 border-t-2 border-zinc-900" />
-                <p className="text-center font-bold">{RECEIPT_MESSAGE}</p>
+              </div>
+
+              {/* Actions */}
+              <div className="grid gap-3 border-t border-zinc-200 p-7 sm:grid-cols-2 shrink-0">
+                <Button
+                  onClick={() => printReceipt(sale)}
+                  size="md"
+                  className="w-full"
+                >
+                  🖨️ Print Receipt
+                </Button>
+                <Button
+                  onClick={() => setShowReceipt(false)}
+                  variant="secondary"
+                  size="md"
+                  className="w-full"
+                >
+                  Done
+                </Button>
               </div>
             </div>
-
-            {/* Actions */}
-            <div className="grid gap-3 border-t border-zinc-200 p-7 sm:grid-cols-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => printReceipt(sale)}
-                className="inline-flex h-[52px] items-center justify-center rounded-xl bg-black px-6 text-lg font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target btn-ripple gpu"
-                onMouseDown={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const y = e.clientY - rect.top;
-                  e.currentTarget.style.setProperty('--x', x + 'px');
-                  e.currentTarget.style.setProperty('--y', y + 'px');
-                }}
-              >
-                Print Receipt
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowReceipt(false)}
-                className="inline-flex h-[52px] items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-bold text-zinc-700 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target touch-feedback gpu"
-              >
-                Done
-              </button>
-            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }

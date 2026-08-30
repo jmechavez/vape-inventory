@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { Button, EmptyState, PageHeader, Tooltip, Toast } from "../components/ui";
 
 type Product = {
   id: number;
@@ -66,133 +68,6 @@ function downloadCsvTemplate() {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
-}
-
-// ============================================================
-// TOOLTIP COMPONENT
-// ============================================================
-type TooltipProps = {
-  children: React.ReactNode;
-  text: string;
-  position?: "top" | "bottom" | "left" | "right";
-};
-
-function Tooltip({ children, text, position = "top" }: TooltipProps) {
-  const [show, setShow] = useState(false);
-
-  const positionClasses = {
-    top: "bottom-full left-1/2 -translate-x-1/2 mb-2",
-    bottom: "top-full left-1/2 -translate-x-1/2 mt-2",
-    left: "right-full top-1/2 -translate-y-1/2 mr-2",
-    right: "left-full top-1/2 -translate-y-1/2 ml-2",
-  };
-
-  const arrowClasses = {
-    top: "top-full left-1/2 -translate-x-1/2 border-t-zinc-900",
-    bottom: "bottom-full left-1/2 -translate-x-1/2 border-b-zinc-900",
-    left: "left-full top-1/2 -translate-y-1/2 border-l-zinc-900",
-    right: "right-full top-1/2 -translate-y-1/2 border-r-zinc-900",
-  };
-
-  return (
-    <div
-      className="relative inline-flex"
-      onMouseEnter={() => setShow(true)}
-      onMouseLeave={() => setShow(false)}
-      onTouchStart={() => setShow(true)}
-      onTouchEnd={() => setTimeout(() => setShow(false), 1500)}
-    >
-      {children}
-      {show && (
-        <div className={`absolute z-50 ${positionClasses[position]} pointer-events-none animate-fade-in`}>
-          <div className="px-3 py-1.5 text-sm font-medium text-white bg-zinc-900 rounded-lg whitespace-nowrap shadow-lg">
-            {text}
-          </div>
-          <div className={`absolute w-0 h-0 border-4 border-transparent ${arrowClasses[position]}`} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ============================================================
-// TOAST COMPONENT
-// ============================================================
-type ToastProps = {
-  message: string;
-  type?: "success" | "error" | "info";
-  duration?: number;
-  onDismiss?: () => void;
-};
-
-function Toast({
-  message,
-  type = "success",
-  duration = 3500,
-  onDismiss,
-}: ToastProps) {
-  const [visible, setVisible] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setVisible(false);
-      if (onDismiss) {
-        setTimeout(onDismiss, 300);
-      }
-    }, duration);
-
-    return () => clearTimeout(timer);
-  }, [duration, onDismiss]);
-
-  if (!visible) return null;
-
-  const styles = {
-    success: "border-emerald-500 bg-emerald-50",
-    error: "border-red-500 bg-red-50",
-    info: "border-blue-500 bg-blue-50",
-  };
-
-  const iconStyles = {
-    success: "text-emerald-600",
-    error: "text-red-600",
-    info: "text-blue-600",
-  };
-
-  return (
-    <div
-      className={`
-        fixed bottom-6 right-6 z-300 max-w-md w-full
-        rounded-2xl border-l-8 shadow-lg p-5
-        animate-slide-up
-        ${styles[type]}
-      `}
-      role="alert"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <span className={`text-2xl ${iconStyles[type]}`}>
-            {type === "success" && "✅"}
-            {type === "error" && "❌"}
-            {type === "info" && "ℹ️"}
-          </span>
-          <p className="text-lg font-bold text-zinc-900 leading-tight">
-            {message}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            setVisible(false);
-            if (onDismiss) setTimeout(onDismiss, 300);
-          }}
-          className="min-h-9 min-w-9 flex items-center justify-center text-xl text-zinc-400 hover:text-zinc-600 transition shrink-0"
-          aria-label="Dismiss notification"
-        >
-          ×
-        </button>
-      </div>
-    </div>
-  );
 }
 
 function ProductsSkeleton() {
@@ -676,527 +551,526 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="h-full flex flex-col min-h-0 overflow-x-hidden">
-      {/* Header */}
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 shrink-0">
-        <div>
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-zinc-500">
-            Inventory
-          </p>
-          <h1 className="mt-1.5 text-4xl font-black tracking-tight text-zinc-950 sm:text-5xl">
-            Products
-          </h1>
-          <p className="mt-1.5 text-xl text-zinc-500">
-            Manage your product catalog.
-          </p>
-        </div>
+    <>
+      <Helmet>
+        <title>Products - Vape Inventory</title>
+        <meta name="description" content="Manage your product catalog" />
+      </Helmet>
 
-        {viewMode === "active" && (
-          <div className="flex flex-wrap gap-3 items-center">
-            {/* Left side: Secondary actions */}
-            <div className="flex gap-3">
-              <label
-                className={`touch-feedback inline-flex min-h-13 cursor-pointer items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target ${uploadingCsv ? "pointer-events-none opacity-50" : ""
-                  }`}
-              >
-                <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                {uploadingCsv ? "Uploading..." : "Import CSV"}
-                <input
-                  type="file"
-                  accept=".csv,text/csv"
-                  className="hidden"
-                  disabled={uploadingCsv}
-                  onChange={uploadProductsCsv}
-                />
-              </label>
+      <div className="h-full flex flex-col min-h-0 overflow-x-hidden">
+        <PageHeader
+          label="Inventory"
+          title="Products"
+          description="Manage your product catalog."
+          actions={
+            viewMode === "active" && (
+              <div className="flex flex-wrap gap-3 items-center">
+                {/* Left side: Secondary actions */}
+                <div className="flex gap-3">
+                  <label
+                    className={`touch-feedback inline-flex min-h-13 cursor-pointer items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target ${uploadingCsv ? "pointer-events-none opacity-50" : ""
+                      }`}
+                  >
+                    <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    {uploadingCsv ? "Uploading..." : "Import"}
+                    <input
+                      type="file"
+                      accept=".csv,text/csv"
+                      className="hidden"
+                      disabled={uploadingCsv}
+                      onChange={uploadProductsCsv}
+                    />
+                  </label>
 
-              <button
-                type="button"
-                onClick={downloadCsvTemplate}
-                className="touch-feedback inline-flex min-h-13 items-center gap-2 rounded-xl border border-zinc-300 bg-white px-6 text-lg font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
-              >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Template
-              </button>
-            </div>
+                  <button
+                    type="button"
+                    onClick={downloadCsvTemplate}
+                    className="touch-feedback inline-flex min-h-13 items-center gap-2 rounded-xl border border-zinc-300 bg-white px-6 text-lg font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
+                  >
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Template
+                  </button>
+                </div>
 
-            {/* Right side: Primary actions with Refresh always rightmost */}
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={openAddForm}
-                disabled={uploadingCsv}
-                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl bg-black px-6 text-lg font-bold text-white shadow-sm transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target"
-              >
-                + New Product
-              </button>
+                {/* Right side: Primary actions with Refresh always rightmost */}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={openAddForm}
+                    disabled={uploadingCsv}
+                    size="md"
+                  >
+                    + New Product
+                  </Button>
 
-              <button
-                type="button"
-                onClick={handleRefresh}
-                disabled={loading || loadingArchived || isRefreshing}
-                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-lg font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
-              >
-                {isRefreshing ? (
-                  <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                ) : (
-                  "⟳ Refresh"
-                )}
-              </button>
-            </div>
+                  <Button
+                    onClick={handleRefresh}
+                    disabled={loading || loadingArchived || isRefreshing}
+                    variant="secondary"
+                    size="md"
+                  >
+                    {isRefreshing ? (
+                      <svg className="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                    ) : (
+                      "⟳ Refresh"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )
+          }
+        />
+
+        {/* Toast */}
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onDismiss={() => setToast(null)}
+          />
+        )}
+
+        {/* Error */}
+        {error && !showForm && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-xl font-medium text-red-700 mb-4 shrink-0 animate-fade-in">
+            {error}
           </div>
         )}
-      </header>
 
-      {/* Toast */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onDismiss={() => setToast(null)}
-        />
-      )}
-
-      {/* Error */}
-      {error && !showForm && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-xl font-medium text-red-700 mb-4 shrink-0 animate-fade-in">
-          {error}
-        </div>
-      )}
-
-      {/* View Tabs */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm mb-6 shrink-0 overflow-hidden">
-        <div className="grid grid-cols-2 gap-3 relative">
-          <div
-            className={`absolute top-3 bottom-3 w-[calc(50%-6px)] rounded-xl bg-black transition-all duration-300 ease-in-out ${viewMode === "active" ? "left-3" : "left-[calc(50%+3px)]"
-              }`}
-          />
-
-          <button
-            type="button"
-            onClick={() => changeView("active")}
-            aria-pressed={viewMode === "active"}
-            className={`touch-feedback relative z-10 rounded-xl px-5 py-4 text-xl font-bold transition-all duration-200 ${viewMode === "active"
-              ? "text-white"
-              : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95"
-              }`}
-          >
-            <span>Active</span>
-            <span
-              className={`ml-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-lg transition-all duration-300 ${viewMode === "active"
-                ? "bg-white/15 text-white"
-                : "bg-zinc-100 text-zinc-500"
+        {/* View Tabs */}
+        <div className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm mb-6 shrink-0 overflow-hidden">
+          <div className="grid grid-cols-2 gap-3 relative">
+            <div
+              className={`absolute top-3 bottom-3 w-[calc(50%-6px)] rounded-xl bg-black transition-all duration-300 ease-in-out ${viewMode === "active" ? "left-3" : "left-[calc(50%+3px)]"
                 }`}
-            >
-              {products.length}
-              {viewMode === "active" && (
-                <span className="text-xs opacity-70">items</span>
-              )}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => changeView("archived")}
-            aria-pressed={viewMode === "archived"}
-            className={`touch-feedback relative z-10 rounded-xl px-5 py-4 text-xl font-bold transition-all duration-200 ${viewMode === "archived"
-              ? "text-white"
-              : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95"
-              }`}
-          >
-            <span>Archived</span>
-            <span
-              className={`ml-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-lg transition-all duration-300 ${viewMode === "archived"
-                ? "bg-white/15 text-white"
-                : "bg-zinc-100 text-zinc-500"
-                }`}
-            >
-              {archivedProducts.length}
-              {viewMode === "archived" && (
-                <span className="text-xs opacity-70">items</span>
-              )}
-            </span>
-          </button>
-        </div>
-      </div>
-
-      {/* Search */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm mb-6 shrink-0 transition-all duration-200 hover:shadow-md hover:border-zinc-300 card-hover">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-500">
-              {viewMode === "active"
-                ? "Product Catalog"
-                : "Archived Products"}
-            </p>
-            <p className="mt-0.5 text-xl font-black text-zinc-950">
-              {displayedProducts.length}{" "}
-              <span className="font-normal text-zinc-400">
-                of {viewMode === "active" ? products.length : archivedProducts.length}{" "}
-                {viewMode === "active"
-                  ? "products"
-                  : "archived"}
-              </span>
-            </p>
-          </div>
-
-          <div className="relative w-full sm:max-w-sm">
-            <svg className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search products..."
-              className="w-full rounded-xl border border-zinc-300 bg-white pl-14 pr-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target"
-              style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
-              aria-label="Search products"
             />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="touch-feedback absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1.5 hover:bg-zinc-100 active:scale-90 tap-target"
-                aria-label="Clear search"
+
+            <button
+              type="button"
+              onClick={() => changeView("active")}
+              aria-pressed={viewMode === "active"}
+              className={`touch-feedback relative z-10 rounded-xl px-5 py-4 text-xl font-bold transition-all duration-200 ${viewMode === "active"
+                ? "text-white"
+                : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95"
+                }`}
+            >
+              <span>Active</span>
+              <span
+                className={`ml-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-lg transition-all duration-300 ${viewMode === "active"
+                  ? "bg-white/15 text-white"
+                  : "bg-zinc-100 text-zinc-500"
+                  }`}
               >
-                <svg className="h-5 w-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+                {products.length}
+                {viewMode === "active" && (
+                  <span className="text-xs opacity-70">items</span>
+                )}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => changeView("archived")}
+              aria-pressed={viewMode === "archived"}
+              className={`touch-feedback relative z-10 rounded-xl px-5 py-4 text-xl font-bold transition-all duration-200 ${viewMode === "archived"
+                ? "text-white"
+                : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95"
+                }`}
+            >
+              <span>Archived</span>
+              <span
+                className={`ml-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-lg transition-all duration-300 ${viewMode === "archived"
+                  ? "bg-white/15 text-white"
+                  : "bg-zinc-100 text-zinc-500"
+                  }`}
+              >
+                {archivedProducts.length}
+                {viewMode === "archived" && (
+                  <span className="text-xs opacity-70">items</span>
+                )}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm mb-6 shrink-0 transition-all duration-200 hover:shadow-md hover:border-zinc-300 card-hover">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-500">
+                {viewMode === "active"
+                  ? "Product Catalog"
+                  : "Archived Products"}
+              </p>
+              <p className="mt-0.5 text-xl font-black text-zinc-950">
+                {displayedProducts.length}{" "}
+                <span className="font-normal text-zinc-400">
+                  of {viewMode === "active" ? products.length : archivedProducts.length}{" "}
+                  {viewMode === "active"
+                    ? "products"
+                    : "archived"}
+                </span>
+              </p>
+            </div>
+
+            <div className="relative w-full sm:max-w-sm">
+              <svg className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search products..."
+                className="w-full rounded-xl border border-zinc-300 bg-white pl-14 pr-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target"
+                style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+                aria-label="Search products"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="touch-feedback absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1.5 hover:bg-zinc-100 active:scale-90 tap-target"
+                  aria-label="Clear search"
+                >
+                  <svg className="h-5 w-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="flex-1 min-h-0 flex flex-col">
+          <div className="flex-1 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm gpu-scroll">
+            {isLoading ? (
+              <ProductsSkeleton />
+            ) : displayedProducts.length === 0 ? (
+              <EmptyState
+                icon={
+                  <svg viewBox="0 0 24 24" fill="none" className="h-12 w-12 text-white">
+                    <path d="M21 8l-9-5-9 5 9 5 9-5z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                    <path d="M3 8v8l9 5 9-5V8" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                    <path d="M12 13v8" stroke="currentColor" strokeWidth="1.8" />
+                  </svg>
+                }
+                title={viewMode === "active" ? "No products found" : "No archived products"}
+                description={
+                  search.trim()
+                    ? "No products match your search."
+                    : viewMode === "active"
+                      ? "Add your first product to get started."
+                      : "Archived products will appear here."
+                }
+                action={
+                  search.trim()
+                    ? { label: "Clear Search", onClick: () => setSearch("") }
+                    : viewMode === "active"
+                      ? { label: "+ Add Product", onClick: openAddForm }
+                      : undefined
+                }
+              />
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-180 text-left">
+                  <thead className="border-b border-zinc-200 bg-zinc-50 sticky top-0 z-10">
+                    <tr>
+                      <th className="px-6 py-5 text-lg font-bold uppercase tracking-wider text-zinc-500">
+                        Product
+                      </th>
+                      <th className="px-6 py-5 text-right text-lg font-bold uppercase tracking-wider text-zinc-500">
+                        Price
+                      </th>
+                      <th className="px-6 py-5 text-right text-lg font-bold uppercase tracking-wider text-zinc-500">
+                        Margin
+                      </th>
+                      <th className="px-6 py-5 text-center text-lg font-bold uppercase tracking-wider text-zinc-500">
+                        Min Stock
+                      </th>
+                      <th className="px-6 py-5 text-right text-lg font-bold uppercase tracking-wider text-zinc-500">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayedProducts.map((product) => {
+                      const margin = calculateMargin(product.cost_price, product.selling_price);
+                      const details = [product.brand, product.version, product.flavor].filter(Boolean).join(" • ");
+
+                      return (
+                        <tr
+                          key={product.id}
+                          className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50 transition-colors duration-150"
+                        >
+                          <td className="px-6 py-5">
+                            <div className="min-w-0">
+                              <p className="text-xl font-black text-zinc-950 truncate">
+                                {product.name}
+                              </p>
+                              <p className="mt-0.5 font-mono text-base font-medium text-zinc-400">
+                                SKU: {product.sku}
+                              </p>
+                              {details && (
+                                <p className="mt-0.5 text-base text-zinc-500 truncate">
+                                  {details}
+                                </p>
+                              )}
+                              {product.version && (
+                                <span className="mt-1 inline-block rounded bg-zinc-100 px-2.5 py-0.5 text-xs font-bold uppercase text-zinc-700">
+                                  {product.version}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-5 text-right">
+                            <span className="text-lg font-bold text-zinc-950">
+                              {formatCurrency(product.selling_price)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-5 text-right">
+                            <div className="flex items-center justify-end gap-3">
+                              <span className={`text-lg font-bold ${margin >= 30 ? 'text-emerald-600' :
+                                margin >= 15 ? 'text-amber-600' : 'text-red-600'
+                                }`}>
+                                {margin.toFixed(0)}%
+                              </span>
+                              <div className="w-16 h-2.5 rounded-full bg-zinc-100 overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full ${margin >= 30 ? 'bg-emerald-500' :
+                                    margin >= 15 ? 'bg-amber-500' : 'bg-red-500'
+                                    }`}
+                                  style={{ width: `${Math.min(margin, 100)}%` }}
+                                />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-5 text-center">
+                            <span className="text-lg font-bold text-zinc-700">
+                              {product.minimum_stock}
+                            </span>
+                          </td>
+                          <td className="px-6 py-5">
+                            <div className="flex justify-end gap-1">
+                              {viewMode === "active" ? (
+                                <>
+                                  <Tooltip text="Edit product" position="top">
+                                    <button
+                                      type="button"
+                                      onClick={() => openEditForm(product)}
+                                      className="min-h-12 min-w-12 rounded-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 active:scale-95 transition tap-target"
+                                      aria-label="Edit product"
+                                    >
+                                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                      </svg>
+                                    </button>
+                                  </Tooltip>
+                                  <Tooltip text="Archive product" position="top">
+                                    <button
+                                      type="button"
+                                      onClick={() => openArchiveModal(product)}
+                                      className="min-h-12 min-w-12 rounded-full flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition tap-target"
+                                      aria-label="Archive product"
+                                    >
+                                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                      </svg>
+                                    </button>
+                                  </Tooltip>
+                                </>
+                              ) : (
+                                <Tooltip text="Restore product" position="top">
+                                  <button
+                                    type="button"
+                                    onClick={() => openRestoreModal(product)}
+                                    className="min-h-12 min-w-12 rounded-full flex items-center justify-center text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 active:scale-95 transition tap-target"
+                                    aria-label="Restore product"
+                                  >
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V10z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7l-4 4-4-4" />
+                                    </svg>
+                                  </button>
+                                </Tooltip>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
-        </div>
-      </div>
 
-      {/* Table */}
-      <div className="flex-1 min-h-0 flex flex-col">
-        <div className="flex-1 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-sm gpu-scroll">
-          {isLoading ? (
-            <ProductsSkeleton />
-          ) : displayedProducts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-16 text-center">
-              <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-linear-to-br from-zinc-900 to-zinc-700 shadow-lg animate-bounce-slow">
-                <svg viewBox="0 0 24 24" fill="none" className="h-12 w-12 text-white">
-                  <path d="M21 8l-9-5-9 5 9 5 9-5z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                  <path d="M3 8v8l9 5 9-5V8" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                  <path d="M12 13v8" stroke="currentColor" strokeWidth="1.8" />
-                </svg>
-              </div>
-              <h2 className="mt-6 text-3xl font-black text-zinc-950">
-                {viewMode === "active"
-                  ? "No products found"
-                  : "No archived products"}
-              </h2>
-              <p className="mt-1.5 text-xl text-zinc-500">
-                {search.trim()
-                  ? "No products match your search."
-                  : viewMode === "active"
-                    ? "Add your first product to get started."
-                    : "Archived products will appear here."}
+          {/* Footer with count */}
+          {!isLoading && displayedProducts.length > 0 && (
+            <div className="shrink-0 flex items-center justify-between border-t border-zinc-200 bg-white px-6 py-4 mt-4 rounded-2xl shadow-sm">
+              <p className="text-lg text-zinc-500">
+                Showing {displayedProducts.length} of{" "}
+                {viewMode === "active" ? products.length : archivedProducts.length} products
               </p>
-
-              {search.trim() ? (
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  className="touch-feedback mt-5 rounded-lg border border-zinc-300 bg-white px-6 py-3.5 text-lg font-bold text-zinc-700 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
-                >
-                  Clear Search
-                </button>
-              ) : viewMode === "active" ? (
-                <button
-                  type="button"
-                  onClick={openAddForm}
-                  className="touch-feedback mt-5 rounded-xl bg-black px-8 py-3.5 text-lg font-bold text-white hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 tap-target"
-                >
-                  + Add Product
-                </button>
-              ) : null}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-180 text-left">
-                <thead className="border-b border-zinc-200 bg-zinc-50 sticky top-0 z-10">
-                  <tr>
-                    <th className="px-6 py-5 text-lg font-bold uppercase tracking-wider text-zinc-500">
-                      Product
-                    </th>
-                    <th className="px-6 py-5 text-right text-lg font-bold uppercase tracking-wider text-zinc-500">
-                      Price
-                    </th>
-                    <th className="px-6 py-5 text-right text-lg font-bold uppercase tracking-wider text-zinc-500">
-                      Margin
-                    </th>
-                    <th className="px-6 py-5 text-center text-lg font-bold uppercase tracking-wider text-zinc-500">
-                      Min Stock
-                    </th>
-                    <th className="px-6 py-5 text-right text-lg font-bold uppercase tracking-wider text-zinc-500">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayedProducts.map((product) => {
-                    const margin = calculateMargin(product.cost_price, product.selling_price);
-                    const details = [product.brand, product.version, product.flavor].filter(Boolean).join(" • ");
-
-                    return (
-                      <tr
-                        key={product.id}
-                        className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50 transition-colors duration-150"
-                      >
-                        <td className="px-6 py-5">
-                          <div className="min-w-0">
-                            <p className="text-xl font-black text-zinc-950 truncate">
-                              {product.name}
-                            </p>
-                            <p className="mt-0.5 font-mono text-base font-medium text-zinc-400">
-                              SKU: {product.sku}
-                            </p>
-                            {details && (
-                              <p className="mt-0.5 text-base text-zinc-500 truncate">
-                                {details}
-                              </p>
-                            )}
-                            {product.version && (
-                              <span className="mt-1 inline-block rounded bg-zinc-100 px-2.5 py-0.5 text-xs font-bold uppercase text-zinc-700">
-                                {product.version}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-5 text-right">
-                          <span className="text-lg font-bold text-zinc-950">
-                            {formatCurrency(product.selling_price)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-5 text-right">
-                          <div className="flex items-center justify-end gap-3">
-                            <span className={`text-lg font-bold ${margin >= 30 ? 'text-emerald-600' :
-                              margin >= 15 ? 'text-amber-600' : 'text-red-600'
-                              }`}>
-                              {margin.toFixed(0)}%
-                            </span>
-                            <div className="w-16 h-2.5 rounded-full bg-zinc-100 overflow-hidden">
-                              <div
-                                className={`h-full rounded-full ${margin >= 30 ? 'bg-emerald-500' :
-                                  margin >= 15 ? 'bg-amber-500' : 'bg-red-500'
-                                  }`}
-                                style={{ width: `${Math.min(margin, 100)}%` }}
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-5 text-center">
-                          <span className="text-lg font-bold text-zinc-700">
-                            {product.minimum_stock}
-                          </span>
-                        </td>
-                        <td className="px-6 py-5">
-                          <div className="flex justify-end gap-1">
-                            {viewMode === "active" ? (
-                              <>
-                                <Tooltip text="Edit product" position="top">
-                                  <button
-                                    type="button"
-                                    onClick={() => openEditForm(product)}
-                                    className="min-h-12 min-w-12 rounded-full flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 active:scale-95 transition tap-target"
-                                    aria-label="Edit product"
-                                  >
-                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                  </button>
-                                </Tooltip>
-                                <Tooltip text="Archive product" position="top">
-                                  <button
-                                    type="button"
-                                    onClick={() => openArchiveModal(product)}
-                                    className="min-h-12 min-w-12 rounded-full flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 active:scale-95 transition tap-target"
-                                    aria-label="Archive product"
-                                  >
-                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                  </button>
-                                </Tooltip>
-                              </>
-                            ) : (
-                              <Tooltip text="Restore product" position="top">
-                                <button
-                                  type="button"
-                                  onClick={() => openRestoreModal(product)}
-                                  className="min-h-12 min-w-12 rounded-full flex items-center justify-center text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 active:scale-95 transition tap-target"
-                                  aria-label="Restore product"
-                                >
-                                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V10z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7l-4 4-4-4" />
-                                  </svg>
-                                </button>
-                              </Tooltip>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
             </div>
           )}
         </div>
 
-        {/* Footer with count */}
-        {!isLoading && displayedProducts.length > 0 && (
-          <div className="shrink-0 flex items-center justify-between border-t border-zinc-200 bg-white px-6 py-4 mt-4 rounded-2xl shadow-sm">
-            <p className="text-lg text-zinc-500">
-              Showing {displayedProducts.length} of{" "}
-              {viewMode === "active" ? products.length : archivedProducts.length} products
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Add/Edit Product Modal */}
-      {showForm && (
-        <div
-          className="fixed inset-0 z-200 flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) closeForm();
-          }}
-        >
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-up gpu">
-            {/* Modal Header */}
-            <div className="border-b border-zinc-200 p-6 shrink-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-500">
-                    {editingProduct ? "Edit" : "New"}
-                  </p>
-                  <h2 className="mt-0.5 text-2xl font-black text-zinc-950">
-                    {editingProduct ? "Edit Product" : "Create Product"}
-                  </h2>
+        {/* Add/Edit Product Modal */}
+        {showForm && (
+          <div
+            className="fixed inset-0 z-200 flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) closeForm();
+            }}
+          >
+            <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-up gpu">
+              {/* Modal Header */}
+              <div className="border-b border-zinc-200 p-6 shrink-0">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-lg font-bold uppercase tracking-[0.2em] text-zinc-500">
+                      {editingProduct ? "Edit" : "New"}
+                    </p>
+                    <h2 className="mt-0.5 text-2xl font-black text-zinc-950">
+                      {editingProduct ? "Edit Product" : "Create Product"}
+                    </h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={closeForm}
+                    className="touch-feedback flex min-h-12 min-w-12 items-center justify-center rounded-lg border border-zinc-200 text-2xl text-zinc-500 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
+                    aria-label="Close form"
+                  >
+                    ×
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={closeForm}
-                  className="touch-feedback flex min-h-12 min-w-12 items-center justify-center rounded-lg border border-zinc-200 text-2xl text-zinc-500 hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 tap-target"
-                  aria-label="Close form"
-                >
-                  ×
-                </button>
               </div>
-            </div>
 
-            <form onSubmit={saveProduct} className="flex-1 overflow-y-auto p-6 gpu-scroll">
-              {error && (
-                <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-5 text-lg font-medium text-red-700 animate-fade-in">
-                  {error}
-                </div>
-              )}
+              <form onSubmit={saveProduct} className="flex-1 overflow-y-auto p-6 gpu-scroll">
+                {error && (
+                  <div className="mb-5 rounded-xl border border-red-200 bg-red-50 p-5 text-lg font-medium text-red-700 animate-fade-in">
+                    {error}
+                  </div>
+                )}
 
-              <div className="space-y-5">
-                <div>
-                  <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">SKU *</label>
-                  <input
-                    type="text"
-                    required
-                    value={sku}
-                    onChange={(e) => setSku(e.target.value)}
-                    placeholder="VAPE-001"
-                    disabled={submitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
-                    style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Juice Box"
-                    disabled={submitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
-                    style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Brand</label>
-                  <input
-                    type="text"
-                    value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
-                    placeholder="Cloud Co."
-                    disabled={submitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
-                    style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-5">
                   <div>
-                    <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Version</label>
+                    <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">SKU *</label>
                     <input
                       type="text"
-                      value={version}
-                      onChange={(e) => setVersion(e.target.value)}
-                      placeholder="V2"
+                      required
+                      value={sku}
+                      onChange={(e) => setSku(e.target.value)}
+                      placeholder="VAPE-001"
                       disabled={submitting}
                       className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
                       style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                     />
                   </div>
+
                   <div>
-                    <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Flavor</label>
+                    <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Name *</label>
                     <input
                       type="text"
-                      value={flavor}
-                      onChange={(e) => setFlavor(e.target.value)}
-                      placeholder="Strawberry"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Juice Box"
                       disabled={submitting}
                       className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
                       style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Cost Price</label>
+                    <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Brand</label>
                     <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={costPrice}
-                      onChange={(e) => setCostPrice(e.target.value)}
-                      placeholder="300.00"
+                      type="text"
+                      value={brand}
+                      onChange={(e) => setBrand(e.target.value)}
+                      placeholder="Cloud Co."
                       disabled={submitting}
-                      className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 font-mono text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                      className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
                       style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
                     />
                   </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Version</label>
+                      <input
+                        type="text"
+                        value={version}
+                        onChange={(e) => setVersion(e.target.value)}
+                        placeholder="V2"
+                        disabled={submitting}
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                        style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Flavor</label>
+                      <input
+                        type="text"
+                        value={flavor}
+                        onChange={(e) => setFlavor(e.target.value)}
+                        placeholder="Strawberry"
+                        disabled={submitting}
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                        style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Cost Price</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={costPrice}
+                        onChange={(e) => setCostPrice(e.target.value)}
+                        placeholder="300.00"
+                        disabled={submitting}
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 font-mono text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                        style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Selling Price *</label>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        step="0.01"
+                        value={sellingPrice}
+                        onChange={(e) => setSellingPrice(e.target.value)}
+                        placeholder="500.00"
+                        disabled={submitting}
+                        className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 font-mono text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
+                        style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Selling Price *</label>
+                    <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Minimum Stock *</label>
                     <input
                       type="number"
                       required
                       min="0"
-                      step="0.01"
-                      value={sellingPrice}
-                      onChange={(e) => setSellingPrice(e.target.value)}
-                      placeholder="500.00"
+                      step="1"
+                      value={minimumStock}
+                      onChange={(e) => setMinimumStock(e.target.value)}
+                      placeholder="5"
                       disabled={submitting}
                       className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 font-mono text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
                       style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
@@ -1204,173 +1078,162 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="mb-2.5 block text-lg font-bold uppercase tracking-wider text-zinc-400">Minimum Stock *</label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    step="1"
-                    value={minimumStock}
-                    onChange={(e) => setMinimumStock(e.target.value)}
-                    placeholder="5"
+                <div className="mt-6 grid gap-3">
+                  <Button
+                    type="submit"
                     disabled={submitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white px-5 py-3.5 font-mono text-lg outline-none transition focus:border-black focus:ring-2 focus:ring-zinc-200 tap-target disabled:opacity-50"
-                    style={{ fontSize: '16px', WebkitTextSizeAdjust: '100%' }}
-                  />
+                    size="lg"
+                    className="w-full"
+                  >
+                    {submitting ? "Saving..." : editingProduct ? "Update Product" : "Create Product"}
+                  </Button>
+
+                  {editingProduct && (
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        closeForm();
+                        openArchiveModal(editingProduct);
+                      }}
+                      variant="danger"
+                      size="lg"
+                      className="w-full"
+                    >
+                      Archive Product
+                    </Button>
+                  )}
+
+                  <Button
+                    type="button"
+                    onClick={closeForm}
+                    disabled={submitting}
+                    variant="secondary"
+                    size="lg"
+                    className="w-full"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Archive Modal */}
+        {productToArchive && (
+          <div
+            className="fixed inset-0 z-200 flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
+            role="dialog"
+            aria-modal="true"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) {
+                closeArchiveModal();
+              }
+            }}
+          >
+            <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl animate-scale-in">
+              <div className="p-6">
+                <div className="flex items-start gap-5">
+                  <div className="flex min-h-13 min-w-13 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4h8v2" />
+                      <path d="M19 6l-1 14H6L5 6" />
+                      <path d="M10 11v5" />
+                      <path d="M14 11v5" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-2xl font-black text-zinc-950">Archive Product?</h2>
+                    <p className="mt-1.5 text-xl leading-7 text-zinc-500">
+                      This product will be removed from the active catalog. Its historical records will remain intact.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-5">
+                  <p className="text-xl font-black text-zinc-950">{productToArchive.name}</p>
+                  <p className="mt-1.5 font-mono text-lg font-bold text-zinc-500">{productToArchive.sku}</p>
                 </div>
               </div>
-
-              <div className="mt-6 grid gap-3">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="touch-feedback inline-flex min-h-14 items-center justify-center rounded-xl bg-black px-8 text-xl font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 tap-target btn-ripple"
-                >
-                  {submitting ? "Saving..." : editingProduct ? "Update Product" : "Create Product"}
-                </button>
-
-                {editingProduct && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeForm();
-                      openArchiveModal(editingProduct);
-                    }}
-                    className="touch-feedback inline-flex min-h-14 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-8 text-xl font-bold text-red-700 transition hover:bg-red-100 hover:scale-[1.02] active:scale-95 tap-target"
-                  >
-                    Archive Product
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={closeForm}
-                  disabled={submitting}
-                  className="touch-feedback inline-flex min-h-14 items-center justify-center rounded-xl border border-zinc-300 bg-white px-8 text-xl font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
+              <div className="flex flex-col-reverse gap-3 border-t border-zinc-200 bg-zinc-50 p-5 sm:flex-row sm:justify-end">
+                <Button
+                  onClick={closeArchiveModal}
+                  disabled={archiving}
+                  variant="secondary"
+                  size="md"
                 >
                   Cancel
-                </button>
+                </Button>
+                <Button
+                  onClick={archiveProduct}
+                  disabled={archiving}
+                  variant="danger"
+                  size="md"
+                >
+                  {archiving ? "Archiving..." : "Archive Product"}
+                </Button>
               </div>
-            </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Archive Modal */}
-      {productToArchive && (
-        <div
-          className="fixed inset-0 z-200 flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
-          role="dialog"
-          aria-modal="true"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) {
-              closeArchiveModal();
-            }
-          }}
-        >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl animate-scale-in">
-            <div className="p-6">
-              <div className="flex items-start gap-5">
-                <div className="flex min-h-13 min-w-13 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M3 6h18" />
-                    <path d="M8 6V4h8v2" />
-                    <path d="M19 6l-1 14H6L5 6" />
-                    <path d="M10 11v5" />
-                    <path d="M14 11v5" />
-                  </svg>
+        {/* Restore Modal */}
+        {productToRestore && (
+          <div
+            className="fixed inset-0 z-200 flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
+            role="dialog"
+            aria-modal="true"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) {
+                closeRestoreModal();
+              }
+            }}
+          >
+            <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl animate-scale-in">
+              <div className="p-6">
+                <div className="flex items-start gap-5">
+                  <div className="flex min-h-13 min-w-13 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 12a9 9 0 0 1 15.5-6.3L21 8" />
+                      <path d="M21 3v5h-5" />
+                      <path d="M21 12a9 9 0 0 1-15.5 6.3L3 16" />
+                      <path d="M3 21v-5h5" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-2xl font-black text-zinc-950">Restore Product?</h2>
+                    <p className="mt-1.5 text-xl leading-7 text-zinc-500">
+                      This product will be returned to the active product catalog.
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h2 className="text-2xl font-black text-zinc-950">Archive Product?</h2>
-                  <p className="mt-1.5 text-xl leading-7 text-zinc-500">
-                    This product will be removed from the active catalog. Its historical records will remain intact.
-                  </p>
+                <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-5">
+                  <p className="text-xl font-black text-zinc-950">{productToRestore.name}</p>
+                  <p className="mt-1.5 font-mono text-lg font-bold text-zinc-500">{productToRestore.sku}</p>
                 </div>
               </div>
-              <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-5">
-                <p className="text-xl font-black text-zinc-950">{productToArchive.name}</p>
-                <p className="mt-1.5 font-mono text-lg font-bold text-zinc-500">{productToArchive.sku}</p>
+              <div className="flex flex-col-reverse gap-3 border-t border-zinc-200 bg-zinc-50 p-5 sm:flex-row sm:justify-end">
+                <Button
+                  onClick={closeRestoreModal}
+                  disabled={restoring}
+                  variant="secondary"
+                  size="md"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={restoreProduct}
+                  disabled={restoring}
+                  variant="primary"
+                  size="md"
+                >
+                  {restoring ? "Restoring..." : "Restore Product"}
+                </Button>
               </div>
-            </div>
-            <div className="flex flex-col-reverse gap-3 border-t border-zinc-200 bg-zinc-50 p-5 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={closeArchiveModal}
-                disabled={archiving}
-                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-xl font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={archiveProduct}
-                disabled={archiving}
-                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl bg-red-600 px-6 text-xl font-bold text-white transition hover:bg-red-700 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
-              >
-                {archiving ? "Archiving..." : "Archive Product"}
-              </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Restore Modal */}
-      {productToRestore && (
-        <div
-          className="fixed inset-0 z-200 flex items-center justify-center bg-black/50 p-6 backdrop-blur-sm animate-fade-in backdrop-gpu gpu"
-          role="dialog"
-          aria-modal="true"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) {
-              closeRestoreModal();
-            }
-          }}
-        >
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl animate-scale-in">
-            <div className="p-6">
-              <div className="flex items-start gap-5">
-                <div className="flex min-h-13 min-w-13 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M3 12a9 9 0 0 1 15.5-6.3L21 8" />
-                    <path d="M21 3v5h-5" />
-                    <path d="M21 12a9 9 0 0 1-15.5 6.3L3 16" />
-                    <path d="M3 21v-5h5" />
-                  </svg>
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-2xl font-black text-zinc-950">Restore Product?</h2>
-                  <p className="mt-1.5 text-xl leading-7 text-zinc-500">
-                    This product will be returned to the active product catalog.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-6 rounded-xl border border-zinc-200 bg-zinc-50 p-5">
-                <p className="text-xl font-black text-zinc-950">{productToRestore.name}</p>
-                <p className="mt-1.5 font-mono text-lg font-bold text-zinc-500">{productToRestore.sku}</p>
-              </div>
-            </div>
-            <div className="flex flex-col-reverse gap-3 border-t border-zinc-200 bg-zinc-50 p-5 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={closeRestoreModal}
-                disabled={restoring}
-                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl border border-zinc-300 bg-white px-6 text-xl font-bold text-zinc-700 transition hover:bg-zinc-100 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={restoreProduct}
-                disabled={restoring}
-                className="touch-feedback inline-flex min-h-13 items-center justify-center rounded-xl bg-black px-6 text-xl font-bold text-white transition hover:bg-zinc-800 hover:scale-[1.02] active:scale-95 disabled:opacity-50 tap-target"
-              >
-                {restoring ? "Restoring..." : "Restore Product"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 
 import Layout from "./components/Layout";
 
@@ -15,70 +16,72 @@ import ReportsPage from "./pages/ReportsPage";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route
-            path="/"
-            element={<Navigate to="/dashboard" replace />}
-          />
+    <HelmetProvider>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            <Route
+              path="/"
+              element={<Navigate to="/dashboard" replace />}
+            />
 
-          <Route
-            path="/dashboard"
-            element={<DashboardPage />}
-          />
+            <Route
+              path="/dashboard"
+              element={<DashboardPage />}
+            />
 
-          <Route
-            path="/inventory"
-            element={<InventoryPage />}
-          />
+            <Route
+              path="/inventory"
+              element={<InventoryPage />}
+            />
 
-          {/* <Route */}
-          {/*   path="/inventory/movements" */}
-          {/*   element={<InventoryMovementsPage />} */}
-          {/* /> */}
-          {/**/}
-          {/* <Route */}
-          {/*   path="/inventory/history" */}
-          {/*   element={<MovementHistoryPage />} */}
-          {/* /> */}
+            {/* <Route */}
+            {/*   path="/inventory/movements" */}
+            {/*   element={<InventoryMovementsPage />} */}
+            {/* /> */}
+            {/**/}
+            {/* <Route */}
+            {/*   path="/inventory/history" */}
+            {/*   element={<MovementHistoryPage />} */}
+            {/* /> */}
 
-          <Route
-            path="/products"
-            element={<ProductsPage />}
-          />
+            <Route
+              path="/products"
+              element={<ProductsPage />}
+            />
 
-          <Route
-            path="/suppliers"
-            element={<SuppliersPage />}
-          />
+            <Route
+              path="/suppliers"
+              element={<SuppliersPage />}
+            />
 
-          <Route
-            path="/sales"
-            element={<SalesPage />}
-          />
+            <Route
+              path="/sales"
+              element={<SalesPage />}
+            />
 
-          <Route
-            path="/sales/history"
-            element={<SalesHistoryPage />}
-          />
+            <Route
+              path="/sales/history"
+              element={<SalesHistoryPage />}
+            />
 
-          <Route
-            path="/sales/:id"
-            element={<SaleDetailsPage />}
-          />
+            <Route
+              path="/sales/:id"
+              element={<SaleDetailsPage />}
+            />
 
-          <Route
-            path="*"
-            element={<Navigate to="/dashboard" replace />}
-          />
+            <Route
+              path="*"
+              element={<Navigate to="/dashboard" replace />}
+            />
 
-          <Route
-            path="/reports"
-            element={<ReportsPage />}
-          />
-        </Routes>
-      </Layout>
-    </BrowserRouter>
+            <Route
+              path="/reports"
+              element={<ReportsPage />}
+            />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
+    </HelmetProvider>
   );
 }

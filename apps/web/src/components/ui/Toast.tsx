@@ -43,7 +43,7 @@ export function Toast({
   return (
     <div
       className={`
-        fixed bottom-6 right-6 z-[300] max-w-md w-full
+        fixed bottom-6 right-6 z-300 max-w-md w-full
         rounded-2xl border-l-8 shadow-lg p-5
         animate-slide-up
         ${styles[type]}
@@ -67,7 +67,7 @@ export function Toast({
             setVisible(false);
             if (onDismiss) setTimeout(onDismiss, 300);
           }}
-          className="min-h-[36px] min-w-[36px] flex items-center justify-center text-xl text-zinc-400 hover:text-zinc-600 transition shrink-0"
+          className="min-h-9 min-w-9 flex items-center justify-center text-xl text-zinc-400 hover:text-zinc-600 transition shrink-0"
           aria-label="Dismiss notification"
         >
           ×
