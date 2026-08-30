@@ -2,85 +2,110 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 
 import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import DashboardPage from "./pages/DashboardPage";
 import InventoryPage from "./pages/InventoryPage";
-// import InventoryMovementsPage from "./pages/InventoryMovementsPage.tsx.backup";
-// import MovementHistoryPage from "./pages/MovementHistoryPage.tsx.backup";
 import ProductsPage from "./pages/ProductsPage";
 import SaleDetailsPage from "./pages/SaleDetailsPage";
 import SalesHistoryPage from "./pages/SalesHistoryPage";
 import SalesPage from "./pages/SalesPage";
 import SuppliersPage from "./pages/SuppliersPage";
 import ReportsPage from "./pages/ReportsPage";
+import LoginPage from "./pages/LoginPage";
 
 export default function App() {
   return (
     <HelmetProvider>
       <BrowserRouter>
-        <Layout>
-          <Routes>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
             <Route
               path="/"
-              element={<Navigate to="/dashboard" replace />}
+              element={
+                <Layout>
+                  <Navigate to="/dashboard" replace />
+                </Layout>
+              }
             />
-
             <Route
               path="/dashboard"
-              element={<DashboardPage />}
+              element={
+                <Layout>
+                  <DashboardPage />
+                </Layout>
+              }
             />
-
             <Route
               path="/inventory"
-              element={<InventoryPage />}
+              element={
+                <Layout>
+                  <InventoryPage />
+                </Layout>
+              }
             />
-
-            {/* <Route */}
-            {/*   path="/inventory/movements" */}
-            {/*   element={<InventoryMovementsPage />} */}
-            {/* /> */}
-            {/**/}
-            {/* <Route */}
-            {/*   path="/inventory/history" */}
-            {/*   element={<MovementHistoryPage />} */}
-            {/* /> */}
-
             <Route
               path="/products"
-              element={<ProductsPage />}
+              element={
+                <Layout>
+                  <ProductsPage />
+                </Layout>
+              }
             />
-
             <Route
               path="/suppliers"
-              element={<SuppliersPage />}
+              element={
+                <Layout>
+                  <SuppliersPage />
+                </Layout>
+              }
             />
-
             <Route
               path="/sales"
-              element={<SalesPage />}
+              element={
+                <Layout>
+                  <SalesPage />
+                </Layout>
+              }
             />
-
             <Route
               path="/sales/history"
-              element={<SalesHistoryPage />}
+              element={
+                <Layout>
+                  <SalesHistoryPage />
+                </Layout>
+              }
             />
-
             <Route
               path="/sales/:id"
-              element={<SaleDetailsPage />}
+              element={
+                <Layout>
+                  <SaleDetailsPage />
+                </Layout>
+              }
             />
-
-            <Route
-              path="*"
-              element={<Navigate to="/dashboard" replace />}
-            />
-
             <Route
               path="/reports"
-              element={<ReportsPage />}
+              element={
+                <Layout>
+                  <ReportsPage />
+                </Layout>
+              }
             />
-          </Routes>
-        </Layout>
+            <Route
+              path="*"
+              element={
+                <Layout>
+                  <Navigate to="/dashboard" replace />
+                </Layout>
+              }
+            />
+          </Route>
+        </Routes>
       </BrowserRouter>
     </HelmetProvider>
   );

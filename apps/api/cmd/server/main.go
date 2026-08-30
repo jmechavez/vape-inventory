@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/jmechavez/vape-inventory/internal/auth"
 	"github.com/jmechavez/vape-inventory/internal/database"
 	"github.com/jmechavez/vape-inventory/internal/imports"
 	"github.com/jmechavez/vape-inventory/internal/inventory"
@@ -26,6 +27,9 @@ func main() {
 		log.Fatalf("database connection failed: %v", err)
 	}
 	defer db.Close()
+
+	authRepository := auth.NewRepository(db)
+	authHandler := auth.NewHandler(authRepository)
 
 	// Initialize repositories
 	productRepository := products.NewRepository(db)
@@ -72,6 +76,10 @@ func main() {
 		// Otherwise, serve index.html (for React Router)
 		http.ServeFile(w, r, "./static/index.html")
 	}))
+
+	mux.HandleFunc("POST /api/auth/login", authHandler.Login)
+	mux.HandleFunc("POST /api/auth/logout", authHandler.Logout)
+	mux.HandleFunc("GET /api/auth/me", authHandler.Me)
 
 	// =========================================================
 	// SYNC ROUTES

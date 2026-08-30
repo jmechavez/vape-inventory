@@ -177,6 +177,12 @@ export default function Layout({ children }: LayoutProps) {
     return "Vape Inventory";
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  };
+
   return (
     <div className="h-dvh min-h-dvh bg-zinc-100 text-zinc-950 overflow-hidden">
       <div className="flex h-full min-h-0">
@@ -263,9 +269,24 @@ export default function Layout({ children }: LayoutProps) {
             })}
           </nav>
 
-          {/* Footer - Simplified */}
+          {/* Footer - Simplified with Logout */}
           <div className="border-t border-zinc-200/50 p-3 shrink-0">
-            <div className="flex items-center justify-between">
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className={[
+                "w-full flex items-center gap-3 rounded-lg text-sm font-medium text-zinc-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200 active:scale-[0.97] touch-feedback",
+                collapsed ? "justify-center min-h-11 px-2" : "px-3 py-2.5",
+              ].join(" ")}
+              aria-label="Logout"
+            >
+              <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              {!collapsed && <span>Logout</span>}
+            </button>
+
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-200/50">
               <p className="text-xs text-zinc-400">
                 {collapsed ? "v1.0" : "v1.0.0"}
               </p>
@@ -325,7 +346,7 @@ export default function Layout({ children }: LayoutProps) {
 
             {/* Mobile Menu Dropdown */}
             {mobileMenuOpen && (
-              <nav className="border-t border-zinc-200/50 bg-white/95 px-3 py-2 space-y-0.5 animate-slide-down">
+              <nav className="border-t border-zinc-200/50 bg-white/95 backdrop-blur-sm px-3 py-2 space-y-0.5 animate-slide-down shadow-lg">
                 {navigation.map((item) => {
                   const active = isActive(item.to);
                   return (
@@ -345,6 +366,19 @@ export default function Layout({ children }: LayoutProps) {
                     </NavLink>
                   );
                 })}
+                {/* Mobile Logout */}
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-zinc-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200 active:scale-[0.97] touch-feedback"
+                >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Logout
+                </button>
               </nav>
             )}
           </header>
@@ -371,6 +405,17 @@ export default function Layout({ children }: LayoutProps) {
               </p>
             </div>
             <div className="flex items-center gap-4">
+              {/* Desktop Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-zinc-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200 active:scale-95 touch-feedback"
+                aria-label="Logout"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>Logout</span>
+              </button>
               <span className="text-xs text-zinc-400 hidden md:inline">
                 {formatDate(currentTime)}
               </span>
